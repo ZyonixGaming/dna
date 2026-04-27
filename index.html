@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DNA Shortener</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       background: #0f172a;
       color: #e2e8f0;
@@ -104,13 +102,12 @@
       white-space: pre-wrap;
       word-break: break-all;
       outline: none;
-      position: relative; /* for pseudo element positioning */
+      position: relative;
     }
     .dna-editor:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
     }
-    /* Placeholder styling */
     .dna-editor.empty::before {
       content: attr(data-placeholder);
       color: #64748b;
@@ -134,13 +131,11 @@
       color: #94a3b8;
       margin: 0.2rem 0 0;
     }
-    /* DNA base colors inside the editor */
     .dna-editor .base-A { color: #facc15; font-weight: 600; }
     .dna-editor .base-C { color: #60a5fa; font-weight: 600; }
     .dna-editor .base-G { color: #4ade80; font-weight: 600; }
     .dna-editor .base-T { color: #f87171; font-weight: 600; }
-	
-	
+
     footer {
       margin-top: 1.5rem;
       text-align: center;
@@ -154,21 +149,18 @@
     footer a:hover {
       text-decoration: underline;
     }
-	
   </style>
 </head>
 <body>
 <div class="container">
   <h1>🧬 DNA Shortener</h1>
-  <p class="small-note">Edit or paste your 40‑line sequences. The short sharing link updates automatically.</p>
+  <p class="small-note">Edit or paste your 40‑line sequences. The sharing link updates automatically.</p>
 
-  <!-- Generated sharing link above editor -->
   <div class="link-area">
     <input type="text" id="linkDisplay" readonly placeholder="Your link will appear here..." aria-label="Sharing link (copy manually)">
     <button id="copyLinkBtn" title="Copy full sharing URL"><span>📋</span> Copy Link</button>
   </div>
 
-  <!-- Copy / Paste buttons for the DNA editor -->
   <div class="button-row">
     <button id="copyTextBtn" class="ghost" title="Copy plain DNA text"><span>📄</span> Copy DNA</button>
     <button id="pasteTextBtn" class="ghost" title="Paste clipboard content into editor"><span>📥</span> Paste DNA</button>
@@ -176,20 +168,27 @@
 
   <div id="errorMessage" class="error-msg"></div>
 
-  <!-- Contenteditable DNA editor with placeholder -->
   <div id="sequenceArea" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
 00:CTATCGCAAT
 00:CTATCGCAAT
 01:CTCTAAGGAGGGA
 ..."></div>
+
   <footer>
-    <a href="https://github.com/ZyonixGaming/dna" target="_blank" rel="noopener noreferrer"><svg data-component="Octicon" aria-hidden="true" focusable="false" class="octicon octicon-mark-github" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M10.226 17.284c-2.965-.36-5.054-2.493-5.054-5.256 0-1.123.404-2.336 1.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112 2.111.36 2.83 1.01.853-.269 1.752-.404 2.853-.404 1.1 0 1.999.135 2.807.382.696-.629 1.932-1.1 2.83-.988.315.606.36 2.179.067 2.942.72.854 1.101 2 1.101 3.167 0 2.763-2.089 4.852-5.098 5.234.763.494 1.28 1.572 1.28 2.807v2.336c0 .674.561 1.056 1.235.786 4.066-1.55 7.255-5.615 7.255-10.646C23.5 6.188 18.334 1 11.978 1 5.62 1 .5 6.188.5 12.545c0 4.986 3.167 9.12 7.435 10.669.606.225 1.19-.18 1.19-.786V20.63a2.9 2.9 0 0 1-1.078.224c-1.483 0-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27 0-.27.45-.471.898-.471.652 0 1.213.404 1.797 1.235.45.651.921.943 1.483.943.561 0 .92-.202 1.437-.719.382-.381.674-.718.944-.943"></path></svg> View source on GitHub</a>
+    <a href="https://github.com/ZyonixGaming/dna" target="_blank" rel="noopener noreferrer">
+      <svg data-component="Octicon" aria-hidden="true" focusable="false" class="octicon octicon-mark-github" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M10.226 17.284c-2.965-.36-5.054-2.493-5.054-5.256 0-1.123.404-2.336 1.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112 2.111.36 2.83 1.01.853-.269 1.752-.404 2.853-.404 1.1 0 1.999.135 2.807.382.696-.629 1.932-1.1 2.83-.988.315.606.36 2.179.067 2.942.72.854 1.101 2 1.101 3.167 0 2.763-2.089 4.852-5.098 5.234.763.494 1.28 1.572 1.28 2.807v2.336c0 .674.561 1.056 1.235.786 4.066-1.55 7.255-5.615 7.255-10.646C23.5 6.188 18.334 1 11.978 1 5.62 1 .5 6.188.5 12.545c0 4.986 3.167 9.12 7.435 10.669.606.225 1.19-.18 1.19-.786V20.63a2.9 2.9 0 0 1-1.078.224c-1.483 0-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27 0-.27.45-.471.898-.471.652 0 1.213.404 1.797 1.235.45.651.921.943 1.483.943.561 0 .92-.202 1.437-.719.382-.381.674-.718.944-.943"></path></svg>
+      View source on GitHub
+    </a>
   </footer>
 </div>
 
 <script>
   (function() {
-    // ---------- Base conversion (A:00, C:01, G:10, T:11) ----------
+    // ---------- Fixed lengths (per pair) from the example schema ----------
+    const FIXED_LENGTHS = [10,13,13,15,11,8,11,8,11,11,13,15,13,11,11,13,15,11,11,16];
+    // Total number of base characters in all 40 lines:
+    const TOTAL_BASES = FIXED_LENGTHS.reduce((sum, len) => sum + 2*len, 0);
+
     const BASE_TO_BITS = { 'A': 0b00, 'C': 0b01, 'G': 0b10, 'T': 0b11 };
     const BITS_TO_BASE = ['A', 'C', 'G', 'T'];
 
@@ -229,60 +228,47 @@
       return bits;
     }
 
-    // ---------- Encode 40 lines → short base64url string ----------
+    // ---------- Encode 40 lines → compact Base64 (no length header) ----------
     function encodeSequences(linesArray) {
       if (linesArray.length !== 40) throw new Error('Exactly 40 lines are required.');
-      const sequences = [];
-      const pairLengths = new Array(20).fill(0);
 
+      let bits = '';
       for (let i = 0; i < 40; i++) {
         const match = linesArray[i].match(/^(\d{2}):([ACGT]+)$/);
         if (!match) throw new Error(`Invalid format at line ${i+1}: "${linesArray[i]}"`);
         const num = parseInt(match[1], 10);
         const seq = match[2];
         if (num !== Math.floor(i/2)) {
-          throw new Error(`Line numbers must appear in order 00,00,01,01,...,19,19. Problem near line ${i+1}`);
+          throw new Error(`Line numbers must appear in order 00,00,01,01,…,19,19. Problem near line ${i+1}`);
         }
-        sequences.push(seq);
-        if (i % 2 === 0) {
-          pairLengths[num] = seq.length;
-        } else {
-          if (seq.length !== pairLengths[num]) {
-            throw new Error(`Pair ${String(num).padStart(2,'0')} lines must have equal length.`);
-          }
+        // Check that this line's length matches the fixed schema
+        const expectedLen = FIXED_LENGTHS[num];
+        if (seq.length !== expectedLen) {
+          throw new Error(`Line ${String(num).padStart(2,'0')} (pair ${num}) must have length ${expectedLen}. Got ${seq.length}.`);
+        }
+        for (const ch of seq) {
+          bits += BASE_TO_BITS[ch].toString(2).padStart(2, '0');
         }
       }
 
-      let bits = '';
-      for (let i = 0; i < 20; i++) bits += pairLengths[i].toString(2).padStart(5, '0');
-      for (const seq of sequences) {
-        for (const ch of seq) bits += BASE_TO_BITS[ch].toString(2).padStart(2, '0');
-      }
-
+      // Pad to multiple of 8 bits
       const pad = (8 - (bits.length % 8)) % 8;
       bits += '0'.repeat(pad);
       return uint8ToBase64url(bitsToBytes(bits));
     }
 
-    // ---------- Decode base64url → 40‑line array ----------
+    // ---------- Decode Base64 → 40‑line array (uses fixed lengths) ----------
     function decodeToLines(encodedStr) {
       const bytes = base64urlToUint8(encodedStr);
       let bits = bytesToBits(bytes);
-      if (bits.length < 100) throw new Error('Invalid link: too short.');
 
-      const pairLengths = [];
-      for (let i = 0; i < 20; i++) {
-        const chunk = bits.substring(i*5, (i+1)*5);
-        if (chunk.length < 5) throw new Error('Incomplete length data.');
-        pairLengths.push(parseInt(chunk, 2));
+      // Total bits required (no length header, only sequence data)
+      const requiredBits = TOTAL_BASES * 2;
+      if (bits.length < requiredBits) {
+        throw new Error('Link too short for the fixed schema.');
       }
 
-      let totalChars = 0;
-      for (const len of pairLengths) totalChars += 2 * len;
-      const seqBitsNeeded = totalChars * 2;
-      if (bits.length < 100 + seqBitsNeeded) throw new Error('Link too short for sequences.');
-
-      const seqBits = bits.substring(100, 100 + seqBitsNeeded);
+      const seqBits = bits.substring(0, requiredBits);
       const sequences = [];
       for (let i = 0; i < seqBits.length; i += 2) {
         sequences.push(BITS_TO_BASE[parseInt(seqBits.substring(i, i+2), 2)]);
@@ -291,7 +277,7 @@
       const lines = [];
       let cursor = 0;
       for (let i = 0; i < 20; i++) {
-        const len = pairLengths[i];
+        const len = FIXED_LENGTHS[i];
         const num = String(i).padStart(2, '0');
         lines.push(num + ':' + sequences.slice(cursor, cursor + len).join(''));
         cursor += len;
@@ -301,7 +287,7 @@
       return lines;
     }
 
-    // ---------- Colorizing DNA text for the editor ----------
+    // ---------- Colorizing DNA text ----------
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
     }
@@ -314,18 +300,11 @@
     const copyTextBtn = document.getElementById('copyTextBtn');
     const pasteTextBtn = document.getElementById('pasteTextBtn');
 
-    // ---------- Placeholder toggle ----------
     function updatePlaceholder() {
-      // Check if editor has any visible text (excluding empty HTML tags)
       const text = editor.innerText.trim();
-      if (text === '') {
-        editor.classList.add('empty');
-      } else {
-        editor.classList.remove('empty');
-      }
+      editor.classList.toggle('empty', text === '');
     }
 
-    // ---------- Cursor preservation helpers ----------
     function getTextAndCursor(div) {
       const sel = window.getSelection();
       if (!sel.rangeCount) return { text: div.innerText, offset: 0 };
@@ -333,8 +312,7 @@
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(div);
       preCaretRange.setEnd(range.endContainer, range.endOffset);
-      const offset = preCaretRange.toString().length;
-      return { text: div.innerText, offset };
+      return { text: div.innerText, offset: preCaretRange.toString().length };
     }
 
     function setCursor(div, offset) {
@@ -360,20 +338,15 @@
       sel.addRange(range);
     }
 
-    // Update editor content with colored uppercase, preserving cursor and placeholder
     function refreshEditorContent(preserveCursor = true) {
       const { text, offset } = getTextAndCursor(editor);
       const cleaned = text.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
-      const coloredHTML = colorizeDNA(cleaned);
-      editor.innerHTML = coloredHTML;
-      if (preserveCursor) {
-        setCursor(editor, Math.min(offset, cleaned.length));
-      }
+      editor.innerHTML = colorizeDNA(cleaned);
+      if (preserveCursor) setCursor(editor, Math.min(offset, cleaned.length));
       updatePlaceholder();
       return cleaned;
     }
 
-    // ---------- Error / URL helpers ----------
     function showError(msg) {
       errorDiv.style.display = 'block';
       errorDiv.textContent = '❌ ' + msg;
@@ -385,14 +358,9 @@
 
     function updateUrlParam(encoded) {
       const base = window.location.href.split('?')[0];
-      if (encoded) {
-        history.replaceState(null, '', base + '?dna=' + encoded);
-      } else {
-        history.replaceState(null, '', base);
-      }
+      history.replaceState(null, '', encoded ? `${base}?dna=${encoded}` : base);
     }
 
-    // Generate link from current plain text
     function refreshLink() {
       const plainText = editor.innerText.trim();
       if (!plainText) {
@@ -404,7 +372,7 @@
       const lines = plainText.split(/\r?\n/).filter(l => l.trim() !== '');
       try {
         const encoded = encodeSequences(lines);
-        const fullUrl = window.location.href.split('?')[0] + '?dna=' + encoded;
+        const fullUrl = `${window.location.href.split('?')[0]}?dna=${encoded}`;
         linkDisplay.value = fullUrl;
         updateUrlParam(encoded);
         hideError();
@@ -415,7 +383,7 @@
       }
     }
 
-    // ---------- Event listeners ----------
+    // ════ Event listeners ════
     editor.addEventListener('input', function(e) {
       if (editor.dataset.updating === 'true') return;
       editor.dataset.updating = 'true';
@@ -446,7 +414,6 @@
       editor.dataset.updating = 'false';
     });
 
-    // Copy sharing link
     copyLinkBtn.addEventListener('click', () => {
       if (linkDisplay.value) {
         navigator.clipboard.writeText(linkDisplay.value).then(() => {
@@ -459,7 +426,6 @@
       }
     });
 
-    // Copy DNA (plain text)
     copyTextBtn.addEventListener('click', () => {
       const plain = editor.innerText;
       navigator.clipboard.writeText(plain).then(() => {
@@ -476,7 +442,6 @@
       });
     });
 
-    // Paste DNA (replace all content)
     pasteTextBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
@@ -485,9 +450,8 @@
         const range = document.createRange();
         range.selectNodeContents(editor);
         range.collapse(false);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
         updatePlaceholder();
         refreshLink();
         hideError();
@@ -498,27 +462,24 @@
       }
     });
 
-    // ---------- Initialization (load from ?dna= or empty) ----------
+    // ════ Initialization ════
     function loadFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const dna = params.get('dna');
       if (dna) {
         try {
           const lines = decodeToLines(dna);
-          const plain = lines.join('\n');
-          editor.innerHTML = colorizeDNA(plain);
-          const fullUrl = window.location.href;
-          linkDisplay.value = fullUrl;
+          editor.innerHTML = colorizeDNA(lines.join('\n'));
+          linkDisplay.value = window.location.href;
           updatePlaceholder();
           hideError();
         } catch (e) {
-          showError('Failed to decode link from URL: ' + e.message);
+          showError('Failed to decode link: ' + e.message);
           editor.innerHTML = '';
           linkDisplay.value = '';
           updatePlaceholder();
         }
       } else {
-        // Start empty – placeholder will show automatically
         editor.innerHTML = '';
         updatePlaceholder();
         linkDisplay.value = '';
