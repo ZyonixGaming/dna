@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Sharing – ACGT</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 780px;
+      width: 100%;
+      background: white;
+      border-radius: 1.2rem;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      padding: 2rem 2.2rem;
+    }
+    h1 {
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h1 span {
+      background: #3b82f6;
+      color: white;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.8rem;
+      border-radius: 30px;
+      letter-spacing: 0.3px;
+    }
+    .link-area {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.7rem;
+      padding: 0.6rem 0.9rem;
+      margin: 1rem 0 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .link-area input {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.7rem;
+      font-family: monospace;
+      background: white;
+      font-size: 0.85rem;
+      min-width: 220px;
+    }
+    .button-row {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 0.7rem;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+    button:hover {
+      background: #1e293b;
+    }
+    button.ghost {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    button.ghost:hover {
+      background: #cbd5e1;
+    }
+    textarea {
+      width: 100%;
+      min-height: 280px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      padding: 0.9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.8rem;
+      background: #f9fafb;
+      resize: vertical;
+      margin-top: 0.4rem;
+      line-height: 1.5;
+      text-transform: uppercase; /* visual only, JS ensures data */
+    }
+    .error-msg {
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 0.6rem 1rem;
+      border-radius: 0.6rem;
+      font-size: 0.9rem;
+      margin: 0.5rem 0 0.2rem;
+      display: none;
+    }
+    .small-note {
+      font-size: 0.8rem;
+      color: #4b5563;
+      margin: 0.2rem 0 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🧬 Sequence Linker <span>ACGT only</span></h1>
+  <p class="small-note">Paste or edit your 40‑line sequences below. The sharing link updates automatically.</p>
+
+  <!-- Generated sharing link above the textarea -->
+  <div class="link-area">
+    <input type="text" id="linkDisplay" readonly placeholder="Your short link will appear here..." aria-label="Sharing link (copy manually)">
+    <button id="copyLinkBtn" title="Copy full sharing URL"><span>📋</span> Copy Link</button>
+  </div>
+
+  <!-- Buttons for textarea copy/paste -->
+  <div class="button-row">
+    <button id="copyTextBtn" class="ghost" title="Copy all text from the editor"><span>📄</span> Copy from textarea</button>
+    <button id="pasteTextBtn" class="ghost" title="Paste clipboard content into the editor"><span>📥</span> Paste to textarea</button>
+  </div>
+
+  <div id="errorMessage" class="error-msg"></div>
+
+  <textarea id="sequenceArea" placeholder="Paste 40 lines (format: NN:ACGT...) here&#10;Lines must be 00,00,01,01,...,19,19 twice each."></textarea>
+</div>
+
+<script>
+  (function() {
+    // ---------- Base conversion (A:00, C:01, G:10, T:11) ----------
+    const BASE_TO_BITS = { 'A': 0b00, 'C': 0b01, 'G': 0b10, 'T': 0b11 };
+    const BITS_TO_BASE = ['A', 'C', 'G', 'T'];
+
+    function bitsToBytes(bitsString) {
+      const bytes = [];
+      for (let i = 0; i < bitsString.length; i += 8) {
+        let chunk = bitsString.substring(i, i + 8);
+        while (chunk.length < 8) chunk += '0';
+        bytes.push(parseInt(chunk, 2));
+      }
+      return new Uint8Array(bytes);
+    }
+
+    function uint8ToBase64url(buffer) {
+      let binary = '';
+      buffer.forEach(byte => binary += String.fromCharCode(byte));
+      const base64 = btoa(binary);
+      return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function base64urlToUint8(str) {
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4 !== 0) str += '=';
+      const binary = atob(str);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function bytesToBits(bytes) {
+      let bits = '';
+      for (let i = 0; i < bytes.length; i++) {
+        bits += bytes[i].toString(2).padStart(8, '0');
+      }
+      return bits;
+    }
+
+    // ---------- Encode 40 lines → short base64url string ----------
+    function encodeSequences(linesArray) {
+      if (linesArray.length !== 40) throw new Error('Exactly 40 lines are required.');
+      const sequences = [];
+      const pairLengths = new Array(20).fill(0);
+
+      for (let i = 0; i < 40; i++) {
+        const match = linesArray[i].match(/^(\d{2}):([ACGT]+)$/);
+        if (!match) throw new Error(`Invalid format at line ${i+1}: "${linesArray[i]}"`);
+        const num = parseInt(match[1], 10);
+        const seq = match[2];
+        if (num !== Math.floor(i/2)) {
+          throw new Error(`Line numbers must appear in order 00,00,01,01,...,19,19. Problem near line ${i+1}`);
+        }
+        sequences.push(seq);
+        if (i % 2 === 0) {
+          pairLengths[num] = seq.length;
+        } else {
+          if (seq.length !== pairLengths[num]) {
+            throw new Error(`Pair ${String(num).padStart(2,'0')} lines must have equal length.`);
+          }
+        }
+      }
+
+      let bits = '';
+      for (let i = 0; i < 20; i++) bits += pairLengths[i].toString(2).padStart(5, '0');
+      for (const seq of sequences) {
+        for (const ch of seq) bits += BASE_TO_BITS[ch].toString(2).padStart(2, '0');
+      }
+
+      const pad = (8 - (bits.length % 8)) % 8;
+      bits += '0'.repeat(pad);
+      return uint8ToBase64url(bitsToBytes(bits));
+    }
+
+    // ---------- Decode base64url → 40‑line array ----------
+    function decodeToLines(encodedStr) {
+      const bytes = base64urlToUint8(encodedStr);
+      let bits = bytesToBits(bytes);
+      if (bits.length < 100) throw new Error('Invalid link: too short.');
+
+      const pairLengths = [];
+      for (let i = 0; i < 20; i++) {
+        const chunk = bits.substring(i*5, (i+1)*5);
+        if (chunk.length < 5) throw new Error('Incomplete length data.');
+        pairLengths.push(parseInt(chunk, 2));
+      }
+
+      let totalChars = 0;
+      for (const len of pairLengths) totalChars += 2 * len;
+      const seqBitsNeeded = totalChars * 2;
+      if (bits.length < 100 + seqBitsNeeded) throw new Error('Link too short for sequences.');
+
+      const seqBits = bits.substring(100, 100 + seqBitsNeeded);
+      const sequences = [];
+      for (let i = 0; i < seqBits.length; i += 2) {
+        sequences.push(BITS_TO_BASE[parseInt(seqBits.substring(i, i+2), 2)]);
+      }
+
+      const lines = [];
+      let cursor = 0;
+      for (let i = 0; i < 20; i++) {
+        const len = pairLengths[i];
+        const num = String(i).padStart(2, '0');
+        lines.push(num + ':' + sequences.slice(cursor, cursor + len).join(''));
+        cursor += len;
+        lines.push(num + ':' + sequences.slice(cursor, cursor + len).join(''));
+        cursor += len;
+      }
+      return lines;
+    }
+
+    // ---------- DOM elements ----------
+    const textarea = document.getElementById('sequenceArea');
+    const linkDisplay = document.getElementById('linkDisplay');
+    const errorDiv = document.getElementById('errorMessage');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const copyTextBtn = document.getElementById('copyTextBtn');
+    const pasteTextBtn = document.getElementById('pasteTextBtn');
+
+    // ---------- Helpers ----------
+    function showError(msg) {
+      errorDiv.style.display = 'block';
+      errorDiv.textContent = '❌ ' + msg;
+    }
+    function hideError() {
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+    }
+
+    function updateUrlParam(encoded) {
+      const base = window.location.href.split('?')[0];
+      if (encoded) {
+        history.replaceState(null, '', base + '?dna=' + encoded);
+      } else {
+        history.replaceState(null, '', base);
+      }
+    }
+
+    // Generate link from current textarea content
+    function refreshLink() {
+      const raw = textarea.value.trim();
+      if (!raw) {
+        linkDisplay.value = '';
+        updateUrlParam('');
+        hideError();
+        return;
+      }
+      const lines = raw.split(/\r?\n/).filter(l => l.trim() !== '');
+      try {
+        const encoded = encodeSequences(lines);
+        const fullUrl = window.location.href.split('?')[0] + '?dna=' + encoded;
+        linkDisplay.value = fullUrl;
+        updateUrlParam(encoded);
+        hideError();
+      } catch (e) {
+        showError(e.message);
+        linkDisplay.value = '';
+        updateUrlParam('');
+      }
+    }
+
+    // Auto‑uppercase handler (preserves cursor position)
+    function autoUppercase(e) {
+      const el = e.target;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const oldValue = el.value;
+      const newValue = oldValue.toUpperCase();
+      if (newValue !== oldValue) {
+        el.value = newValue;
+        el.setSelectionRange(start, end);
+      }
+    }
+
+    // ---------- Event listeners ----------
+    textarea.addEventListener('input', function(e) {
+      autoUppercase(e);
+      // Debounce link generation slightly
+      clearTimeout(textarea._debounceTimer);
+      textarea._debounceTimer = setTimeout(refreshLink, 200);
+    });
+
+    textarea.addEventListener('paste', function(e) {
+      // Allow paste to happen, then uppercase and trigger link update
+      setTimeout(() => {
+        autoUppercase({ target: textarea }); // manually call uppercase
+        refreshLink();
+      }, 10);
+    });
+
+    // Copy full sharing link
+    copyLinkBtn.addEventListener('click', () => {
+      if (linkDisplay.value) {
+        navigator.clipboard.writeText(linkDisplay.value).then(() => {
+          copyLinkBtn.innerHTML = '<span>✅</span> Copied!';
+          setTimeout(() => { copyLinkBtn.innerHTML = '<span>📋</span> Copy Link'; }, 1500);
+        }).catch(() => {
+          linkDisplay.select();
+          document.execCommand('copy');
+        });
+      }
+    });
+
+    // Copy textarea content
+    copyTextBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        copyTextBtn.innerHTML = '<span>✅</span> Copied!';
+        setTimeout(() => { copyTextBtn.innerHTML = '<span>📄</span> Copy from textarea'; }, 1500);
+      }).catch(() => {
+        textarea.select();
+        document.execCommand('copy');
+      });
+    });
+
+    // Paste into textarea (replace content)
+    pasteTextBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        textarea.value = text.toUpperCase();   // enforce uppercase
+        refreshLink();
+        hideError();
+        pasteTextBtn.innerHTML = '<span>✅</span> Pasted!';
+        setTimeout(() => { pasteTextBtn.innerHTML = '<span>📥</span> Paste to textarea'; }, 1500);
+      } catch (err) {
+        showError('Unable to read clipboard. Please paste manually (Ctrl+V).');
+      }
+    });
+
+    // ---------- Initialization: load from ?dna= parameter or show default ----------
+    function loadFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const dna = params.get('dna');
+      if (dna) {
+        try {
+          const lines = decodeToLines(dna);
+          textarea.value = lines.join('\n');
+          const fullUrl = window.location.href;
+          linkDisplay.value = fullUrl;
+          hideError();
+        } catch (e) {
+          showError('Failed to decode link from URL: ' + e.message);
+          textarea.value = '';
+          linkDisplay.value = '';
+        }
+      } else {
+        // Default example data
+        const defaultData = `00:CTATCGCAAT
+00:CTATCGCAAT
+01:CTCTAAGGAGGGA
+01:CACTCAGGAGGGA
+02:CGTACTTTAAACT
+02:CGTACTTTGAACT
+03:CTTGATTTCCGAGCT
+03:CTTGATTTCCAAGCT
+04:TCCGGGACCGC
+04:TCCGGGACCGC
+05:CACTTTTT
+05:CACTTTTT
+06:AATACTGGAGA
+06:AATACTGGAGA
+07:TCCGTCAT
+07:TCCGTCAC
+08:TTAACTCCAAG
+08:TTAACTCCAAG
+09:ATAGCGAATGC
+09:CTAGCGAATGC
+10:CTACGTTCGTTCG
+10:CTACGTTCGTTCG
+11:ACATATAGAACTGCG
+11:ACATATACAACTGCG
+12:CTGCTAGAGACAG
+12:CTGCTAGAGACAG
+13:AGGCTCGCCCG
+13:AGGCTCGCCCG
+14:GGCAGTGCCGA
+14:GGCAGTGCAGA
+15:TGCTGAAAAAACC
+15:TGCTGAATCAACC
+16:TGGTGATTGTATTGG
+16:TGGTGATTGTATTGG
+17:CTAACCCTTCG
+17:CTAACCCTTCG
+18:TTTCTCGCGCA
+18:TTTCTGGGGCA
+19:TGTTTCTCTCCTCAGA
+19:TGTTTCTCTCCTCAGA`;
+        textarea.value = defaultData;
+        refreshLink();
+      }
+    }
+
+    window.addEventListener('load', loadFromUrl);
+  })();
+</script>
+</body>
+</html>
