@@ -880,7 +880,7 @@
         entries: []
       };
       categories.push(newCat);
-      saveCategories();
+      broadcastUpdate();
       renderSidebar();
       selectCategory(newCat.id);
       showToast(`Category "${newCat.name}" created`);
@@ -906,7 +906,7 @@
         name: name.trim(),
         dnaText: dnaText
       });
-      saveCategories();
+      broadcastUpdate();
       renderSidebar();
       showToast(`DNA "${name.trim()}" saved`);
     }
