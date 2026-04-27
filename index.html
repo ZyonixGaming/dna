@@ -3,43 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sequence Sharing – ACGT</title>
+  <title>DNA Shortener</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
+      background: #0f172a;
+      color: #e2e8f0;
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #f4f7fa;
       margin: 0;
       padding: 2rem 1rem;
       display: flex;
       justify-content: center;
     }
     .container {
-      max-width: 780px;
+      max-width: 800px;
       width: 100%;
-      background: white;
+      background: #1e293b;
       border-radius: 1.2rem;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
       padding: 2rem 2.2rem;
     }
     h1 {
       font-weight: 600;
-      color: #1e293b;
       margin: 0 0 0.2rem;
+      color: #f1f5f9;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    h1 span {
-      background: #3b82f6;
-      color: white;
-      font-size: 0.8rem;
-      padding: 0.2rem 0.8rem;
-      border-radius: 30px;
-      letter-spacing: 0.3px;
-    }
     .link-area {
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
+      background: #0f172a;
+      border: 1px solid #334155;
       border-radius: 0.7rem;
       padding: 0.6rem 0.9rem;
       margin: 1rem 0 0.8rem;
@@ -50,11 +46,12 @@
     }
     .link-area input {
       flex: 1;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #475569;
       border-radius: 0.5rem;
       padding: 0.45rem 0.7rem;
-      font-family: monospace;
-      background: white;
+      font-family: 'JetBrains Mono', monospace;
+      background: #1e293b;
+      color: #f1f5f9;
       font-size: 0.85rem;
       min-width: 220px;
     }
@@ -65,7 +62,7 @@
       flex-wrap: wrap;
     }
     button {
-      background: #0f172a;
+      background: #3b82f6;
       color: white;
       border: none;
       padding: 0.55rem 1.1rem;
@@ -73,39 +70,59 @@
       font-weight: 500;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 0.4rem;
       white-space: nowrap;
     }
     button:hover {
-      background: #1e293b;
+      background: #2563eb;
+      transform: translateY(-1px);
     }
     button.ghost {
-      background: #e2e8f0;
-      color: #1e293b;
+      background: #334155;
+      color: #cbd5e1;
     }
     button.ghost:hover {
-      background: #cbd5e1;
+      background: #475569;
     }
-    textarea {
+    .dna-editor {
       width: 100%;
       min-height: 280px;
+      max-height: 500px;
+      overflow-y: auto;
       font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       padding: 0.9rem;
-      border: 1px solid #d1d5db;
+      border: 1px solid #475569;
       border-radius: 0.8rem;
-      background: #f9fafb;
-      resize: vertical;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.6;
       margin-top: 0.4rem;
-      line-height: 1.5;
-      text-transform: uppercase; /* visual only, JS ensures data */
+      white-space: pre-wrap;
+      word-break: break-all;
+      outline: none;
+      position: relative; /* for pseudo element positioning */
+    }
+    .dna-editor:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+    }
+    /* Placeholder styling */
+    .dna-editor.empty::before {
+      content: attr(data-placeholder);
+      color: #64748b;
+      pointer-events: none;
+      position: absolute;
+      top: 0.9rem;
+      left: 0.9rem;
+      opacity: 0.6;
     }
     .error-msg {
-      color: #b91c1c;
-      background: #fee2e2;
+      color: #fca5a5;
+      background: #7f1d1d;
       padding: 0.6rem 1rem;
       border-radius: 0.6rem;
       font-size: 0.9rem;
@@ -114,31 +131,41 @@
     }
     .small-note {
       font-size: 0.8rem;
-      color: #4b5563;
+      color: #94a3b8;
       margin: 0.2rem 0 0;
     }
+    /* DNA base colors inside the editor */
+    .dna-editor .base-A { color: #facc15; font-weight: 600; }
+    .dna-editor .base-C { color: #60a5fa; font-weight: 600; }
+    .dna-editor .base-G { color: #4ade80; font-weight: 600; }
+    .dna-editor .base-T { color: #f87171; font-weight: 600; }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>🧬 Sequence Linker <span>ACGT only</span></h1>
-  <p class="small-note">Paste or edit your 40‑line sequences below. The sharing link updates automatically.</p>
+  <h1>🧬 DNA Shortener</h1>
+  <p class="small-note">Edit or paste your 40‑line sequences. The short sharing link updates automatically.</p>
 
-  <!-- Generated sharing link above the textarea -->
+  <!-- Generated sharing link above editor -->
   <div class="link-area">
-    <input type="text" id="linkDisplay" readonly placeholder="Your short link will appear here..." aria-label="Sharing link (copy manually)">
+    <input type="text" id="linkDisplay" readonly placeholder="Your link will appear here..." aria-label="Sharing link (copy manually)">
     <button id="copyLinkBtn" title="Copy full sharing URL"><span>📋</span> Copy Link</button>
   </div>
 
-  <!-- Buttons for textarea copy/paste -->
+  <!-- Copy / Paste buttons for the DNA editor -->
   <div class="button-row">
-    <button id="copyTextBtn" class="ghost" title="Copy all text from the editor"><span>📄</span> Copy from textarea</button>
-    <button id="pasteTextBtn" class="ghost" title="Paste clipboard content into the editor"><span>📥</span> Paste to textarea</button>
+    <button id="copyTextBtn" class="ghost" title="Copy plain DNA text"><span>📄</span> Copy DNA</button>
+    <button id="pasteTextBtn" class="ghost" title="Paste clipboard content into editor"><span>📥</span> Paste DNA</button>
   </div>
 
   <div id="errorMessage" class="error-msg"></div>
 
-  <textarea id="sequenceArea" placeholder="Paste 40 lines (format: NN:ACGT...) here&#10;Lines must be 00,00,01,01,...,19,19 twice each."></textarea>
+  <!-- Contenteditable DNA editor with placeholder -->
+  <div id="sequenceArea" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
+00:CTATCGCAAT
+00:CTATCGCAAT
+01:CTCTAAGGAGGGA
+..."></div>
 </div>
 
 <script>
@@ -255,15 +282,79 @@
       return lines;
     }
 
+    // ---------- Colorizing DNA text for the editor ----------
+    function colorizeDNA(plainText) {
+      return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
+    }
+
     // ---------- DOM elements ----------
-    const textarea = document.getElementById('sequenceArea');
+    const editor = document.getElementById('sequenceArea');
     const linkDisplay = document.getElementById('linkDisplay');
     const errorDiv = document.getElementById('errorMessage');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const copyTextBtn = document.getElementById('copyTextBtn');
     const pasteTextBtn = document.getElementById('pasteTextBtn');
 
-    // ---------- Helpers ----------
+    // ---------- Placeholder toggle ----------
+    function updatePlaceholder() {
+      // Check if editor has any visible text (excluding empty HTML tags)
+      const text = editor.innerText.trim();
+      if (text === '') {
+        editor.classList.add('empty');
+      } else {
+        editor.classList.remove('empty');
+      }
+    }
+
+    // ---------- Cursor preservation helpers ----------
+    function getTextAndCursor(div) {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return { text: div.innerText, offset: 0 };
+      const range = sel.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(div);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      const offset = preCaretRange.toString().length;
+      return { text: div.innerText, offset };
+    }
+
+    function setCursor(div, offset) {
+      const sel = window.getSelection();
+      const range = document.createRange();
+      let currentPos = 0;
+      const treeWalker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      while ((node = treeWalker.nextNode())) {
+        const length = node.textContent.length;
+        if (currentPos + length >= offset) {
+          range.setStart(node, offset - currentPos);
+          range.setEnd(node, offset - currentPos);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          return;
+        }
+        currentPos += length;
+      }
+      range.selectNodeContents(div);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    // Update editor content with colored uppercase, preserving cursor and placeholder
+    function refreshEditorContent(preserveCursor = true) {
+      const { text, offset } = getTextAndCursor(editor);
+      const cleaned = text.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+      const coloredHTML = colorizeDNA(cleaned);
+      editor.innerHTML = coloredHTML;
+      if (preserveCursor) {
+        setCursor(editor, Math.min(offset, cleaned.length));
+      }
+      updatePlaceholder();
+      return cleaned;
+    }
+
+    // ---------- Error / URL helpers ----------
     function showError(msg) {
       errorDiv.style.display = 'block';
       errorDiv.textContent = '❌ ' + msg;
@@ -282,16 +373,16 @@
       }
     }
 
-    // Generate link from current textarea content
+    // Generate link from current plain text
     function refreshLink() {
-      const raw = textarea.value.trim();
-      if (!raw) {
+      const plainText = editor.innerText.trim();
+      if (!plainText) {
         linkDisplay.value = '';
         updateUrlParam('');
         hideError();
         return;
       }
-      const lines = raw.split(/\r?\n/).filter(l => l.trim() !== '');
+      const lines = plainText.split(/\r?\n/).filter(l => l.trim() !== '');
       try {
         const encoded = encodeSequences(lines);
         const fullUrl = window.location.href.split('?')[0] + '?dna=' + encoded;
@@ -305,36 +396,38 @@
       }
     }
 
-    // Auto‑uppercase handler (preserves cursor position)
-    function autoUppercase(e) {
-      const el = e.target;
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const oldValue = el.value;
-      const newValue = oldValue.toUpperCase();
-      if (newValue !== oldValue) {
-        el.value = newValue;
-        el.setSelectionRange(start, end);
-      }
-    }
-
     // ---------- Event listeners ----------
-    textarea.addEventListener('input', function(e) {
-      autoUppercase(e);
-      // Debounce link generation slightly
-      clearTimeout(textarea._debounceTimer);
-      textarea._debounceTimer = setTimeout(refreshLink, 200);
+    editor.addEventListener('input', function(e) {
+      if (editor.dataset.updating === 'true') return;
+      editor.dataset.updating = 'true';
+      refreshEditorContent(true);
+      refreshLink();
+      editor.dataset.updating = 'false';
     });
 
-    textarea.addEventListener('paste', function(e) {
-      // Allow paste to happen, then uppercase and trigger link update
-      setTimeout(() => {
-        autoUppercase({ target: textarea }); // manually call uppercase
-        refreshLink();
-      }, 10);
+    editor.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const clipboardData = (e.clipboardData || window.clipboardData);
+      if (!clipboardData) return;
+      const pastedText = clipboardData.getData('text/plain');
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const cleaned = pastedText.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+      const textNode = document.createTextNode(cleaned);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      editor.dataset.updating = 'true';
+      refreshEditorContent(true);
+      refreshLink();
+      editor.dataset.updating = 'false';
     });
 
-    // Copy full sharing link
+    // Copy sharing link
     copyLinkBtn.addEventListener('click', () => {
       if (linkDisplay.value) {
         navigator.clipboard.writeText(linkDisplay.value).then(() => {
@@ -347,91 +440,69 @@
       }
     });
 
-    // Copy textarea content
+    // Copy DNA (plain text)
     copyTextBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(textarea.value).then(() => {
+      const plain = editor.innerText;
+      navigator.clipboard.writeText(plain).then(() => {
         copyTextBtn.innerHTML = '<span>✅</span> Copied!';
-        setTimeout(() => { copyTextBtn.innerHTML = '<span>📄</span> Copy from textarea'; }, 1500);
+        setTimeout(() => { copyTextBtn.innerHTML = '<span>📄</span> Copy DNA'; }, 1500);
       }).catch(() => {
-        textarea.select();
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
         document.execCommand('copy');
+        sel.removeAllRanges();
       });
     });
 
-    // Paste into textarea (replace content)
+    // Paste DNA (replace all content)
     pasteTextBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
-        textarea.value = text.toUpperCase();   // enforce uppercase
+        const cleaned = text.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+        editor.innerHTML = colorizeDNA(cleaned);
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        updatePlaceholder();
         refreshLink();
         hideError();
         pasteTextBtn.innerHTML = '<span>✅</span> Pasted!';
-        setTimeout(() => { pasteTextBtn.innerHTML = '<span>📥</span> Paste to textarea'; }, 1500);
+        setTimeout(() => { pasteTextBtn.innerHTML = '<span>📥</span> Paste DNA'; }, 1500);
       } catch (err) {
         showError('Unable to read clipboard. Please paste manually (Ctrl+V).');
       }
     });
 
-    // ---------- Initialization: load from ?dna= parameter or show default ----------
+    // ---------- Initialization (load from ?dna= or empty) ----------
     function loadFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const dna = params.get('dna');
       if (dna) {
         try {
           const lines = decodeToLines(dna);
-          textarea.value = lines.join('\n');
+          const plain = lines.join('\n');
+          editor.innerHTML = colorizeDNA(plain);
           const fullUrl = window.location.href;
           linkDisplay.value = fullUrl;
+          updatePlaceholder();
           hideError();
         } catch (e) {
           showError('Failed to decode link from URL: ' + e.message);
-          textarea.value = '';
+          editor.innerHTML = '';
           linkDisplay.value = '';
+          updatePlaceholder();
         }
       } else {
-        // Default example data
-        const defaultData = `00:CTATCGCAAT
-00:CTATCGCAAT
-01:CTCTAAGGAGGGA
-01:CACTCAGGAGGGA
-02:CGTACTTTAAACT
-02:CGTACTTTGAACT
-03:CTTGATTTCCGAGCT
-03:CTTGATTTCCAAGCT
-04:TCCGGGACCGC
-04:TCCGGGACCGC
-05:CACTTTTT
-05:CACTTTTT
-06:AATACTGGAGA
-06:AATACTGGAGA
-07:TCCGTCAT
-07:TCCGTCAC
-08:TTAACTCCAAG
-08:TTAACTCCAAG
-09:ATAGCGAATGC
-09:CTAGCGAATGC
-10:CTACGTTCGTTCG
-10:CTACGTTCGTTCG
-11:ACATATAGAACTGCG
-11:ACATATACAACTGCG
-12:CTGCTAGAGACAG
-12:CTGCTAGAGACAG
-13:AGGCTCGCCCG
-13:AGGCTCGCCCG
-14:GGCAGTGCCGA
-14:GGCAGTGCAGA
-15:TGCTGAAAAAACC
-15:TGCTGAATCAACC
-16:TGGTGATTGTATTGG
-16:TGGTGATTGTATTGG
-17:CTAACCCTTCG
-17:CTAACCCTTCG
-18:TTTCTCGCGCA
-18:TTTCTGGGGCA
-19:TGTTTCTCTCCTCAGA
-19:TGTTTCTCTCCTCAGA`;
-        textarea.value = defaultData;
-        refreshLink();
+        // Start empty – placeholder will show automatically
+        editor.innerHTML = '';
+        updatePlaceholder();
+        linkDisplay.value = '';
       }
     }
 
