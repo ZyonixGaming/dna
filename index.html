@@ -503,6 +503,37 @@
     function generateId() {
       return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
+	
+	// ----- Cross‑tab sync -----
+	const syncChannel = new BroadcastChannel('dna-shortener-sync');
+
+	syncChannel.onmessage = (event) => {
+	  if (event.data && event.data.type === 'update') {
+		// Reload the latest data from localStorage
+		categories = loadCategories();
+		// Make sure the selected category still exists
+		if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
+		  selectedCategoryId = null;
+		}
+		renderSidebar();
+		updateSaveButton();
+	  }
+	};
+
+	// Helper to reload before any modification
+	function reloadCategoriesFromStorage() {
+	  categories = loadCategories();
+	  if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
+		selectedCategoryId = null;
+	  }
+	}
+
+	// Replace all calls to saveCategories() with this function
+	function broadcastUpdate() {
+	  saveCategories();
+	  syncChannel.postMessage({ type: 'update' });
+	}	
+	
 
     let categories = loadCategories();
     let selectedCategoryId = null;
@@ -630,31 +661,36 @@
         const renameBtn = document.createElement('button');
         renameBtn.innerHTML = '✏️';
         renameBtn.title = 'Rename category';
-        renameBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const newName = prompt('New category name:', cat.name);
-          if (newName && newName.trim()) {
-            cat.name = newName.trim();
-            saveCategories();
-            renderSidebar();
-            showToast(`Category renamed to "${cat.name}"`);
-          }
-        });
+		renameBtn.addEventListener('click', (e) => {
+		  e.stopPropagation();
+		  const newName = prompt('New category name:', cat.name);
+		  if (newName && newName.trim()) {
+			reloadCategoriesFromStorage();
+			const targetCat = categories.find(c => c.id === cat.id);
+			if (targetCat) {
+			  targetCat.name = newName.trim();
+			  broadcastUpdate();
+			  renderSidebar();
+			  showToast(`Category renamed to "${targetCat.name}"`);
+			}
+		  }
+		});
 
         const deleteBtn = document.createElement('button');
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.title = 'Delete category';
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (confirm(`Delete category "${cat.name}" and all its DNA?`)) {
-            categories = categories.filter(c => c.id !== cat.id);
-            if (selectedCategoryId === cat.id) selectedCategoryId = null;
-            saveCategories();
-            renderSidebar();
-            updateSaveButton();
-            showToast(`Category "${cat.name}" deleted`, 'error');
-          }
-        });
+		deleteBtn.addEventListener('click', (e) => {
+		  e.stopPropagation();
+		  if (confirm(`Delete category "${cat.name}" and all its DNA?`)) {
+			reloadCategoriesFromStorage();
+			categories = categories.filter(c => c.id !== cat.id);
+			if (selectedCategoryId === cat.id) selectedCategoryId = null;
+			broadcastUpdate();
+			renderSidebar();
+			updateSaveButton();
+			showToast(`Category "${cat.name}" deleted`, 'error');
+		  }
+		});
 
         actions.appendChild(renameBtn);
         actions.appendChild(deleteBtn);
@@ -686,7 +722,10 @@
             const entryName = document.createElement('span');
             entryName.className = 'entry-name';
             entryName.textContent = entry.name;
-            entryLi.addEventListener('click', () => loadEntry(entry));
+            entryLi.addEventListener('click', () => {
+				loadEntry(entry);
+				reloadCategoriesFromStorage();
+			});
 
             const entryActions = document.createElement('div');
             entryActions.className = 'entry-actions';
@@ -694,29 +733,40 @@
             const entryRename = document.createElement('button');
             entryRename.innerHTML = '✏️';
             entryRename.title = 'Rename DNA';
-            entryRename.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const newName = prompt('New name:', entry.name);
-              if (newName && newName.trim()) {
-                entry.name = newName.trim();
-                saveCategories();
-                renderSidebar();
-                showToast(`DNA renamed to "${entry.name}"`);
-              }
-            });
+			entryRename.addEventListener('click', (e) => {
+			  e.stopPropagation();
+			  const newName = prompt('New name:', entry.name);
+			  if (newName && newName.trim()) {
+				reloadCategoriesFromStorage();
+				const targetCat = categories.find(c => c.id === cat.id);
+				if (targetCat) {
+				  const targetEntry = targetCat.entries.find(e => e.id === entry.id);
+				  if (targetEntry) {
+					targetEntry.name = newName.trim();
+					broadcastUpdate();
+					renderSidebar();
+					showToast(`DNA renamed to "${targetEntry.name}"`);
+				  }
+				}
+			  }
+			});
 
             const entryDelete = document.createElement('button');
             entryDelete.innerHTML = '🗑️';
             entryDelete.title = 'Delete DNA';
-            entryDelete.addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (confirm(`Delete DNA "${entry.name}"?`)) {
-                cat.entries = cat.entries.filter(e => e.id !== entry.id);
-                saveCategories();
-                renderSidebar();
-                showToast(`DNA "${entry.name}" deleted`, 'error');
-              }
-            });
+			entryDelete.addEventListener('click', (e) => {
+			  e.stopPropagation();
+			  if (confirm(`Delete DNA "${entry.name}"?`)) {
+				reloadCategoriesFromStorage();
+				const targetCat = categories.find(c => c.id === cat.id);
+				if (targetCat) {
+				  targetCat.entries = targetCat.entries.filter(e => e.id !== entry.id);
+				  broadcastUpdate();
+				  renderSidebar();
+				  showToast(`DNA "${entry.name}" deleted`, 'error');
+				}
+			  }
+			});
 
             entryActions.appendChild(entryRename);
             entryActions.appendChild(entryDelete);
@@ -765,21 +815,22 @@
       if (target && target.dataset.categoryId !== draggedCategoryId)
         target.style.borderTop = '2px solid #3b82f6';
     }
-    function handleCategoryDrop(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      target.style.borderTop = '';
-      const targetId = target.dataset.categoryId;
-      if (!draggedCategoryId || targetId === draggedCategoryId) return;
-      const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
-      const targetIndex = categories.findIndex(c => c.id === targetId);
-      if (draggedIndex !== -1 && targetIndex !== -1) {
-        const [moved] = categories.splice(draggedIndex, 1);
-        categories.splice(targetIndex, 0, moved);
-        saveCategories();
-        renderSidebar();
-      }
-    }
+	function handleCategoryDrop(e) {
+	  e.preventDefault();
+	  const target = e.currentTarget;
+	  target.style.borderTop = '';
+	  const targetId = target.dataset.categoryId;
+	  if (!draggedCategoryId || targetId === draggedCategoryId) return;
+	  reloadCategoriesFromStorage();
+	  const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
+	  const targetIndex = categories.findIndex(c => c.id === targetId);
+	  if (draggedIndex !== -1 && targetIndex !== -1) {
+		const [moved] = categories.splice(draggedIndex, 1);
+		categories.splice(targetIndex, 0, moved);
+		broadcastUpdate();
+		renderSidebar();
+	  }
+	}
     function handleEntryDragStart(e) {
       draggedEntryId = this.dataset.entryId;
       draggedFromCategoryId = this.dataset.categoryId;
@@ -793,22 +844,23 @@
       if (target && target.dataset.entryId !== draggedEntryId && target.dataset.categoryId === draggedFromCategoryId)
         target.style.borderTop = '2px solid #3b82f6';
     }
-    function handleEntryDrop(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      target.style.borderTop = '';
-      if (!draggedEntryId || !draggedFromCategoryId) return;
-      const cat = categories.find(c => c.id === draggedFromCategoryId);
-      if (!cat || target.dataset.categoryId !== draggedFromCategoryId) return;
-      const draggedIndex = cat.entries.findIndex(ent => ent.id === draggedEntryId);
-      const targetIndex = cat.entries.findIndex(ent => ent.id === target.dataset.entryId);
-      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
-        const [moved] = cat.entries.splice(draggedIndex, 1);
-        cat.entries.splice(targetIndex, 0, moved);
-        saveCategories();
-        renderSidebar();
-      }
-    }
+	function handleEntryDrop(e) {
+	  e.preventDefault();
+	  const target = e.currentTarget;
+	  target.style.borderTop = '';
+	  if (!draggedEntryId || !draggedFromCategoryId) return;
+	  reloadCategoriesFromStorage();
+	  const cat = categories.find(c => c.id === draggedFromCategoryId);
+	  if (!cat || target.dataset.categoryId !== draggedFromCategoryId) return;
+	  const draggedIndex = cat.entries.findIndex(ent => ent.id === draggedEntryId);
+	  const targetIndex = cat.entries.findIndex(ent => ent.id === target.dataset.entryId);
+	  if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+		const [moved] = cat.entries.splice(draggedIndex, 1);
+		cat.entries.splice(targetIndex, 0, moved);
+		broadcastUpdate();
+		renderSidebar();
+	  }
+	}
     function handleDragEnd() {
       this.classList.remove('dragging');
       document.querySelectorAll('.category-item, .entry-item').forEach(el => el.style.borderTop = '');
@@ -821,6 +873,7 @@
     function addCategory() {
       const name = prompt('Category name:');
       if (!name || !name.trim()) return;
+	  reloadCategoriesFromStorage();
       const newCat = {
         id: generateId(),
         name: name.trim(),
@@ -838,6 +891,7 @@
         alert('Please select a category first.');
         return;
       }
+	  reloadCategoriesFromStorage();
       const cat = categories.find(c => c.id === selectedCategoryId);
       if (!cat) return;
       const dnaText = editor.innerText;
@@ -876,15 +930,16 @@
       importFileInput.click();
     }
 
-    function handleImportFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (!Array.isArray(imported)) throw new Error('Invalid format');
-          imported.forEach(cat => {
+	function handleImportFile(event) {
+	  const file = event.target.files[0];
+	  if (!file) return;
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+		try {
+		  const imported = JSON.parse(e.target.result);
+		  if (!Array.isArray(imported)) throw new Error('Invalid format');
+		  reloadCategoriesFromStorage();
+		  imported.forEach(cat => {
             if (!cat.name || typeof cat.name !== 'string') throw new Error('Invalid category');
             const newCatId = generateId();
             const entries = Array.isArray(cat.entries) ? cat.entries : [];
@@ -899,7 +954,9 @@
               entries: newEntries
             });
           });
-          saveCategories();
+		  
+          
+		  broadcastUpdate();
           renderSidebar();
           showToast(`Imported ${imported.length} categories`);
         } catch (err) {
