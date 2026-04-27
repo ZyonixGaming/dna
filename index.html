@@ -14,6 +14,7 @@
       padding: 2rem 1rem;
       display: flex;
       justify-content: center;
+      gap: 2rem;
     }
     .container {
       max-width: 800px;
@@ -74,17 +75,9 @@
       gap: 0.4rem;
       white-space: nowrap;
     }
-    button:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-    button.ghost {
-      background: #334155;
-      color: #cbd5e1;
-    }
-    button.ghost:hover {
-      background: #475569;
-    }
+    button:hover { background: #2563eb; transform: translateY(-1px); }
+    button.ghost { background: #334155; color: #cbd5e1; }
+    button.ghost:hover { background: #475569; }
     .dna-editor {
       width: 100%;
       min-height: 280px;
@@ -142,12 +135,160 @@
       font-size: 0.85rem;
       color: #94a3b8;
     }
-    footer a {
-      color: #60a5fa;
-      text-decoration: none;
+    footer a { color: #60a5fa; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: #1e293b;
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
     }
-    footer a:hover {
-      text-decoration: underline;
+    .sidebar h2 {
+      font-size: 1.2rem;
+      margin: 0;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .category-item {
+      background: #0f172a;
+      border-radius: 0.6rem;
+      padding: 0.4rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      transition: background 0.2s, border-color 0.2s;
+      border: 2px solid transparent;
+    }
+    .category-item.selected {
+      border-color: #3b82f6;
+      background: #1e2a3a;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .category-name {
+      flex: 1;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .category-actions {
+      display: flex;
+      gap: 0.2rem;
+      align-items: center;
+    }
+    .category-actions button {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 0.2rem;
+      font-size: 0.8rem;
+    }
+    .category-actions button:hover { color: #f1f5f9; }
+    .entry-list {
+      list-style: none;
+      padding-left: 1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .entry-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.4rem;
+      background: #1e293b;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .entry-item:hover { background: #334155; }
+    .entry-name {
+      flex: 1;
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .entry-actions {
+      display: flex;
+      gap: 0.2rem;
+      align-items: center;
+    }
+    .entry-actions button {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 0.1rem;
+      font-size: 0.7rem;
+    }
+    .entry-actions button:hover { color: #f1f5f9; }
+    .sidebar-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .drag-handle {
+      cursor: grab;
+      color: #64748b;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .category-item.dragging, .entry-item.dragging { opacity: 0.4; }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+    .toast {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 0.7rem 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideIn 0.3s ease;
+      min-width: 200px;
+    }
+    .toast.success { border-left: 4px solid #4ade80; }
+    .toast.error { border-left: 4px solid #f87171; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
 </head>
@@ -182,11 +323,23 @@
   </footer>
 </div>
 
+<!-- Sidebar -->
+<div class="sidebar">
+  <h2>📁 DNA Library</h2>
+  <div class="sidebar-controls">
+    <button id="addCategoryBtn"><span>➕</span> Add Category</button>
+    <button id="saveDnaBtn"><span>💾</span> <span id="saveBtnText">Save DNA</span></button>
+  </div>
+  <ul class="category-list" id="categoryList"></ul>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
   (function() {
-    // ---------- Fixed lengths (per pair) from the example schema ----------
+    // ---------- Fixed lengths from example ----------
     const FIXED_LENGTHS = [10,13,13,15,11,8,11,8,11,11,13,15,13,11,11,13,15,11,11,16];
-    // Total number of base characters in all 40 lines:
     const TOTAL_BASES = FIXED_LENGTHS.reduce((sum, len) => sum + 2*len, 0);
 
     const BASE_TO_BITS = { 'A': 0b00, 'C': 0b01, 'G': 0b10, 'T': 0b11 };
@@ -201,79 +354,51 @@
       }
       return new Uint8Array(bytes);
     }
-
     function uint8ToBase64url(buffer) {
       let binary = '';
       buffer.forEach(byte => binary += String.fromCharCode(byte));
       const base64 = btoa(binary);
       return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
-
     function base64urlToUint8(str) {
       str = str.replace(/-/g, '+').replace(/_/g, '/');
       while (str.length % 4 !== 0) str += '=';
       const binary = atob(str);
       const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       return bytes;
     }
-
     function bytesToBits(bytes) {
       let bits = '';
-      for (let i = 0; i < bytes.length; i++) {
-        bits += bytes[i].toString(2).padStart(8, '0');
-      }
+      for (let i = 0; i < bytes.length; i++) bits += bytes[i].toString(2).padStart(8, '0');
       return bits;
     }
 
-    // ---------- Encode 40 lines → compact Base64 (no length header) ----------
     function encodeSequences(linesArray) {
       if (linesArray.length !== 40) throw new Error('Exactly 40 lines are required.');
-
       let bits = '';
       for (let i = 0; i < 40; i++) {
         const match = linesArray[i].match(/^(\d{2}):([ACGT]+)$/);
         if (!match) throw new Error(`Invalid format at line ${i+1}: "${linesArray[i]}"`);
         const num = parseInt(match[1], 10);
         const seq = match[2];
-        if (num !== Math.floor(i/2)) {
-          throw new Error(`Line numbers must appear in order 00,00,01,01,…,19,19. Problem near line ${i+1}`);
-        }
-        // Check that this line's length matches the fixed schema
+        if (num !== Math.floor(i/2)) throw new Error(`Line numbers must be 00,00,…,19,19. Problem at line ${i+1}`);
         const expectedLen = FIXED_LENGTHS[num];
-        if (seq.length !== expectedLen) {
-          throw new Error(`Line ${String(num).padStart(2,'0')} (pair ${num}) must have length ${expectedLen}. Got ${seq.length}.`);
-        }
-        for (const ch of seq) {
-          bits += BASE_TO_BITS[ch].toString(2).padStart(2, '0');
-        }
+        if (seq.length !== expectedLen) throw new Error(`Line ${String(num).padStart(2,'0')} must have length ${expectedLen}. Got ${seq.length}.`);
+        for (const ch of seq) bits += BASE_TO_BITS[ch].toString(2).padStart(2, '0');
       }
-
-      // Pad to multiple of 8 bits
       const pad = (8 - (bits.length % 8)) % 8;
       bits += '0'.repeat(pad);
       return uint8ToBase64url(bitsToBytes(bits));
     }
 
-    // ---------- Decode Base64 → 40‑line array (uses fixed lengths) ----------
     function decodeToLines(encodedStr) {
       const bytes = base64urlToUint8(encodedStr);
       let bits = bytesToBits(bytes);
-
-      // Total bits required (no length header, only sequence data)
-      const requiredBits = TOTAL_BASES * 2;
-      if (bits.length < requiredBits) {
-        throw new Error('Link too short for the fixed schema.');
-      }
-
-      const seqBits = bits.substring(0, requiredBits);
+      if (bits.length < TOTAL_BASES * 2) throw new Error('Link too short for fixed schema.');
+      const seqBits = bits.substring(0, TOTAL_BASES * 2);
       const sequences = [];
-      for (let i = 0; i < seqBits.length; i += 2) {
-        sequences.push(BITS_TO_BASE[parseInt(seqBits.substring(i, i+2), 2)]);
-      }
-
+      for (let i = 0; i < seqBits.length; i += 2) sequences.push(BITS_TO_BASE[parseInt(seqBits.substring(i, i+2), 2)]);
       const lines = [];
       let cursor = 0;
       for (let i = 0; i < 20; i++) {
@@ -287,7 +412,6 @@
       return lines;
     }
 
-    // ---------- Colorizing DNA text ----------
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
     }
@@ -299,7 +423,51 @@
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const copyTextBtn = document.getElementById('copyTextBtn');
     const pasteTextBtn = document.getElementById('pasteTextBtn');
+    const categoryList = document.getElementById('categoryList');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const saveDnaBtn = document.getElementById('saveDnaBtn');
+    const saveBtnText = document.getElementById('saveBtnText');
+    const toastContainer = document.getElementById('toastContainer');
 
+    // ---------- Toast ----------
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    // ---------- Local storage ----------
+    const STORAGE_KEY = 'dna_shortener_categories';
+
+    function loadCategories() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+      return [{
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name: 'Horse',
+        entries: []
+      }];
+    }
+
+    function saveCategories() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
+    }
+
+    let categories = loadCategories();
+    let selectedCategoryId = null;
+
+    // ---------- UI update ----------
     function updatePlaceholder() {
       const text = editor.innerText.trim();
       editor.classList.toggle('empty', text === '');
@@ -383,7 +551,273 @@
       }
     }
 
-    // ════ Event listeners ════
+    // ---------- Sidebar rendering ----------
+    function renderSidebar() {
+      categoryList.innerHTML = '';
+      categories.forEach(cat => {
+        const li = document.createElement('li');
+        li.className = 'category-item';
+        if (cat.id === selectedCategoryId) li.classList.add('selected');
+        li.draggable = true;
+        li.dataset.categoryId = cat.id;
+
+        li.addEventListener('dragstart', handleCategoryDragStart);
+        li.addEventListener('dragover', handleCategoryDragOver);
+        li.addEventListener('drop', handleCategoryDrop);
+        li.addEventListener('dragend', handleDragEnd);
+
+        const header = document.createElement('div');
+        header.className = 'category-header';
+
+        const dragHandle = document.createElement('span');
+        dragHandle.className = 'drag-handle';
+        dragHandle.innerHTML = '⋮⋮';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'category-name';
+        nameSpan.textContent = cat.name;
+        nameSpan.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectCategory(cat.id);
+        });
+
+        const actions = document.createElement('div');
+        actions.className = 'category-actions';
+
+        const renameBtn = document.createElement('button');
+        renameBtn.innerHTML = '✏️';
+        renameBtn.title = 'Rename category';
+        renameBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const newName = prompt('New category name:', cat.name);
+          if (newName && newName.trim()) {
+            cat.name = newName.trim();
+            saveCategories();
+            renderSidebar();
+            showToast(`Category renamed to "${cat.name}"`);
+          }
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.title = 'Delete category';
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Delete category "${cat.name}" and all its DNA?`)) {
+            categories = categories.filter(c => c.id !== cat.id);
+            if (selectedCategoryId === cat.id) selectedCategoryId = null;
+            saveCategories();
+            renderSidebar();
+            updateSaveButton();
+            showToast(`Category "${cat.name}" deleted`, 'error');
+          }
+        });
+
+        actions.appendChild(renameBtn);
+        actions.appendChild(deleteBtn);
+        header.appendChild(dragHandle);
+        header.appendChild(nameSpan);
+        header.appendChild(actions);
+        li.appendChild(header);
+
+        if (cat.id === selectedCategoryId) {
+          const entryList = document.createElement('ul');
+          entryList.className = 'entry-list';
+          cat.entries.forEach(entry => {
+            const entryLi = document.createElement('li');
+            entryLi.className = 'entry-item';
+            entryLi.draggable = true;
+            entryLi.dataset.entryId = entry.id;
+            entryLi.dataset.categoryId = cat.id;
+
+            entryLi.addEventListener('dragstart', handleEntryDragStart);
+            entryLi.addEventListener('dragover', handleEntryDragOver);
+            entryLi.addEventListener('drop', handleEntryDrop);
+            entryLi.addEventListener('dragend', handleDragEnd);
+
+            const entryDragHandle = document.createElement('span');
+            entryDragHandle.className = 'drag-handle';
+            entryDragHandle.innerHTML = '⋮';
+            entryDragHandle.style.fontSize = '0.8rem';
+
+            const entryName = document.createElement('span');
+            entryName.className = 'entry-name';
+            entryName.textContent = entry.name;
+            entryLi.addEventListener('click', () => loadEntry(entry));
+
+            const entryActions = document.createElement('div');
+            entryActions.className = 'entry-actions';
+
+            const entryRename = document.createElement('button');
+            entryRename.innerHTML = '✏️';
+            entryRename.title = 'Rename DNA';
+            entryRename.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const newName = prompt('New name:', entry.name);
+              if (newName && newName.trim()) {
+                entry.name = newName.trim();
+                saveCategories();
+                renderSidebar();
+                showToast(`DNA renamed to "${entry.name}"`);
+              }
+            });
+
+            const entryDelete = document.createElement('button');
+            entryDelete.innerHTML = '🗑️';
+            entryDelete.title = 'Delete DNA';
+            entryDelete.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (confirm(`Delete DNA "${entry.name}"?`)) {
+                cat.entries = cat.entries.filter(e => e.id !== entry.id);
+                saveCategories();
+                renderSidebar();
+                showToast(`DNA "${entry.name}" deleted`, 'error');
+              }
+            });
+
+            entryActions.appendChild(entryRename);
+            entryActions.appendChild(entryDelete);
+            entryLi.appendChild(entryDragHandle);
+            entryLi.appendChild(entryName);
+            entryLi.appendChild(entryActions);
+            entryList.appendChild(entryLi);
+          });
+          li.appendChild(entryList);
+        }
+        categoryList.appendChild(li);
+      });
+    }
+
+    function selectCategory(id) {
+      selectedCategoryId = id;
+      renderSidebar();
+      updateSaveButton();
+    }
+
+    function updateSaveButton() {
+      const cat = categories.find(c => c.id === selectedCategoryId);
+      if (cat) {
+        saveBtnText.textContent = `Save DNA to ${cat.name}`;
+      } else {
+        saveBtnText.textContent = 'Save DNA';
+      }
+    }
+
+    function loadEntry(entry) {
+      editor.innerHTML = colorizeDNA(entry.dnaText);
+      updatePlaceholder();
+      refreshLink();
+      showToast(`Loaded DNA "${entry.name}"`);
+    }
+
+    // ---------- Drag & Drop ----------
+    let draggedCategoryId = null;
+    let draggedEntryId = null;
+    let draggedFromCategoryId = null;
+
+    function handleCategoryDragStart(e) {
+      draggedCategoryId = this.dataset.categoryId;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    function handleCategoryDragOver(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      if (target && target.dataset.categoryId !== draggedCategoryId)
+        target.style.borderTop = '2px solid #3b82f6';
+    }
+    function handleCategoryDrop(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      target.style.borderTop = '';
+      const targetId = target.dataset.categoryId;
+      if (!draggedCategoryId || targetId === draggedCategoryId) return;
+      const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
+      const targetIndex = categories.findIndex(c => c.id === targetId);
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        const [moved] = categories.splice(draggedIndex, 1);
+        categories.splice(targetIndex, 0, moved);
+        saveCategories();
+        renderSidebar();
+      }
+    }
+    function handleEntryDragStart(e) {
+      draggedEntryId = this.dataset.entryId;
+      draggedFromCategoryId = this.dataset.categoryId;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.stopPropagation();
+    }
+    function handleEntryDragOver(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      if (target && target.dataset.entryId !== draggedEntryId && target.dataset.categoryId === draggedFromCategoryId)
+        target.style.borderTop = '2px solid #3b82f6';
+    }
+    function handleEntryDrop(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      target.style.borderTop = '';
+      if (!draggedEntryId || !draggedFromCategoryId) return;
+      const cat = categories.find(c => c.id === draggedFromCategoryId);
+      if (!cat || target.dataset.categoryId !== draggedFromCategoryId) return;
+      const draggedIndex = cat.entries.findIndex(ent => ent.id === draggedEntryId);
+      const targetIndex = cat.entries.findIndex(ent => ent.id === target.dataset.entryId);
+      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+        const [moved] = cat.entries.splice(draggedIndex, 1);
+        cat.entries.splice(targetIndex, 0, moved);
+        saveCategories();
+        renderSidebar();
+      }
+    }
+    function handleDragEnd() {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.category-item, .entry-item').forEach(el => el.style.borderTop = '');
+      draggedCategoryId = null;
+      draggedEntryId = null;
+      draggedFromCategoryId = null;
+    }
+
+    // ---------- Category / Entry actions ----------
+    function addCategory() {
+      const name = prompt('Category name:');
+      if (!name || !name.trim()) return;
+      const newCat = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name: name.trim(),
+        entries: []
+      };
+      categories.push(newCat);
+      saveCategories();
+      renderSidebar();
+      selectCategory(newCat.id);
+      showToast(`Category "${newCat.name}" created`);
+    }
+
+    function saveCurrentDna() {
+      if (!selectedCategoryId) {
+        alert('Please select a category first.');
+        return;
+      }
+      const cat = categories.find(c => c.id === selectedCategoryId);
+      if (!cat) return;
+      const dnaText = editor.innerText;
+      if (!dnaText.trim()) {
+        alert('DNA editor is empty.');
+        return;
+      }
+      const name = prompt('Name for this DNA snapshot:', `DNA ${new Date().toLocaleTimeString()}`);
+      if (!name || !name.trim()) return;
+      cat.entries.push({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name: name.trim(),
+        dnaText: dnaText
+      });
+      saveCategories();
+      renderSidebar();
+      showToast(`DNA "${name.trim()}" saved`);
+    }
+
+    // ---------- Main event listeners ----------
     editor.addEventListener('input', function(e) {
       if (editor.dataset.updating === 'true') return;
       editor.dataset.updating = 'true';
@@ -419,13 +853,9 @@
         navigator.clipboard.writeText(linkDisplay.value).then(() => {
           copyLinkBtn.innerHTML = '<span>✅</span> Copied!';
           setTimeout(() => { copyLinkBtn.innerHTML = '<span>📋</span> Copy Link'; }, 1500);
-        }).catch(() => {
-          linkDisplay.select();
-          document.execCommand('copy');
-        });
+        }).catch(() => { linkDisplay.select(); document.execCommand('copy'); });
       }
     });
-
     copyTextBtn.addEventListener('click', () => {
       const plain = editor.innerText;
       navigator.clipboard.writeText(plain).then(() => {
@@ -434,14 +864,11 @@
       }).catch(() => {
         const range = document.createRange();
         range.selectNodeContents(editor);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
         document.execCommand('copy');
-        sel.removeAllRanges();
       });
     });
-
     pasteTextBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
@@ -457,12 +884,12 @@
         hideError();
         pasteTextBtn.innerHTML = '<span>✅</span> Pasted!';
         setTimeout(() => { pasteTextBtn.innerHTML = '<span>📥</span> Paste DNA'; }, 1500);
-      } catch (err) {
-        showError('Unable to read clipboard. Please paste manually (Ctrl+V).');
-      }
+      } catch (err) { showError('Unable to read clipboard. Please paste manually.'); }
     });
+    addCategoryBtn.addEventListener('click', addCategory);
+    saveDnaBtn.addEventListener('click', saveCurrentDna);
 
-    // ════ Initialization ════
+    // ---------- Initialization ----------
     function loadFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const dna = params.get('dna');
@@ -473,6 +900,8 @@
           linkDisplay.value = window.location.href;
           updatePlaceholder();
           hideError();
+          showToast('DNA loaded from link');
+          return true;
         } catch (e) {
           showError('Failed to decode link: ' + e.message);
           editor.innerHTML = '';
@@ -484,9 +913,22 @@
         updatePlaceholder();
         linkDisplay.value = '';
       }
+      return false;
     }
 
-    window.addEventListener('load', loadFromUrl);
+    window.addEventListener('load', () => {
+      if (!categories.length) {
+        categories = loadCategories();
+        saveCategories();
+      }
+      loadFromUrl();
+      // Auto-select first category if none selected
+      if (!selectedCategoryId && categories.length > 0) {
+        selectedCategoryId = categories[0].id;
+      }
+      renderSidebar();
+      updateSaveButton();
+    });
   })();
 </script>
 </body>
