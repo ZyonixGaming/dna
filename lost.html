@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Lost Horsey Finder</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', 'Courier New', 'Roboto Mono', monospace;
+    }
+    body {
+      background: #1a2a1f;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 1000px;
+      width: 100%;
+      background: #fef7e0;
+      background-image: radial-gradient(circle at 10% 20%, rgba(210, 180, 140, 0.15) 2%, transparent 2.5%);
+      background-size: 28px 28px;
+      border-radius: 48px 32px 48px 32px;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,245,200,0.8);
+    }
+    .header {
+      background: #2c3e2b;
+      padding: 20px 28px 16px 28px;
+      border-bottom: 4px solid #d4af37;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #ffefb9;
+      text-shadow: 2px 2px 0 #3a2e1f;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header h1:before { content: "🐴"; font-size: 2rem; filter: drop-shadow(2px 2px 0 #634e2a); }
+    .content { padding: 28px 30px 34px 30px; }
+    .info-panel {
+      background: #e8ddbc;
+      border-radius: 24px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      border-left: 12px solid #b3823a;
+      box-shadow: inset 0 0 0 1px #fff9e8, 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .info-panel p { margin: 8px 0; font-size: 0.9rem; color: #2c2a1f; }
+    .default-path {
+      font-family: monospace;
+      background: #2d2b1f;
+      color: #f5e7b2;
+      padding: 6px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+    button {
+      background: #6b4c2c;
+      border: none;
+      font-weight: bold;
+      padding: 12px 20px;
+      margin: 8px 8px 8px 0;
+      border-radius: 60px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 3px 0 #3b2a18;
+      color: white;
+      transition: 0.07s linear;
+    }
+    button:active { transform: translateY(2px); box-shadow: 0 1px 0 #3b2a18; }
+    button.load-btn { background: #2f6b2f; box-shadow: 0 3px 0 #1b3e1b; }
+    button.copy-btn { background: #2a5f6b; box-shadow: 0 3px 0 #17444e; }
+    .file-status {
+      background: #d9cdab;
+      border-radius: 32px;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      margin: 16px 0 12px 0;
+      display: inline-block;
+      max-width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    textarea {
+      width: 100%;
+      padding: 18px;
+      font-family: 'Courier New', 'Fira Code', monospace;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      background: #fdf8ed;
+      border: 2px solid #b8935a;
+      border-radius: 24px;
+      resize: vertical;
+      margin-top: 12px;
+      color: #2d2412;
+      font-weight: 500;
+    }
+    textarea:focus { outline: none; border-color: #e5a23b; box-shadow: 0 0 0 2px #ffde9e; }
+    @media (max-width: 640px) {
+      .content { padding: 20px; }
+      button { padding: 8px 16px; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>🔎 Lost Horsey Finder</h1>    
+  </div>
+  <div class="content">
+    <div class="info-panel">
+        Load <code><strong>save1.dat</strong></code><br>
+        Typical path:
+        <span class="default-path">📁 C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\save1.dat</span>
+        <br><br>
+        It retrieves the Lost Horse's Genome from the save file.
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between;">
+      <div>
+        <button id="loadSaveBtn" class="load-btn">📂 LOAD SAVE FILE</button>
+        <button id="copyBtn" class="copy-btn">📋 Copy Genome to Clipboard</button>
+      </div>
+      <span id="fileLabel" class="file-status">⚡ No file selected</span>
+    </div>
+
+    <label style="font-weight: bold; margin-top: 10px; display: block;">🧬 Lost Horse genome:</label>
+    <textarea id="outputTextarea" rows="12" placeholder="After loading a valid save1.dat, the genome will appear here ..." readonly></textarea>
+    
+    <div id="statusMessage" style="margin-top: 16px; font-size: 0.85rem; font-family: monospace;"></div>
+  </div>
+</div>
+
+<script>
+// ------------------------------------------------------------------
+// 1. CONSTANTS & MAPPING DATA
+// ------------------------------------------------------------------
+const hex_map = {
+  "0":{ "name":"SIZE","n":"ATGC"},"1":{"name":"ASPECT","n":"GCAT"},"2":{"name":"SKINNY","n":"GACT"},"3":{"name":"BONES","n":"GCAT"},"4":{"name":"BONES2","n":"TGCA"},"5":{"name":"CHEST_BIG","n":"ATCG"},"6":{"name":"CHEST_SMALL","n":"GCTA"},"7":{"name":"GIANT_DWARF","n":"GACT"},"8":{"name":"MUSCLE_USE","n":"CTAG"},"9":{"name":"QUADRUPED","n":"CGAT"},"10":{"name":"BIPED","n":"TAGC"},"11":{"name":"SPLAY","n":"ACTG"},"12":{"name":"LEG_IN","n":"CGAT"},"13":{"name":"LEG_IN2","n":"CGAT"},"14":{"name":"GUT","n":"TGAC"},"15":{"name":"GUT_IS_UDDER","n":"ACGT"},"16":{"name":"OSTODERM","n":"GATC"},"17":{"name":"OSTO_SIZE","n":"TACG"},"18":{"name":"DERRIERE","n":"CTGA"},"19":{"name":"SPEED_FACTOR","n":"GCAT"},"20":{"name":"BREAK_FORCE","n":"GATC"},"21":{"name":"TAIL_TAG","n":"TAGC"},"22":{"name":"TAIL_EXISTS","n":"GCAT"},"23":{"name":"TAIL_SIZE","n":"GCAT"},"24":{"name":"TAIL_SHORT","n":"CAGT"},"25":{"name":"TAIL_ASPECT","n":"AGCT"},"26":{"name":"TAIL_ANGLE","n":"GCAT"},"27":{"name":"TAIL_JOINT_TYPE","n":"ATGC"},"28":{"name":"TAIL_STIFF","n":"ATGC"},"29":{"name":"TAIL_SPEED","n":"GCAT"},"30":{"name":"TAIL_FLEXIBILITY","n":"GTAC"},"31":{"name":"TAIL_SHAPE","n":"AGTC"},"32":{"name":"TAIL_BOTTOM","n":"GTCA"},"33":{"name":"TAIL_SEGMENTS","n":"GTCA"},"34":{"name":"LEG_TAG","n":"ATGC"},"35":{"name":"LEG_TYPE","n":"TACG"},"36":{"name":"LEG_LENGTH","n":"CATG"},"37":{"name":"LEG_STRETCH","n":"GACT"},"38":{"name":"LEG_STRETCH2","n":"ATCG"},"39":{"name":"LEG_STRENGTH","n":"GCTA"},"40":{"name":"LEG_HAS_FOOT","n":"GACT"},"41":{"name":"LEG_JOINT_TYPE","n":"AGTC"},"42":{"name":"LEG_FLEXIBILITY","n":"GTCA"},"43":{"name":"LEG_FLEX_BIAS","n":"CGAT"},"44":{"name":"LEG_THRUST_BACK","n":"GCTA"},"45":{"name":"LEG_IS_CIRCLE","n":"ATGC"},"46":{"name":"LEG_COUNT","n":"CGTA"},"47":{"name":"LEG_SKEW","n":"TCGA"},"48":{"name":"LEG_PENCIL","n":"ATGC"},"49":{"name":"LEG_AND_ARM_LIMP","n":"TAGC"},"50":{"name":"HAS_KNEE","n":"TCGA"},"51":{"name":"KNEE_MIN","n":"CGAT"},"52":{"name":"KNEE_MAX","n":"TAGC"},"53":{"name":"ARM_TAG","n":"GTAC"},"54":{"name":"ARM_TYPE","n":"CGAT"},"55":{"name":"ARM_LENGTH","n":"ATCG"},"56":{"name":"ARM_STRETCH","n":"GACT"},"57":{"name":"ARM_STRETCH2","n":"TCAG"},"58":{"name":"ARM_STRENGTH","n":"ATCG"},"59":{"name":"ARM_HAS_HAND","n":"CGTA"},"60":{"name":"ARM_JOINT_TYPE","n":"GCTA"},"61":{"name":"ARM_FLEXIBILITY","n":"ACTG"},"62":{"name":"ARM_FLEX_BIAS","n":"GCTA"},"63":{"name":"ARM_FORWARD","n":"CTGA"},"64":{"name":"ARM_SKEW","n":"TCGA"},"65":{"name":"ARM_NODE_SCALE","n":"CTGA"},"66":{"name":"HAS_ELBOW","n":"CATG"},"67":{"name":"ELBOW_RANGE","n":"CTAG"},"68":{"name":"UPARM_TAG","n":"ATCG"},"69":{"name":"UPARM_Y","n":"CTAG"},"70":{"name":"UPARM_ANGLE","n":"GCAT"},"71":{"name":"UPARM_GOOFY","n":"ACGT"},"72":{"name":"NECK_TAG","n":"AGTC"},"73":{"name":"NECK_TYPE","n":"TACG"},"74":{"name":"NECK_LENGTH","n":"ATGC"},"75":{"name":"NECK_GIRAFFE","n":"TCAG"},"76":{"name":"NECK_THICKNESS","n":"CGTA"},"77":{"name":"NECK_ANGLE","n":"TACG"},"78":{"name":"NECK_COCK","n":"CGAT"},"79":{"name":"NECK_JOINT_TYPE","n":"TGCA"},"80":{"name":"NECK_FLEXIBILITY","n":"GTCA"},"81":{"name":"NECK_FLEX_BIAS","n":"GATC"},"82":{"name":"NECK_SLOUCH","n":"CTGA"},"83":{"name":"NECK_ONTOP","n":"GTCA"},"84":{"name":"NECK_STIFF","n":"CATG"},"85":{"name":"NECK_SPEED","n":"AGCT"},"86":{"name":"HAS_FOOT","n":"TACG"},"87":{"name":"FOOT_SIZE","n":"GTAC"},"88":{"name":"FOOT_CLOWN","n":"GTAC"},"89":{"name":"FOOT_THICKNESS","n":"TCAG"},"90":{"name":"FOOT_TOE","n":"AGCT"},"91":{"name":"FOOT_IS_CIRCLE","n":"GACT"},"92":{"name":"FOOT_BACKWARDS","n":"AGCT"},"93":{"name":"HAS_HAND","n":"CGTA"},"94":{"name":"HAND_WIDTH","n":"GACT"},"95":{"name":"HAND_LENGTH","n":"CGAT"},"96":{"name":"HAND_FINGER","n":"CTGA"},"97":{"name":"HEAD_SIZE","n":"GCTA"},"98":{"name":"HEAD_THICK_SKULL","n":"TGAC"},"99":{"name":"HEAD_X_GROWTH","n":"ACGT"},"100":{"name":"HEAD_Y_GROWTH","n":"TACG"},"101":{"name":"HEAD_ASPECT","n":"TCAG"},"102":{"name":"HEAD_SQUARE","n":"CTAG"},"103":{"name":"HEAD_HAS_BACK","n":"GTCA"},"104":{"name":"HEAD_GIANT","n":"CTAG"},"105":{"name":"HEAD_SHRUNK","n":"CATG"},"106":{"name":"HEAD_JOINTED","n":"CATG"},"107":{"name":"HEAD_CHIMERA","n":"ATCG"},"108":{"name":"EYE_STYLE","n":"CATG"},"109":{"name":"BUGEYE","n":"GACT"},"110":{"name":"EYEBOX_X","n":"AGCT"},"111":{"name":"EYEBOX_Y","n":"CGTA"},"112":{"name":"EYEBOX_SIZE","n":"ATGC"},"113":{"name":"EYE_SIZE","n":"ACTG"},"114":{"name":"PUPIL_SIZE","n":"CAGT"},"115":{"name":"HAS_PUPIL","n":"ATCG"},"116":{"name":"BROW_SIZE","n":"GATC"},"117":{"name":"BROW_SLANT","n":"GTAC"},"118":{"name":"EAR_STYLE","n":"TGCA"},"119":{"name":"EAR_SHAPE","n":"CGAT"},"120":{"name":"EAR_FLOP","n":"CTAG"},"121":{"name":"EAR_X","n":"TAGC"},"122":{"name":"EAR_SIZE","n":"TCGA"},"123":{"name":"EAR_ASPECT","n":"ATCG"},"124":{"name":"EAR_SLANT","n":"GACT"},"125":{"name":"EAR_INTERIOR","n":"TAGC"},"126":{"name":"TEETH_SHAPE","n":"TCGA"},"127":{"name":"HAS_MOUTH","n":"TCGA"},"128":{"name":"MOUTH_Y","n":"CGAT"},"129":{"name":"MOUTH_SIZE","n":"CTGA"},"130":{"name":"JAW","n":"CAGT"},"131":{"name":"TEETH_UPPER","n":"GATC"},"132":{"name":"TEETH_UPPER2","n":"CATG"},"133":{"name":"TONGUE","n":"CGAT"},"134":{"name":"TONGUE_SEGS","n":"ACGT"},"135":{"name":"NOSE_STYLE","n":"GTCA"},"136":{"name":"NOSE_INNY","n":"GCTA"},"137":{"name":"NOSE_Y","n":"CTAG"},"138":{"name":"NOSE_SIZE","n":"AGCT"},"139":{"name":"NOSE_INTERIOR","n":"ATGC"},"140":{"name":"HAS_ANTLERS","n":"CTGA"},"141":{"name":"ANTLER_X","n":"TGAC"},"142":{"name":"ANTLER_W","n":"TACG"},"143":{"name":"ANTLER_H","n":"TACG"},"144":{"name":"ANTLER_TAPER","n":"CGAT"},"145":{"name":"ANTLER_POM","n":"CTGA"},"146":{"name":"ANTLER_COLOR","n":"ACGT"},"147":{"name":"POM_COLOR","n":"GCTA"},"148":{"name":"POM_USECOLOR","n":"GTAC"},"149":{"name":"ANTLER_REC","n":"TAGC"},"150":{"name":"ANTLER_REC2","n":"CTGA"},"151":{"name":"ANTLER_FLIP","n":"TACG"},"152":{"name":"ANTLER_MOD","n":"TCAG"},"153":{"name":"ANTLER_SCALEH","n":"GCTA"},"154":{"name":"ANTLER_SCALEW","n":"TCGA"},"155":{"name":"ANTLER_ANGLE","n":"GATC"},"156":{"name":"ANTLER_ANGLE2","n":"ACTG"},"157":{"name":"ANTLER_ANGLE_RAND","n":"GTAC"},"158":{"name":"ANTLER_T1","n":"CGAT"},"159":{"name":"ANTLER_T2","n":"ATGC"},"160":{"name":"HAT_EXISTS","n":"ACTG"},"161":{"name":"HAT_SIZE","n":"CATG"},"162":{"name":"HAT_RAKE","n":"AGTC"},"163":{"name":"HAT_ASPECT","n":"ATGC"},"164":{"name":"HAT_TAPER","n":"TGCA"},"165":{"name":"HAT_POM","n":"TGAC"},"166":{"name":"HAT_POM_IS_LID","n":"TAGC"},"167":{"name":"HAT_CLONE","n":"CGTA"},"168":{"name":"HAT_BACK_SCALE","n":"TAGC"},"169":{"name":"HAT_FRONT_SCALE","n":"CGTA"},"170":{"name":"HAT_BACK_ANGLE","n":"ACGT"},"171":{"name":"HAT_FRONT_ANGLE","n":"CGAT"},"172":{"name":"HAT_ANGLE_RAND","n":"TCGA"},"173":{"name":"HAT_FLIP","n":"TACG"},"174":{"name":"HAT_T","n":"GTAC"},"175":{"name":"BASE_BROWN","n":"ATCG"},"176":{"name":"BASE_BLACK","n":"TGCA"},"177":{"name":"BASE_RED","n":"GTCA"},"178":{"name":"BASE_GREEN","n":"TCAG"},"179":{"name":"GREEN_KNOCKOUT","n":"CAGT"},"180":{"name":"BASE_CREAM","n":"AGCT"},"181":{"name":"ALT_BLUE","n":"TAGC"},"182":{"name":"SPOT_YELLOW","n":"TGCA"},"183":{"name":"SKIN_HUE","n":"CGAT"},"184":{"name":"SKIN_HUE2","n":"TAGC"},"185":{"name":"SWAP_BASE_SPOT","n":"ATCG"},"186":{"name":"SWAP_ALT_SPOT","n":"TGCA"},"187":{"name":"WHITE","n":"TAGC"},"188":{"name":"WHITE_IS_LETHAL","n":"AGCT"},"189":{"name":"EYE_HUE","n":"GCTA"},"190":{"name":"NOSE_HUE","n":"GACT"},"191":{"name":"HOOF_COLOR","n":"CTAG"},"192":{"name":"AGOUTI","n":"ATGC"},"193":{"name":"BELLY_ALT","n":"TACG"},"194":{"name":"SKIN_HEAD","n":"GCAT"},"195":{"name":"SKIN_HANDS","n":"GCAT"},"196":{"name":"FOOT_IS_HOOF","n":"GACT"},"197":{"name":"RACCOON_EYE","n":"GCAT"},"198":{"name":"EAR_COMP","n":"GTCA"},"199":{"name":"TAIL_ALT","n":"CGTA"},"200":{"name":"PAT_SPLIT","n":"CGAT"},"201":{"name":"PAT_BELLY","n":"ACTG"},"202":{"name":"PAT_STRIPE","n":"CTAG"},"203":{"name":"PAT_SPOT","n":"ACGT"},"204":{"name":"PAT_PERLIN","n":"TCAG"},"205":{"name":"PAT_PERLIN2","n":"GTCA"},"206":{"name":"PAT_PERLIN_SIZE","n":"GACT"},"207":{"name":"RAMPAGE","n":"GATC"},"208":{"name":"SPINAL_LOCO","n":"CTGA"},"209":{"name":"BRAIN_SPASTIC","n":"TGAC"},"210":{"name":"HIGH_INTELLECT","n":"CTAG"},"211":{"name":"OMNIVORE","n":"CATG"},"212":{"name":"LITTER_SIZE","n":"CTAG"},"213":{"name":"OLD_AGE","n":"TACG"},"214":{"name":"LIMP","n":"AGTC"},"215":{"name":"NARCOLEPSY","n":"TCGA"},"216":{"name":"FLU_IMMUNITY","n":"CATG"},"217":{"name":"TAIL_WAG","n":"CTGA"},"218":{"name":"STIFF_JOINTS","n":"CGAT"},"219":{"name":"L_LEG_SIGNAL","n":"GTCA"},"220":{"name":"L_LEG_FTOB_REACT","n":"TCAG"},"221":{"name":"L_LEG_FTOB_EVENT","n":"GATC"},"222":{"name":"L_LEG_BTOF_REACT","n":"ACGT"},"223":{"name":"L_LEG_BTOF_EVENT","n":"TGAC"},"224":{"name":"L_ARM_SIGNAL","n":"CGAT"},"225":{"name":"L_ARM_FTOB_REACT","n":"ACGT"},"226":{"name":"L_ARM_FTOB_EVENT","n":"TGAC"},"227":{"name":"L_ARM_BTOF_REACT","n":"GATC"},"228":{"name":"L_ARM_BTOF_EVENT","n":"CATG"},"229":{"name":"L_TAIL_SIGNAL","n":"ACTG"},"230":{"name":"L_TAIL_FTOB_REACT","n":"CGAT"},"231":{"name":"L_TAIL_FTOB_EVENT","n":"TCGA"},"232":{"name":"L_TAIL_BTOF_REACT","n":"GTCA"},"233":{"name":"L_TAIL_BTOF_EVENT","n":"ATCG"},"234":{"name":"L_NECK_SIGNAL","n":"TGAC"},"235":{"name":"L_NECK_FTOB_REACT","n":"GTAC"},"236":{"name":"L_NECK_FTOB_EVENT","n":"CATG"},"237":{"name":"L_NECK_BTOF_REACT","n":"TCAG"},"238":{"name":"L_NECK_BTOF_EVENT","n":"TCAG"},"239":{"name":"LOCO_SYNC","n":"CTGA"}
+};
+
+const targetBytes = new Set([9, 10, 11, 12, 17, 18, 19, 20, 25, 26, 27, 28, 33, 34, 35, 36]);
+
+// Genome layout (20 rows, each row: array of byte indices 0..239)
+const genome_layout = [
+  "03041011072026396254",
+  "0e0f122d5b8586c1c9d4d5d3d6",
+  "081c2a2b1e1d313a3d3e5051d1",
+  "0b0c0d1a1b293233343c42434f6ada",
+  "22282e2c353b4852531479",
+  "090a4445473f46bc",
+  "0001020506494a4b4c4d4e",
+  "15161718191f21d9",
+  "2324252f27303637384041",
+  "565758595a5c5d5e5f60c3",
+  "61636465666768696b6e6f70c2",
+  "6c6d7172737475bd76777a7b7c7d78",
+  "7e7f80818283848788898a8bd8",
+  "8c8d8e8f9091929394a5a6",
+  "95969798999a9b9c9d9e9f",
+  "a0a1a2a3a4a7a8a9aaabacadae",
+  "afb0b1b2b3b4b5b6b7b8b9babbbebf",
+  "c0c4c5c6c7c8cacbcccdce",
+  "d71355cfd0d2dbe0e5eaef",
+  "dcdddedfe1e2e3e4e6e7e8e9ebecedee"
+].map(line => line.match(/.{1,2}/g).map(hex => parseInt(hex, 16)));
+
+// ------------------------------------------------------------------
+// 2. Decode byte array directly to genome string
+// ------------------------------------------------------------------
+function decodeGenomeToString(byteArray240) {
+  let lines = [];
+  for (let row = 0; row < genome_layout.length; row++) {
+    let strand1 = "", strand2 = "";
+    const indices = genome_layout[row];
+    for (let j = 0; j < indices.length; j++) {
+      const idx = indices[j];
+      const byteVal = byteArray240[idx];
+      if (byteVal === undefined) return null;
+      const entry = hex_map[idx];
+      if (!entry || !entry.n) return null;
+      if (!targetBytes.has(byteVal)) return null;
+      const n1 = byteVal % 8;
+      const n2 = Math.floor(byteVal / 8);
+      const ch1 = entry.n[n1 - 1];
+      const ch2 = entry.n[n2 - 1];
+      if (!ch1 || !ch2) return null;
+      strand1 += ch1;
+      strand2 += ch2;
+    }
+    lines.push(`${String(row).padStart(2,"0")}:${strand1}`);
+    lines.push(`${String(row).padStart(2,"0")}:${strand2}`);
+  }
+  return lines.join("\r\n");
+}
+
+// ------------------------------------------------------------------
+// 3. BLOCK SEARCH: non‑overlapping 240‑byte blocks + verification
+// ------------------------------------------------------------------
+function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset, maxBlocks) {
+  const blockLen = 240;
+  const validBlocks = [];
+  let i = startOffset;
+  const totalLen = buffer.length;
+  const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  
+  while (i + blockLen <= totalLen) {
+    let allValid = true;
+    for (let j = 0; j < blockLen; j++) {
+      if (!targetSet.has(buffer[i + j])) {
+        allValid = false;
+        break;
+      }
+    }
+    if (allValid) {
+      const lastBytePos = i + blockLen - 1;
+      const verifyOffset = lastBytePos + 9;
+      if (verifyOffset + 4 <= totalLen) {
+        const val = dataView.getInt32(verifyOffset, true);
+        if (val > 9 && val < m_value) {
+          validBlocks.push(i);
+          i += blockLen;
+		  if(validBlocks.length>=maxBlocks){
+			return validBlocks;
+		  }
+          continue;
+        }
+      }
+    }
+    i++;
+  }
+  return validBlocks;
+}
+
+// ------------------------------------------------------------------
+// 4. MAIN PROCESSOR (m at 0x10, n+1, verification)
+// ------------------------------------------------------------------
+async function processSaveFile(file) {
+  const fileLabelSpan = document.getElementById('fileLabel');
+  const outputTextarea = document.getElementById('outputTextarea');
+  const statusDiv = document.getElementById('statusMessage');
+
+  function setError(msg) {
+    statusDiv.innerHTML = `<span style="color:#b12a2c;">⚠️ ${escapeHtml(msg)}</span>`;
+    outputTextarea.value = `[ERROR] ${msg}`;
+  }
+  function setSuccess(msg) { statusDiv.innerHTML = `<span style="color:#2b6e2f;">✅ ${escapeHtml(msg)}</span>`; }
+  function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+  if (!file) { setError("No file selected."); fileLabelSpan.innerHTML = "❌ No file selected"; return; }
+  fileLabelSpan.innerHTML = `📄 ${escapeHtml(file.name)} (${(file.size/1024).toFixed(1)} KB)`;
+  statusDiv.innerHTML = "";
+  outputTextarea.value = "⏳ Scanning save file ...";
+  
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const dataBytes = new Uint8Array(arrayBuffer);
+    if (dataBytes.length < 30) throw new Error("File too small.");
+
+    // read m from offset 0x10 (little-endian signed 32bit)
+    if (0x10 + 4 > dataBytes.length) throw new Error("File too small to read m at 0x10.");
+    const m = new DataView(arrayBuffer).getInt32(0x10, true);
+
+    // locate "Willaby Ranch"
+    const pattern = "Willaby Ranch";
+    const patternBytes = new TextEncoder().encode(pattern);
+    let pos = -1;
+    for (let i = 0; i <= dataBytes.length - patternBytes.length; i++) {
+      let match = true;
+      for (let j = 0; j < patternBytes.length; j++) {
+        if (dataBytes[i + j] !== patternBytes[j]) { match = false; break; }
+      }
+      if (match) { pos = i; break; }
+    }
+    if (pos === -1) throw new Error(`Text "Willaby Ranch" not found.`);
+    
+    const intOffset = pos + patternBytes.length;
+    if (intOffset + 4 > dataBytes.length) throw new Error("Truncated file — cannot read n.");
+    const n = new DataView(arrayBuffer).getInt32(intOffset, true);
+
+    // find all verified blocks starting after the integer
+    const validBlocks = findValidBlocksWithVerification(dataBytes, targetBytes, m, intOffset + 4,n+2);
+    
+    const targetBlockIdx = n + 1;   // n+1 (as per requirement: n+2? your comment said n+1)
+    if (targetBlockIdx < 0) throw new Error(`n+1 = ${targetBlockIdx} is negative.`);
+    if (targetBlockIdx >= validBlocks.length) {
+      throw new Error(`Not enough valid blocks. Need index ${targetBlockIdx}, only ${validBlocks.length} found.`);
+    }
+    
+    const lettersStart = validBlocks[targetBlockIdx];
+    
+    const blockBytes = dataBytes.slice(lettersStart, lettersStart + 240);
+    if (blockBytes.length !== 240) throw new Error("Failed to extract full 240 bytes.");
+    
+    const genomeString = decodeGenomeToString(blockBytes);
+    if (!genomeString) throw new Error("Genome decoding failed — invalid byte mapping or targetBytes mismatch.");
+    
+    outputTextarea.value = genomeString;
+    setSuccess(`Success: used verified block #${targetBlockIdx} (n=${n}) at offset ${lettersStart}.`);
+    
+  } catch (err) {
+    console.error(err);
+    setError(err.message);
+    fileLabelSpan.innerHTML = `⚠️ Error with ${escapeHtml(file.name)}`;
+  }
+}
+
+// ------------------------------------------------------------------
+// 5. UI SETUP (copy to clipboard)
+// ------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const loadBtn = document.getElementById('loadSaveBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const outputTextarea = document.getElementById('outputTextarea');
+  const fileLabelSpan = document.getElementById('fileLabel');
+  const statusDiv = document.getElementById('statusMessage');
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.dat';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  function setError(msg) {
+    statusDiv.innerHTML = `<span style="color:#b12a2c;">⚠️ ${msg}</span>`;
+  }
+  function setSuccess(msg) { statusDiv.innerHTML = `<span style="color:#2b6e2f;">✅ ${msg}</span>`; }
+
+  loadBtn.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) processSaveFile(file);
+    else fileLabelSpan.innerHTML = "⚡ No file selected";
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const content = outputTextarea.value;
+    if (!content || content.startsWith("[ERROR]") || content.includes("⏳ Scanning")) {
+      setError("Nothing to copy. Load a valid save file first.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(content);
+      setSuccess("Genome copied to clipboard!");
+    } catch (err) {
+      setError("Failed to copy: " + err.message);
+    }
+  });
+});
+</script>
+</body>
+</html>
