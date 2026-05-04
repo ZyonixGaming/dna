@@ -126,7 +126,7 @@
         Typical path:
         <span class="default-path">📁 C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\save1.dat</span>
         <br><br>
-        It retrieves the Lost Horse's Genome from the save file.
+        It retrieves the Lost Horse's Genome from the save file.<br>
     </div>
 
     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between;">
@@ -210,14 +210,14 @@ function decodeGenomeToString(byteArray240) {
 // ------------------------------------------------------------------
 // 3. BLOCK SEARCH: non‑overlapping 240‑byte blocks + verification
 // ------------------------------------------------------------------
-function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset, maxBlocks) {
+function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset, maxBlocks, limitOffset) {
   const blockLen = 240;
   const validBlocks = [];
   let i = startOffset;
   const totalLen = buffer.length;
   const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   
-  while (i + blockLen <= totalLen) {
+  while ((i + blockLen <= totalLen)&& (i+blockLen < limitOffset)) {
     let allValid = true;
     for (let j = 0; j < blockLen; j++) {
       if (!targetSet.has(buffer[i + j])) {
@@ -275,8 +275,8 @@ async function processSaveFile(file) {
     const m = new DataView(arrayBuffer).getInt32(0x10, true);
 
     // locate "Willaby Ranch"
-    const pattern = "Willaby Ranch";
-    const patternBytes = new TextEncoder().encode(pattern);
+    let pattern = "Willaby Ranch";
+    let patternBytes = new TextEncoder().encode(pattern);
     let pos = -1;
     for (let i = 0; i <= dataBytes.length - patternBytes.length; i++) {
       let match = true;
@@ -288,16 +288,32 @@ async function processSaveFile(file) {
     if (pos === -1) throw new Error(`Text "Willaby Ranch" not found.`);
     
     const intOffset = pos + patternBytes.length;
+
+    pattern = "Circle-D Corral";
+    patternBytes = new TextEncoder().encode(pattern);
+    let pos2 = -1;
+    for (let i = 0; i <= dataBytes.length - patternBytes.length; i++) {
+      let match = true;
+      for (let j = 0; j < patternBytes.length; j++) {
+        if (dataBytes[i + j] !== patternBytes[j]) { match = false; break; }
+      }
+      if (match) { pos2 = i; break; }
+    }
+    if (pos2 === -1) throw new Error(`Text "Circle-D Corral" not found.`);
+    
+	const limitOffset = pos2;	
+	
     if (intOffset + 4 > dataBytes.length) throw new Error("Truncated file — cannot read n.");
     const n = new DataView(arrayBuffer).getInt32(intOffset, true);
 
     // find all verified blocks starting after the integer
-    const validBlocks = findValidBlocksWithVerification(dataBytes, targetBytes, m, intOffset + 4,n+2);
+    const validBlocks = findValidBlocksWithVerification(dataBytes, targetBytes, m, intOffset + 4,n+2,limitOffset);
     
     const targetBlockIdx = n + 1;   // n+1 (as per requirement: n+2? your comment said n+1)
     if (targetBlockIdx < 0) throw new Error(`n+1 = ${targetBlockIdx} is negative.`);
     if (targetBlockIdx >= validBlocks.length) {
-      throw new Error(`Not enough valid blocks. Need index ${targetBlockIdx}, only ${validBlocks.length} found.`);
+      //throw new Error(`Not enough valid blocks. Need index ${targetBlockIdx}, only ${validBlocks.length} found.`);
+	  throw new Error(`Lost Horse not found. Please check the lost horse sign at Willaby Ranch, exit and save, then try this tool again.`);
     }
     
     const lettersStart = validBlocks[targetBlockIdx];
