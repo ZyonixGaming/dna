@@ -230,7 +230,7 @@ function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset
       const verifyOffset = lastBytePos + 9;
       if (verifyOffset + 4 <= totalLen) {
         const val = dataView.getInt32(verifyOffset, true);
-        if (val > 9 && val < m_value) {
+        if ((val > 9 && val < m_value)||(val==0&&validBlocks.length==0)) {
           validBlocks.push(i);
           i += blockLen;
 		  if(validBlocks.length>=maxBlocks){
