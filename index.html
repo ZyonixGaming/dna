@@ -312,10 +312,20 @@
       to { transform: translateX(0); opacity: 1; }
     }
   </style>
+  <link rel="stylesheet" href="headers.css">
 </head>
 <body>
 <div class="container">
-  <h1>🧬 DNA Shortener</h1>
+  <h1>🧬 DNA Shortener</h1> 
+<div class="tools-dropdown" id="toolsDropdown">
+            <button class="tools-btn" id="toolsBtn">
+                🔧 Other Tools <span class="arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <!-- Populated by header-links.js -->
+            </div>
+        </div>
+		
   <p class="small-note">Edit or paste your 40‑line sequences. The sharing link updates automatically.</p>
 
   <div class="link-area">
@@ -1088,5 +1098,6 @@
     });
   })();
 </script>
+ <script src="headers.js"></script>
 </body>
 </html>

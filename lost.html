@@ -114,11 +114,20 @@
       button { padding: 8px 16px; font-size: 0.9rem; }
     }
   </style>
+  <link rel="stylesheet" href="headers.css">
 </head>
 <body>
 <div class="card">
   <div class="header">
     <h1>🔎 Lost Horsey Finder</h1>    
+	<div class="tools-dropdown" id="toolsDropdown">
+            <button class="tools-btn" id="toolsBtn">
+                🔧 Other Tools <span class="arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <!-- Populated by header-links.js -->
+            </div>
+        </div>
   </div>
   <div class="content">
     <div class="info-panel">
@@ -230,7 +239,7 @@ function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset
       const verifyOffset = lastBytePos + 9;
       if (verifyOffset + 4 <= totalLen) {
         const val = dataView.getInt32(verifyOffset, true);
-        if ((val > 9 && val < m_value)||(val==0&&validBlocks.length==0)) {
+        if ((val > 9 && val < m_value)||(val>=0&&val<=9&&validBlocks.length==0)) {
           validBlocks.push(i);
           i += blockLen;
 		  if(validBlocks.length>=maxBlocks){
@@ -377,5 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script src="headers.js"></script>
 </body>
 </html>
