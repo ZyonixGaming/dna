@@ -42,7 +42,7 @@ const HEADER_LINKS = [
     let html = '';
     HEADER_LINKS.forEach(link => {
         const isCurrent = link.url === window.location.pathname || link.url === window.location.href;
-        html += `<a href="${link.url}" target="${isCurrent ? '_self' : '_blank'}" rel="noopener">
+        html += `<a href="${link.url}" target="${isCurrent ? '_blank' : '_blank'}" rel="noopener">
             <span class="tool-icon">${link.icon}</span> ${link.name}
         </a>`;
     });
