@@ -348,7 +348,7 @@
 
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-    <a id="crisprLink" href="https://zyonixgaming.github.io/crispr/" target="_self" rel="noopener noreferrer">🧪 Edit in CRISPR 2.0</a>
+    <a id="crisprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_self" rel="noopener noreferrer">🧪 Edit in SIMPR Horsey Genome Editor</a>
   </div>
 
   <footer>
@@ -616,7 +616,7 @@
       if (!plainText) {
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = 'https://zyonixgaming.github.io/crispr/';
+        crisprLink.href = 'https://zyonixgaming.github.io/crispr/simpr.html';
         hideError();
         return;
       }
@@ -627,13 +627,13 @@
         linkDisplay.value = fullUrl;
         updateUrlParam(encoded);
         // Update CRISPR editor link with compressed DNA
-        crisprLink.href = `https://zyonixgaming.github.io/crispr/?dna=${encoded}`;
+        crisprLink.href = `https://zyonixgaming.github.io/crispr/simpr.html?dna=${encoded}`;
         hideError();
       } catch (e) {
         showError(e.message);
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = 'https://zyonixgaming.github.io/crispr/';
+        crisprLink.href = 'https://zyonixgaming.github.io/crispr/simpr.html';
       }
     }
 

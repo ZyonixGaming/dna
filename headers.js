@@ -9,6 +9,11 @@ const HEADER_LINKS = [
         icon: '🧬'
     },
     {
+        name: 'SIMPR Horsey Genome Editor',
+        url: 'https://zyonixgaming.github.io/crispr/simpr.html',
+        icon: '🧬'
+    },
+    {
         name: 'DNA Shortener',
         url: 'https://zyonixgaming.github.io/dna/',
         icon: '🔗'
