@@ -1,0 +1,70 @@
+/* ===== Mobile layout overrides ===== */
+
+/* Floating toggle button – hidden on desktop */
+#mobileRightToggle {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 110;
+    background: #2c6e6e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay – hidden by default */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 98;
+}
+
+/* ---- Mobile breakpoint ---- */
+@media (max-width: 900px) {
+
+    /* Shrink left sidebar */
+    .left-sidebar {
+        width: 160px;
+    }
+
+    /* Right sidebar becomes a fixed floating panel */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -320px;              /* hidden off‑screen */
+        width: 300px;
+        max-width: 85vw;            /* avoid overflow on small phones */
+        height: 100%;
+        transition: right 0.3s ease;
+        z-index: 99;
+        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    /* Show the toggle button */
+    #mobileRightToggle {
+        display: flex;
+    }
+
+    /* Overlay visible when sidebar is open */
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
