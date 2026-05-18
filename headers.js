@@ -26,6 +26,10 @@ const HEADER_LINKS = [
         name: 'Lost Horsey Finder',
         url: 'https://zyonixgaming.github.io/dna/lost.html',
         icon: '🔎'
+    },    {
+        name: 'pop.xml DNA Validator',
+        url: 'https://zyonixgaming.github.io/dna/pop.html',
+        icon: '✓'
     },
     {
         name: 'Horsey Game Save Editor',
