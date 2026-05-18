@@ -172,7 +172,7 @@
     </div>
 
     <h2>Populations</h2>
-    <p style="font-size: 0.9em; color: #94a3b8;">Select a population to generate its DNA. If a sequence in the text area is mathematically impossible for a specific population, its tag will turn <strong style="color: #fca5a5;">red</strong>.</p>
+    <p style="font-size: 0.9em; color: #94a3b8;">Select a population to generate its DNA.<br>If a sequence in the text area is impossible for a specific population, its tag will turn <strong style="color: #fca5a5;">red</strong>.</p>
     <div class="populations" id="pop-container">
         </div>
 
@@ -232,6 +232,8 @@
 
         // --- Core Logic ---
 
+const defaultWeights=[1,0,0,0];
+
         // Parse genes.xml
         function parseGenes(xmlString) {
             const parser = new DOMParser();
@@ -255,21 +257,22 @@
 
             function resolvePop(node, parentGenes) {
                 if (node.tagName !== "pop") return;
+				
                 const popName = node.getAttribute("name");
                 const currentGenes = { ...parentGenes };
-
+				//console.log("name: " + popName);
                 Array.from(node.children).forEach(child => {
                     if (child.tagName === "gene") {
                         const gName = child.getAttribute("name");
-                        const p0 = parseFloat(child.getAttribute("p0") || 0);
-                        const p1 = parseFloat(child.getAttribute("p1") || 0);
-                        const p2 = parseFloat(child.getAttribute("p2") || 0);
-                        const p3 = parseFloat(child.getAttribute("p3") || 0);
+                        const p0 = parseInt(child.getAttribute("p0") || 0);
+                        const p1 = parseInt(child.getAttribute("p1") || 0);
+                        const p2 = parseInt(child.getAttribute("p2") || 0);
+                        const p3 = parseInt(child.getAttribute("p3") || 0);
 
                         let probs = [p0, p1, p2, p3];
                         // If all are 0, default to equal chance
                         if (p0 === 0 && p1 === 0 && p2 === 0 && p3 === 0) {
-                            probs = [1, 1, 1, 1];
+                            probs = defaultWeights;
                         }
                         currentGenes[gName] = probs;
                     }
@@ -278,8 +281,11 @@
                 if (popName) result[popName] = currentGenes;
 
                 // Recurse to children
-                Array.from(node.children).forEach(child => {
-                    if (child.tagName === "pop") resolvePop(child, currentGenes);
+                Array.from(node.children).forEach(child => {					
+                    if (child.tagName === "pop"){
+						//console.log("parent: " + popName);
+						resolvePop(child, currentGenes);
+					}					
                 });
             }
 
@@ -289,6 +295,27 @@
         }
 
         // Utility: Weighted Random
+function weightedRandom(weights) {
+    // 1. Transform [a, b, c, d] into inverse weights [1/a, 1/b, 1/c, 1/d]
+    // If a value is 0, its weight is 0 (0% chance)
+    let inverseWeights = weights.map(w => w === 0 ? 0 : 1 / w);
+    
+    // 2. Calculate the sum of inverse weights (1/a + 1/b + 1/c + 1/d)
+    let sum = inverseWeights.reduce((sum, w) => sum + w, 0);
+    
+    // If all inputs were 0 or the array is empty, return a fallback index
+    if (sum === 0) return 0; 
+    
+    // 3. Perform the standard weighted random selection
+    let r = Math.random() * sum;
+    for (let i = 0; i < inverseWeights.length; i++) {
+        r -= inverseWeights[i];
+        if (r <= 0) return i;
+    }
+    
+    return inverseWeights.length - 1;
+}		
+		/*
         function weightedRandom(weights) {
             let sum = weights.reduce((a, b) => a + b, 0);
             let r = Math.random() * sum;
@@ -298,6 +325,7 @@
             }
             return weights.length - 1;
         }
+		*/
 
         // Generate DNA
         function generateDNA(popName) {
@@ -316,7 +344,8 @@
                         seq1 += "?"; seq2 += "?"; continue; 
                     }
                     
-                    let weights = popConfig[gene.name] || [1, 1, 1, 1];
+                    //let weights = popConfig[gene.name] || [1, 1, 1, 1];
+					let weights = popConfig[gene.name] || defaultWeights;
 
                     let allele1 = weightedRandom(weights);
                     let allele2 = weightedRandom(weights);
@@ -374,7 +403,7 @@
                         let gene = genesArray[geneIndex];
                         if (!gene) continue;
 
-                        let weights = popConfig[gene.name] || [1, 1, 1, 1];
+                        let weights = popConfig[gene.name] || defaultWeights;
                         let baseChar = entry.seq[p];
 
                         // Find compatible alleles for the character
