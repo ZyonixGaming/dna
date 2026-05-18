@@ -182,6 +182,7 @@
     
     <div class="action-btns">
         <button class="action" onclick="copyDNA()">Copy to Clipboard</button>
+		<button class="action" onclick="pasteDNA()">Paste from Clipboard</button>
         <button class="action secondary" onclick="clearDNA()">Clear</button>
     </div>
 
@@ -355,7 +356,10 @@ function weightedRandom(weights) {
                 }
 
                 let prefix = h.toString().padStart(2, '0');
-                result += `${prefix}:${seq1}\n${prefix}:${seq2}\n`;
+				if (result.length>0){
+					result += `\n`;
+				}
+                result += `${prefix}:${seq1}\n${prefix}:${seq2}`;
             }
 
             const ta = document.getElementById('dna-output');
@@ -443,11 +447,39 @@ function weightedRandom(weights) {
             });
         }
 
-        function copyDNA() {
-            const ta = document.getElementById('dna-output');
-            ta.select();
-            document.execCommand('copy');
-        }
+// Function to copy text from #dna-output
+async function copyDNA() {
+  const outputElement = document.getElementById('dna-output');
+  // Works for both inputs/textareas (.value) and regular elements (.innerText)
+  const textToCopy = outputElement.value || outputElement.innerText;
+
+  try {
+    await navigator.clipboard.writeText(textToCopy);
+    console.log('DNA sequence copied to clipboard!');
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+  }
+}
+
+// Function to paste text into #dna-output
+async function pasteDNA() {
+  const outputElement = document.getElementById('dna-output');
+
+  try {
+    const text = await navigator.clipboard.readText();
+    
+    if ('value' in outputElement) {
+      outputElement.value = text; // For input or textarea
+    } else {
+      outputElement.innerText = text; // For div, span, or paragraph
+    }
+	const event = new Event('input', { });
+	outputElement.dispatchEvent(event);	
+    console.log('DNA sequence pasted!');
+  } catch (err) {
+    console.error('Failed to paste: ', err);
+  }
+}
 
         function clearDNA() {
             document.getElementById('dna-output').value = '';
