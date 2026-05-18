@@ -226,33 +226,34 @@ function findValidBlocksWithVerification(buffer, targetSet, m_value, startOffset
   const totalLen = buffer.length;
   const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   
-  while ((i + blockLen <= totalLen)&& (i+blockLen < limitOffset)) {
-    let allValid = true;
-    for (let j = 0; j < blockLen; j++) {
-      if (!targetSet.has(buffer[i + j])) {
-        allValid = false;
-        break;
-      }
-    }
-    if (allValid) {
-      const lastBytePos = i + blockLen - 1;
-      const verifyOffset = lastBytePos + 9;
-      if (verifyOffset + 4 <= totalLen) {
-        const val = dataView.getInt32(verifyOffset, true);
-        if ((val > 9 && val < m_value)||(val>=0&&val<=9&&validBlocks.length==0)) {
-          validBlocks.push(i);
-          i += blockLen;
-		  if(validBlocks.length>=maxBlocks){
-			return validBlocks;
-		  }
-          continue;
-        }
-      }
-    }
-    i++;
+  while(i<limitOffset){
+		if (!targetSet.has(buffer[i])) {
+			i++;
+			continue;
+		}
+		let j = i+1;		
+		while (j < limitOffset && targetBytes.has(buffer[j])&& (j-i+1<=240)) j++;
+		const len = j - i;
+		if (len >= 240) {
+			const val = dataView.getInt32(j+8, true);
+			//console.log("v: "+val);
+			if ((val > 9 && val < m_value)||(val>=0&&val<=9&&validBlocks.length==0)) {
+			  validBlocks.push(i);
+			  //console.log("valid");
+			  i += blockLen;
+			  if(validBlocks.length>=maxBlocks){
+				return validBlocks;
+			  }
+			  
+			}	
+		}
+		i=j;
   }
+  
   return validBlocks;
 }
+
+			
 
 // ------------------------------------------------------------------
 // 4. MAIN PROCESSOR (m at 0x10, n+1, verification)
@@ -297,7 +298,8 @@ async function processSaveFile(file) {
     if (pos === -1) throw new Error(`Text "Willaby Ranch" not found.`);
     
     const intOffset = pos + patternBytes.length;
-
+	//console.log(pos);
+	//console.log(intOffset);
     pattern = "Circle-D Corral";
     patternBytes = new TextEncoder().encode(pattern);
     let pos2 = -1;
@@ -309,7 +311,7 @@ async function processSaveFile(file) {
       if (match) { pos2 = i; break; }
     }
     if (pos2 === -1) throw new Error(`Text "Circle-D Corral" not found.`);
-    
+    //console.log(pos2);
 	const limitOffset = pos2;	
 	
     if (intOffset + 4 > dataBytes.length) throw new Error("Truncated file — cannot read n.");
@@ -318,7 +320,7 @@ async function processSaveFile(file) {
     // find all verified blocks starting after the integer
     const validBlocks = findValidBlocksWithVerification(dataBytes, targetBytes, m, intOffset + 4,n+2,limitOffset);
     
-    const targetBlockIdx = n + 1;   // n+1 (as per requirement: n+2? your comment said n+1)
+    const targetBlockIdx = n ;   // n+1 (as per requirement: n+2? your comment said n+1)
     if (targetBlockIdx < 0) throw new Error(`n+1 = ${targetBlockIdx} is negative.`);
     if (targetBlockIdx >= validBlocks.length) {
       //throw new Error(`Not enough valid blocks. Need index ${targetBlockIdx}, only ${validBlocks.length} found.`);
