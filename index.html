@@ -387,7 +387,6 @@
 <script>
   (function() {
 
-
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
     }
@@ -451,7 +450,6 @@
 	// ----- Cross‑tab sync -----
 	const syncChannel = new BroadcastChannel('dna-shortener-sync');
 
-
 	syncChannel.onmessage = (event) => {
 		if (event.data && event.data.type === 'update') {
 			if(event.data && event.data.categories){
@@ -468,7 +466,6 @@
 			updateSaveButton();
 		}
 	};
-
 
 	// Helper to reload before any modification
 	function reloadCategoriesFromStorage() {
@@ -487,7 +484,6 @@
 		});
 	}
 	
-
     let categories = loadCategories();
     let selectedCategoryId = null;
 
@@ -591,7 +587,7 @@
 
         li.addEventListener('dragstart', handleCategoryDragStart);
         li.addEventListener('dragover', handleCategoryDragOver);
-        li.addEventListener('drop', handleCategoryDrop);
+        li.addEventListener('drop', handleCategoryDrop); // unified drop handler
         li.addEventListener('dragend', handleDragEnd);
 
         const header = document.createElement('div');
@@ -752,7 +748,7 @@
       showToast(`Loaded DNA "${entry.name}"`);
     }
 
-    // ---------- Drag & Drop ----------
+    // ---------- Drag & Drop (enhanced for cross‑category moves) ----------
     let draggedCategoryId = null;
     let draggedEntryId = null;
     let draggedFromCategoryId = null;
@@ -768,22 +764,48 @@
       if (target && target.dataset.categoryId !== draggedCategoryId)
         target.style.borderTop = '2px solid #3b82f6';
     }
-	function handleCategoryDrop(e) {
-	  e.preventDefault();
-	  const target = e.currentTarget;
-	  target.style.borderTop = '';
-	  const targetId = target.dataset.categoryId;
-	  if (!draggedCategoryId || targetId === draggedCategoryId) return;
-	  reloadCategoriesFromStorage();
-	  const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
-	  const targetIndex = categories.findIndex(c => c.id === targetId);
-	  if (draggedIndex !== -1 && targetIndex !== -1) {
-		const [moved] = categories.splice(draggedIndex, 1);
-		categories.splice(targetIndex, 0, moved);
-		broadcastUpdate();
-		renderSidebar();
-	  }
-	}
+    // Unified drop handler for categories: reorder categories OR drop entry
+    function handleCategoryDrop(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      target.style.borderTop = '';
+      const targetCategoryId = target.dataset.categoryId;
+      if (!targetCategoryId) return;
+
+      reloadCategoriesFromStorage();
+
+      // Case 1: reorder categories
+      if (draggedCategoryId && draggedCategoryId !== targetCategoryId) {
+        const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
+        const targetIndex = categories.findIndex(c => c.id === targetCategoryId);
+        if (draggedIndex !== -1 && targetIndex !== -1) {
+          const [moved] = categories.splice(draggedIndex, 1);
+          categories.splice(targetIndex, 0, moved);
+          broadcastUpdate();
+          renderSidebar();
+          showToast(`Category moved`);
+        }
+        return;
+      }
+
+      // Case 2: drop an entry onto a category (move to that category)
+      if (draggedEntryId && draggedFromCategoryId) {
+        const sourceCat = categories.find(c => c.id === draggedFromCategoryId);
+        const targetCat = categories.find(c => c.id === targetCategoryId);
+        if (!sourceCat || !targetCat) return;
+
+        const entryIndex = sourceCat.entries.findIndex(ent => ent.id === draggedEntryId);
+        if (entryIndex === -1) return;
+
+        const [movedEntry] = sourceCat.entries.splice(entryIndex, 1);
+        targetCat.entries.push(movedEntry); // append at end
+
+        broadcastUpdate();
+        renderSidebar();
+        showToast(`Moved DNA to "${targetCat.name}"`);
+      }
+    }
+
     function handleEntryDragStart(e) {
       draggedEntryId = this.dataset.entryId;
       draggedFromCategoryId = this.dataset.categoryId;
@@ -797,23 +819,53 @@
       if (target && target.dataset.entryId !== draggedEntryId && target.dataset.categoryId === draggedFromCategoryId)
         target.style.borderTop = '2px solid #3b82f6';
     }
-	function handleEntryDrop(e) {
-	  e.preventDefault();
-	  const target = e.currentTarget;
-	  target.style.borderTop = '';
-	  if (!draggedEntryId || !draggedFromCategoryId) return;
-	  reloadCategoriesFromStorage();
-	  const cat = categories.find(c => c.id === draggedFromCategoryId);
-	  if (!cat || target.dataset.categoryId !== draggedFromCategoryId) return;
-	  const draggedIndex = cat.entries.findIndex(ent => ent.id === draggedEntryId);
-	  const targetIndex = cat.entries.findIndex(ent => ent.id === target.dataset.entryId);
-	  if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
-		const [moved] = cat.entries.splice(draggedIndex, 1);
-		cat.entries.splice(targetIndex, 0, moved);
-		broadcastUpdate();
-		renderSidebar();
-	  }
-	}
+    // Handles drop on another entry (reorder within same category OR move to different category)
+    function handleEntryDrop(e) {
+      e.preventDefault();
+      const target = e.currentTarget;
+      target.style.borderTop = '';
+      if (!draggedEntryId || !draggedFromCategoryId) return;
+      reloadCategoriesFromStorage();
+
+      const targetCategoryId = target.dataset.categoryId;
+      const targetEntryId = target.dataset.entryId;
+
+      const sourceCat = categories.find(c => c.id === draggedFromCategoryId);
+      const targetCat = categories.find(c => c.id === targetCategoryId);
+      if (!sourceCat || !targetCat) return;
+
+      const draggedIndex = sourceCat.entries.findIndex(ent => ent.id === draggedEntryId);
+      if (draggedIndex === -1) return;
+
+      const [movedEntry] = sourceCat.entries.splice(draggedIndex, 1);
+
+      // If same category and target entry exists, insert before target
+      if (draggedFromCategoryId === targetCategoryId && targetEntryId) {
+        const targetIndex = targetCat.entries.findIndex(ent => ent.id === targetEntryId);
+        if (targetIndex !== -1) {
+          targetCat.entries.splice(targetIndex, 0, movedEntry);
+        } else {
+          targetCat.entries.push(movedEntry);
+        }
+      }
+      // Different category – insert before target entry if possible, else append
+      else {
+        if (targetEntryId) {
+          const targetIndex = targetCat.entries.findIndex(ent => ent.id === targetEntryId);
+          if (targetIndex !== -1) {
+            targetCat.entries.splice(targetIndex, 0, movedEntry);
+          } else {
+            targetCat.entries.push(movedEntry);
+          }
+        } else {
+          targetCat.entries.push(movedEntry);
+        }
+      }
+
+      broadcastUpdate();
+      renderSidebar();
+      showToast(`Moved DNA to "${targetCat.name}"`);
+    }
     function handleDragEnd() {
       this.classList.remove('dragging');
       document.querySelectorAll('.category-item, .entry-item').forEach(el => el.style.borderTop = '');
