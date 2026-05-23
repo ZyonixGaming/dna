@@ -451,18 +451,24 @@
 	// ----- Cross‑tab sync -----
 	const syncChannel = new BroadcastChannel('dna-shortener-sync');
 
+
 	syncChannel.onmessage = (event) => {
-	  if (event.data && event.data.type === 'update') {
-		// Reload the latest data from localStorage
-		categories = loadCategories();
-		// Make sure the selected category still exists
-		if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
-		  selectedCategoryId = null;
+		if (event.data && event.data.type === 'update') {
+			if(event.data && event.data.categories){
+				categories = event.data.categories;
+			}
+			else{
+				categories = loadCategories();
+			}
+			if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
+			  selectedCategoryId = null;
+			}
+			
+			renderSidebar();
+			updateSaveButton();
 		}
-		renderSidebar();
-		updateSaveButton();
-	  }
 	};
+
 
 	// Helper to reload before any modification
 	function reloadCategoriesFromStorage() {
@@ -474,9 +480,12 @@
 
 	// Replace all calls to saveCategories() with this function
 	function broadcastUpdate() {
-	  saveCategories();
-	  syncChannel.postMessage({ type: 'update' });
-	}	
+		saveCategories();
+		syncChannel.postMessage({
+			type: 'update', 
+			categories: JSON.parse(JSON.stringify(categories))
+		});
+	}
 	
 
     let categories = loadCategories();
