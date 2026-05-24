@@ -349,7 +349,8 @@
 
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-    <a id="crisprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_self" rel="noopener noreferrer">🧪 Edit in SIMPR Horsey Genome Editor</a>
+	<a id="crisprLink" href="https://zyonixgaming.github.io/crispr/" target="_self" rel="noopener noreferrer">🧪</a>
+    <a id="simprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_self" rel="noopener noreferrer">Edit in SIMPR Horsey Genome Editor</a>
   </div>
 
   <footer>
@@ -387,6 +388,9 @@
 <script>
   (function() {
 
+	const simprUrl = "https://zyonixgaming.github.io/crispr/simpr.html"
+	const crisprUrl = "https://zyonixgaming.github.io/crispr/"
+
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
     }
@@ -407,6 +411,7 @@
     const importFileInput = document.getElementById('importFileInput');
     const toastContainer = document.getElementById('toastContainer');
     const crisprLink = document.getElementById('crisprLink');
+	const simprLink = document.getElementById('simprLink');
 
     // ---------- Toast ----------
     function showToast(message, type = 'success') {
@@ -554,7 +559,8 @@
       if (!plainText) {
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = 'https://zyonixgaming.github.io/crispr/simpr.html';
+        crisprLink.href = crisprUrl;
+		simprLink.href = simprUrl;
         hideError();
         return;
       }
@@ -565,13 +571,15 @@
         linkDisplay.value = fullUrl;
         updateUrlParam(encoded);
         // Update CRISPR editor link with compressed DNA
-        crisprLink.href = `https://zyonixgaming.github.io/crispr/simpr.html?dna=${encoded}`;
+        crisprLink.href = `${crisprUrl}?dna=${encoded}`;
+		simprLink.href = `${simprUrl}?dna=${encoded}`;
         hideError();
       } catch (e) {
         showError(e.message);
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = 'https://zyonixgaming.github.io/crispr/simpr.html';
+        crisprLink.href = crisprUrl;
+		simprLink.href = simprUrl;
       }
     }
 
