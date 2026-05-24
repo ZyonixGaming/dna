@@ -526,8 +526,8 @@
 
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-	<a id="crisprLink" href="https://zyonixgaming.github.io/crispr/" target="_blank" rel="noopener noreferrer">🧪</a>
-    <a id="simprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_blank" rel="noopener noreferrer">Open SIMPR Horsey Genome Editor</a>
+	<a id="crisprLink" href="https://zyonixgaming.github.io/dna/crispr.html" target="_blank" rel="noopener noreferrer">🧪</a>
+    <a id="simprLink" href="https://zyonixgaming.github.io/dna/simpr.html" target="_blank" rel="noopener noreferrer">Open SIMPR Horsey Genome Editor</a>
   </div>
 
   <footer>
@@ -566,8 +566,8 @@
 <script>
   (function() {
 
-	const simprUrl = "https://zyonixgaming.github.io/crispr/simpr.html"
-	const crisprUrl = "https://zyonixgaming.github.io/crispr/"
+	const simprUrl = "https://zyonixgaming.github.io/dna/simpr.html"
+	const crisprUrl = "https://zyonixgaming.github.io/dna/crispr.html"
 
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
@@ -738,8 +738,7 @@
         linkDisplay.value = '';
         updateUrlParam('');
         crisprLink.href = crisprUrl;
-		simprLink.href = simprUrl;
-		link.href = "https://example.com";
+		simprLink.href = simprUrl;		
 		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
 		crisprLink.target = "_blank";
 		simprLink.target = "_blank";

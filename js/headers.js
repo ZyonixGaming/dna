@@ -5,12 +5,12 @@
 const HEADER_LINKS = [
     {
         name: 'CRISPR 2.0',
-        url: 'https://zyonixgaming.github.io/crispr/',
+        url: 'https://zyonixgaming.github.io/dna/crispr.html',
         icon: '🧬'
     },
     {
         name: 'SIMPR Horsey Genome Editor',
-        url: 'https://zyonixgaming.github.io/crispr/simpr.html',
+        url: 'https://zyonixgaming.github.io/dna/simpr.html',
         icon: '🧬'
     },    {
         name: 'DNA Shortener',
@@ -19,7 +19,7 @@ const HEADER_LINKS = [
     },
     {
         name: 'BioHacker Optimizer',
-        url: 'https://zyonixgaming.github.io/crispr/biohack.html',
+        url: 'https://zyonixgaming.github.io/dna/biohack.html',
         icon: '🧪'
     },
     {
