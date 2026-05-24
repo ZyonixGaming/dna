@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>BioHacker Optimizer</title>
+  <link rel="icon" type="image/x-icon" href="dna.ico">
+  <!-- Reuse existing styles -->
+  <link rel="stylesheet" href="./css/crispr.css">
+  <link rel="stylesheet" href="./css/headers.css">
+  <link rel="stylesheet" href="./css/mobile.css">
+  <!-- BioHacker specific overrides -->
+  <link rel="stylesheet" href="./css/biohack.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header (same as other tools) -->
+    <header class="header-bar">
+      <div class="header-title">
+        <span>🧬</span> BioHacker Optimizer
+      </div>
+      <div class="tools-dropdown" id="toolsDropdown">
+        <button class="tools-btn" id="toolsBtn">
+          🔧 Tools <span class="arrow">▼</span>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <!-- Populated by headers.js -->
+        </div>
+      </div>
+    </header>
+
+    <!-- Three‑column layout -->
+    <div class="app-layout">
+      <!-- LEFT SIDEBAR: Source DNA area -->
+      <div class="left-sidebar">
+        <div class="textarea-section">
+          <label>🧪 Source DNA</label>
+          <textarea id="sourceDNA" rows="12" placeholder="00:ATATGGCTTC
+00:CTATGGACTC
+01:TATAGCAACCTCA
+..."></textarea>
+          <div class="btn-group" style="margin-top: 8px;">
+            <button id="pasteSourceBtn" class="primary">📋 Paste</button>
+            <button id="clearSourceBtn" class="clear-btn">🗑️ Clear</button>
+          </div>
+        </div>
+        <!-- Instructions (moved to sidebar bottom) -->
+        <div class="instructions-box">
+          <h3>📘 How to Use</h3>
+          <ol>
+            <li><strong>Paste</strong> a full genome sequence into the Source DNA area.</li>
+            <li><strong>Load a preset</strong> – click "Horse" or "Car" on the right.</li>
+            <li><strong>Edit gene pool:</strong> Click 🧪/🧬 to toggle mode, or click A,C,G,T buttons to manage bases.</li>
+            <li><strong>Save custom preset</strong> – click "Save current preset".</li>
+            <li><strong>Copy</strong> Flask 1 and Flask 2, then paste into game flasks.</li>
+            <li><strong>Drain vat, add flasks, press red button.</strong></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT: Gene table -->
+      <div class="main-content">
+	  
+        <div class="filter-cell">
+		<div style="display: flex; gap: 8px;">
+          <label>🔍 Search: </label>
+          <input type="text" id="filterInput" class="filter-input" placeholder="">
+          <button id="clearFilterBtn" class="clear-filter-btn">✖</button></div>
+		        <div style="display: flex; gap: 8px;">
+                <button title="Click to only use bases from the source genome." id="allSourceBtn" class="primary">🔄 All Source</button>
+                <button title="Click to utilize all possible base/values." id="allRandomBtn" class="warning">🎲 All Randomize</button>
+        </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="gene-table" id="geneTable">
+            <thead>
+              <tr>
+                <th style="width:44px;">Mode</th>
+                <th>Location</th>
+                <th style="width:160px;">Gene</th>
+                <th>m</th>
+                <th>Bases (values)</th>
+              </tr>
+            </thead>
+            <tbody id="geneTableBody"></tbody>
+          </table>
+        </div>
+        <!-- Toolbar buttons moved above table -->
+
+      </div>
+
+      <!-- RIGHT SIDEBAR: Flasks, XML export, Presets -->
+      <div class="right-sidebar">
+        <!-- Flask 1 -->
+        <div class="bookmarks-section">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>🧬 Flask 1</h3>
+            <button id="copyFlask1Btn" class="success" style="padding: 4px 10px;">📋 Copy</button>
+          </div>
+          <textarea id="flask1Output" rows="8" readonly style="width:100%; margin-top: 8px;"></textarea>
+        </div>
+        <!-- Flask 2 -->
+        <div class="bookmarks-section">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>🧬 Flask 2</h3>
+            <button id="copyFlask2Btn" class="success" style="padding: 4px 10px;">📋 Copy</button>
+          </div>
+          <textarea id="flask2Output" rows="8" readonly style="width:100%; margin-top: 8px;"></textarea>
+        </div>
+        <!-- XML Export -->
+        <div class="bookmarks-section">
+          <h3>📄 XML Export</h3>
+          <button id="downloadXmlBtn" class="primary" style="width:100%;">📥 Download custom.xml</button>
+        </div>
+        <!-- Presets -->
+        <div class="saved-dna-section">
+          <h3>💾 Presets</h3>
+          <button id="savePresetBtn" class="primary" style="margin-bottom: 8px; width:100%;">💾 Save current preset</button>
+          <div class="import-export-btns" style="margin-bottom: 12px;">
+            <button id="exportPresetsBtn" class="success">📤 Export All</button>
+            <button id="importPresetsBtn" class="warning">📥 Import</button>
+          </div>
+          <input type="file" id="importPresetsFile" accept=".json" style="display:none;">
+          <ul class="category-list" id="presetList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <button id="mobileRightToggle" title="Bookmarks &amp; Library">📑</button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Reused scripts -->
+  <script src="./js/genes.js"></script>
+  <script src="./js/headers.js"></script>
+  <script src="./js/mobile.js"></script>
+  <!-- BioHacker specific logic -->
+  <script src="./js/biohack.js"></script>
+</body>
+</html>

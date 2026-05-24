@@ -1,0 +1,176 @@
+/* ===== crispr2-override.css ===== */
+
+/* ---------- Layout adjustments ---------- */
+.helix-btn {
+    min-width: 36px;
+    max-width: 36px;
+}
+
+.right-sidebar {
+	width:100%;
+    
+	max-width:350px;
+	min-width:350px;
+}
+.main-content {
+    /* flex: 1 already set, shrinks to accommodate wider sidebar */
+	
+}
+
+/* ---------- Custom dropdown (table & bookmark) ---------- */
+.custom-dropdown {
+    position: relative;          /* no z-index here → doesn't trap fixed child */
+    user-select: none;
+    min-width: 150px;            /* smaller in main table */
+    max-width: 160px;
+	margin:auto;
+}
+
+.gene-table {
+	margin-bottom:300px;
+	max-width:800px;
+	width:100%;
+	min-width:300px;
+}
+
+.selected-option {
+    background: #0f1720;
+    border: 1px solid #4b5563;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.85rem;
+    color: white;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+}
+.selected-option:hover {
+    border-color: #48b5b5;
+}
+
+.selected-option .value-part {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #facc15;              /* prominent value */
+    flex-shrink: 0;
+}
+
+.selected-option .bases-part {
+    display: flex;
+    gap: 1px;
+    margin-left: auto;           /* push to right */
+    font-size: 0.75rem;
+    font-family: "Courier New", monospace;
+    opacity: 0.5;
+}
+.selected-option .bases-part span {
+    font-weight: bold;
+}
+
+.selected-option .arrow {
+    font-size: 0.6rem;
+    color: #b9c7d9;
+    flex-shrink: 0;
+}
+
+/* Fixed-position dropdown menu – escapes clipping */
+.dropdown-options {
+    position: fixed;                 /* no longer bound by parent overflow */
+    background: #0f1720;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 10000;                 /* on top of everything */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    min-width: 160px;               /* will be overridden by JS to match button width */
+}
+
+.option-item {
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.85rem;
+    color: #cbd5e6;
+    transition: background 0.1s;
+    white-space: nowrap;
+}
+.option-item:hover {
+    background: #1e293b;
+}
+.option-item .value-part {
+    font-weight: 700;
+    color: #22c55e;              /* bright in list */
+    flex-shrink: 0;
+}
+.option-item .bases-part {
+    display: flex;
+    gap: 1px;
+    margin-left: auto;           /* push to right */
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+.option-item .bases-part span {
+    font-weight: bold;
+}
+.option-item.selected {
+    background: #2c6e6e;
+    color: white;
+}
+.option-item.selected .bases-part {
+    opacity: 0.8;
+}
+
+/* Nucleotide colour classes */
+.nuc-A { color: #facc15; }   /* yellow */
+.nuc-C { color: #3b82f6; }   /* blue */
+.nuc-G { color: #22c55e; }   /* green */
+.nuc-T { color: #ef4444; }   /* red */
+
+/* In bookmark lists, dropdown wider */
+.bookmark-item .custom-dropdown {
+    min-width: 120px;
+    max-width: 120px;
+}
+.bookmark-item .selected-option {
+    padding: 3px 6px;
+    font-size: 0.6rem;
+}
+.bookmark-item .selected-option .value-part {
+    font-size: 0.7rem;
+}
+.bookmark-item .selected-option .bases-part {
+    font-size: 0.6rem;
+}
+
+.bookmark-info strong {
+	font-size: 0.63rem;
+}
+.bookmark-info{
+	font-size: 0.67rem;
+}
+
+button[title="Load into compare"] {
+    display: none !important;
+}
+
+.desc-td {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.desc-td:hover {
+    background: rgba(72, 181, 181, 0.15);
+}
+
+.desc-td.inverted {
+    text-decoration: underline;
+    text-decoration-color: #676767;
+    text-underline-offset: 2px;
+}

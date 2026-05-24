@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="folder.ico">
   <title>DNA Shortener</title>
   <style>
     * { box-sizing: border-box; }
@@ -311,9 +311,186 @@
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
-  </style>
-  <link rel="stylesheet" href="mobile.css">
-  <link rel="stylesheet" href="headers.css">
+	
+
+        /* ---- Header Bar ---- */
+        .header-bar {
+			width: 100%;              /* not strictly necessary if using block/flex */
+            background: #0b1218;
+            border-bottom: 2px solid #2d3a46;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #48b5b5;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-title span {
+            font-size: 1.5rem;
+        }
+        .tools-dropdown {
+            position: relative;
+        }
+        .tools-btn {
+            background: #1e293b;
+            border: 2px solid #3b4e6b;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #b9c7d9;
+            font-family: monospace;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tools-btn:hover {
+            background: #2d3e44;
+            border-color: #48b5b5;
+            color: #fff;
+        }
+        .tools-btn .arrow {
+            font-size: 0.65rem;
+            transition: 0.2s;
+        }
+        .tools-btn.open .arrow {
+            transform: rotate(180deg);
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            min-width: 200px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.15s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: #cbd5e6;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-family: monospace;
+            transition: 0.15s;
+            border-bottom: 1px solid #1e293b;
+        }
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-menu a:hover {
+            background: #1e293b;
+            color: #48b5b5;
+        }
+        .dropdown-menu a .tool-icon {
+            font-size: 1rem;
+            width: 22px;
+            text-align: center;
+        }
+/* ===== Mobile layout overrides ===== */
+
+/* Floating toggle button – hidden on desktop */
+#mobileRightToggle {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 110;
+    background: #2c6e6e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay – hidden by default */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 98;
+}
+
+/* ---- Mobile breakpoint ---- */
+@media (max-width: 900px) {
+
+    /* Shrink left sidebar */
+    .left-sidebar {
+        width: 160px;
+    }
+
+    /* Right sidebar becomes a fixed floating panel */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -320px;              /* hidden off‑screen */
+        width: 300px;
+        max-width: 85vw;            /* avoid overflow on small phones */
+        height: 100%;
+        transition: right 0.3s ease;
+        z-index: 99;
+        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    /* Show the toggle button */
+    #mobileRightToggle {
+        display: flex;
+    }
+
+    /* Overlay visible when sidebar is open */
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+		
+  </style>  
 </head>
 <body>
 <div class="container">
@@ -349,8 +526,8 @@
 
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-	<a id="crisprLink" href="https://zyonixgaming.github.io/crispr/" target="_self" rel="noopener noreferrer">🧪</a>
-    <a id="simprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_self" rel="noopener noreferrer">Edit in SIMPR Horsey Genome Editor</a>
+	<a id="crisprLink" href="https://zyonixgaming.github.io/crispr/" target="_blank" rel="noopener noreferrer">🧪</a>
+    <a id="simprLink" href="https://zyonixgaming.github.io/crispr/simpr.html" target="_blank" rel="noopener noreferrer">Open SIMPR Horsey Genome Editor</a>
   </div>
 
   <footer>
@@ -384,7 +561,8 @@
 	<button id="mobileRightToggle" title="Library">📑</button>
 	<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<script src="dna-encoder.js"></script>
+
+<script src="./js/genes.js"></script>
 <script>
   (function() {
 
@@ -561,6 +739,10 @@
         updateUrlParam('');
         crisprLink.href = crisprUrl;
 		simprLink.href = simprUrl;
+		link.href = "https://example.com";
+		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
+		crisprLink.target = "_blank";
+		simprLink.target = "_blank";
         hideError();
         return;
       }
@@ -573,6 +755,9 @@
         // Update CRISPR editor link with compressed DNA
         crisprLink.href = `${crisprUrl}?dna=${encoded}`;
 		simprLink.href = `${simprUrl}?dna=${encoded}`;
+		simprLink.textContent = "Edit in SIMPR Horsey Genome Editor";
+		crisprLink.target = "_self";
+		simprLink.target = "_self";		
         hideError();
       } catch (e) {
         showError(e.message);
@@ -580,6 +765,9 @@
         updateUrlParam('');
         crisprLink.href = crisprUrl;
 		simprLink.href = simprUrl;
+		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
+		crisprLink.target = "_blank";
+		simprLink.target = "_blank";		
       }
     }
 
@@ -1099,8 +1287,49 @@
       refreshLink();
     });
   })();
+  
+  // Mobile sidebar toggle logic
+(function () {
+    const toggleBtn = document.getElementById('mobileRightToggle');
+    const rightSidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if (!toggleBtn || !rightSidebar) return;
+
+    function openSidebar() {
+        rightSidebar.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+        rightSidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    toggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (rightSidebar.classList.contains('open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    // Auto‑close if window is resized back to desktop width
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 900) {
+            rightSidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+        }
+    });
+})();
 </script>
- <script src="headers.js"></script>
- <script src="mobile.js"></script>
+
+ <script src="./js/headers.js"></script>
+ 
 </body>
 </html>

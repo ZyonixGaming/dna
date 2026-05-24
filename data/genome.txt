@@ -1,0 +1,943 @@
+When the two sides of a chromosome have different bases, the one that is more leftwards in that gene's row of the table is dominant. m% of the dominant base's value is and (100-m)% of the other base's value is applied.</br>
+NOTE: In this table, chromosomes are indexed starting from 0 while genes are indexed starting from 1. Apologies for the inconsistency.</br>
+(Tip: You can sort by chromosome and gene by clicking Chromosome, then shift-clicking Gene!)
+{| class="wikitable sortable"
+! Chromosome
+! Gene
+! Name
+! m
+! s
+! colspan="2" | g0
+! colspan="2" | g1
+! colspan="2" | g2
+! colspan="2" | g3
+! Order
+! Description
+|-
+| 6  || 1  || SIZE              || 95 || 100 || A || 100 || T || 50 || G || 35 || C || 75 || ATGC
+||
+Torso scaling
+|-
+| 6  || 2  || ASPECT            || 95 || 100 || G || 200 || C || 310 || A || 150 || T || 250 || GCAT
+|-
+| 6  || 3  || SKINNY            || 100 || 100 || G || 100 || A || 200 || C || 100 || T || 75 || GACT
+|-
+| 0  || 1  || BONES             || 95 || 100 || G || 0 || C || -14 || A || 14 || T || 0 || GCAT
+|-
+| 0  || 2  || BONES2            || 60 || 100 || T || 0 || G || 16 || C || -16 || A || 0 || TGCA
+|-
+| 6  || 4  || CHEST_BIG         || 100 || 100 || A || 104 || T || 102 || C || 108 || G || 102 || ATCG
+|-
+| 6  || 5  || CHEST_SMALL       || 100 || 100 || G || 95 || C || 100 || T || 90 || A || 95 || GCTA || If at least 1 base is A, it will give a sloped chest.
+|-
+| 0  || 5  || GIANT_DWARF       || 100 || 100 || G || 100 || A || 66 || C || 133 || T || 100 || GACT
+|-
+| 2  || 1  || MUSCLE_USE        || 100 || 100 || C || 100 || T || 50 || A || 80 || G || 100 || CTAG
+|-
+| 5  || 1  || QUADRUPED         || 100 || 1 || C || 1 || G || 0 || A || 1 || T || 0 || CGAT
+||
+Effect combines with BIPED.
+* 0 QUADRUPED, 0 BIPED = Rabbit-type body, with downwards leg in back and downwards arm in front.
+* 1 QUADRUPED, 0 BIPED = Horse-type body, with two downwards legs and no arms
+* 0 QUADRUPED, 1 BIPED = Human-type body, with two downwards legs and two sideways arms
+* 1 QUADRUPED, 1 BIPED = Centaur-type body, with two downwards legs on a wide body with a smaller tall body on the front that has two sideways arms
+(Yet to be tested with multiple legs...)
+|-
+| 5  || 2  || BIPED             || 100 || 1 || T || 0 || A || 1 || G || 0 || C || 1 || TAGC
+||
+* See QUADRUPED.
+|-
+| 3  || 1  || SPLAY             || 100 || 1 || A || 0 || C || 10 || T || -5 || G || 45 || ACTG
+||
+How much legs should be angled outwards.
+|-
+| 3  || 2  || LEG_IN            || 50 || 100 || C || 0 || G || 18 || A || 6 || T || 0 || CGAT
+||
+Front leg inwardness?
+|-
+| 3  || 3  || LEG_IN2           || 100 || 100 || C || 0 || G || 13 || A || 0 || T || 1 || CGAT
+||
+Back leg inwardness?
+|-
+| 1  || 1  || GUT               || 100 || 100 || T || 0 || G || 25 || A || 45 || C || 0 || TGAC
+||
+Height of round shape on bottom side of torso.
+|-
+| 1  || 2  || GUT_IS_UDDER      || 100 || 1 || A || 0 || C || 1 || G || 0 || T || 2 || ACGT
+||
+* 0 (A/G) = Normal gut
+* 2 (T) = Gut has 5 evenly-spaced bumps representing nipples
+* 1 (C) = Same as 1, but gut is also is shrunken horizontally to take up about 30% of the bottom of the torso and made SKIN-colored
+|-
+| 0  || 3  || OSTODERM          || 100 || 1 || G || 1 || A || 0 || T || 1 || C || 2 || GATC
+||
+* 0 (A) = Normal
+* 1 (G/T) = ALT-colored spikes on top of torso. Spikes are instead on back of torso if pure BIPED.
+* 2 (C) = One single ALT-colored spike on top of torso. (Seems to only appear sometimes?... TODO)
+|-
+| 0  || 4  || OSTO_SIZE         || 85 || 100 || T || 30 || A || 15 || C || 45 || G || 45 || TACG
+||
+Scaling of ostoderm spikes. If at least 1 base is G, it will give rounded spikes.
+|-
+| 1  || 3  || DERRIERE          || 85 || 100 || C || 0 || T || 40 || G || 70 || A || 10 || CTGA
+||
+Width of round shape on back of torso. Also changes base tail angle to compensate.
+|-
+| 18 || 2  || SPEED_FACTOR      || 75 || 100 || G || 100 || C || 30 || A || 50 || T || 133 || GCAT
+||
+Movement speed
+|-
+| 4  || 10 || BREAK_FORCE       || 100 || 10 || G || 0 || A || 54 || T || 0 || C || 35 || GATC
+||
+Amount of force required for a body part to detach. Value of 0 means limb can take a very high amount of force, though not infinite.
+|-
+| 7  || 1  || TAIL_TAG          || 100 || 1 || T || 3 || A || 4 || G || 2 || C || 1 || TAGC
+||
+* 1 (C) = Torso's tail joint spawns leg part
+* 2 (G) = Torso's tail joint spawns arm part
+* 3 (T) = Torso's tail joint spawns tail part
+* 4 (A) = Torso's tail joint spawns neck part
+|-
+| 7  || 2  || TAIL_EXISTS       || 100 || 1 || G || 1 || C || 0 || A || 1 || T || 2 || GCAT
+||
+Enables spawning of tail parts. This applies regardless of joint - if TAIL_TAG isn't 3, this doesn't affect whatever spawns at the tail joint
+|-
+| 7  || 3  || TAIL_SIZE         || 60 || 100 || G || 100 || C || 80 || A || 120 || T || 140 || GCAT
+||
+Determines tail size.</br>
+Measuring at 1x window size, tails are 16 * TAIL_SIZE% * TAIL_SHORT% pixels long and 16 * TAIL_SIZE% * TAIL_ASPECT% pixels wide.
+|-
+| 7  || 4  || TAIL_SHORT        || 100 || 100 || C || 100 || A || 50 || G || 35 || T || 100 || CAGT
+||
+Additional percentage multiplier to tail length.
+|-
+| 7  || 5  || TAIL_ASPECT       || 90 || 100 || A || 20 || G || 10 || C || 30 || T || 20 || AGCT
+||
+Additional percentage multiplier to tail width.
+|-
+| 3  || 4  || TAIL_ANGLE        || 100 || 1 || G || 45 || C || 90 || A || 135 || T || 60 || GCAT
+|-
+| 3  || 5  || TAIL_JOINT_TYPE   || 100 || 1 || A || 0 || T || 1 || G || 0 || C || 0 || ATGC
+||
+* 0 (A/G/C) = Part in tail joint (even if not a tail) has limited rotation range
+* 1 (T) = Part in tail joint (even if not a tail) has unlimited rotation range
+|-
+| 2  || 2  || TAIL_STIFF        || 100 || 1 || A || 0 || T || 1 || G || 0 || C || 1 || ATGC
+||
+Disables free rotation of tail joint
+|-
+| 2  || 6  || TAIL_SPEED        || 100 || 10 || G || 60 || C || 200 || A || 60 || T || 0 || GCAT
+|-
+| 2  || 5  || TAIL_FLEXIBILITY  || 100 || 1 || G || 135 || T || 90 || A || 45 || C || 15 || GTAC
+||
+Sets rotation range of tail joint
+|-
+| 7  || 6  || TAIL_SHAPE        || 100 || 1 || A || 2 || G || 1 || T || 5 || C || 6 || AGTC
+||
+* 1 (G) = Rectangle shape
+* 2 (A) = Reverse triangle shape (the tails horses usually have)
+* 5 (T) = Stubby square shape (rabbit tail)
+* 6 (C) = Chromosome tail
+|-
+| 0  || 6  || TAIL_BOTTOM       || 100 || 1 || G || 0 || T || 1 || C || 0 || A || 0 || GTCA
+||
+Sets tail joint to be at the bottom corner of the chest rather than at the top corner of the chest. This allows for the UPARM joints to express on pure QUADRUPEDs!
+|-
+| 7  || 7  || TAIL_SEGMENTS     || 100 || 1 || G || 3 || T || 0 || C || 3 || A || 5 || GTCA
+||
+If TAIL_SHAPE is 1 or 5, changes the tail to multiple TAIL_SHAPE 5 sized rectangles connected by joints..
+* 0 (T) = One segment
+* 3 (G/C) = Three segments
+* 5 (A) = Five segments
+|-
+| 4  || 1  || LEG_TAG           || 100 || 1 || A || 1 || T || 2 || G || 4 || C || 3 || ATGC
+||
+* 1 (A) = Torso's back leg joints spawn leg parts
+* 2 (T) = Torso's back leg joints spawn arm parts
+* 3 (C) = Torso's back leg joints spawn tail parts
+* 4 (G) = Torso's back leg joints spawn neck parts
+|-
+| 8  || 1  || LEG_TYPE          || 100 || 1 || T || 1 || A || 2 || C || 0 || G || 1 || TACG
+||
+* 0 (C) = No legs
+* 1 (T/G) = Normal legs
+* 2 (A) = Fixed-length stubby rabbit legs
+|-
+| 8  || 2  || LEG_LENGTH        || 90 || 100 || C || 80 || A || 50 || T || 120 || G || 100 || CATG
+|-
+| 8  || 3  || LEG_STRETCH       || 60 || 100 || G || 0 || A || 14 || C || -14 || T || 0 || GACT
+|-
+| 0  || 7  || LEG_STRETCH2      || 100 || 100 || A || 0 || T || -16 || C || 16 || G || 0 || ATCG
+|-
+| 8  || 5  || LEG_STRENGTH      || 60 || 100 || G || 95 || C || 120 || T || 80 || A || 104 || GCTA
+|-
+| 4  || 2  || LEG_HAS_FOOT      || 100 || 1 || G || 1 || A || 1 || C || 0 || T || 0 || GACT
+|-
+| 3  || 6  || LEG_JOINT_TYPE    || 100 || 1 || A || 0 || G || 1 || T || 2 || C || 0 || AGTC
+||
+* 0 (A/C) = Standard back-and-forth back leg movement
+* 1 (G) = 360-degree back leg movement
+* 2 (T) = Piston back leg movement
+|-
+| 2  || 3  || LEG_FLEXIBILITY   || 80 || 1 || G || 30 || T || 20 || C || 40 || A || 50 || GTCA
+|-
+| 2  || 4  || LEG_FLEX_BIAS     || 100 || 1 || C || 15 || G || 20 || A || 10 || T || -10 || CGAT
+|-
+| 4  || 4  || LEG_THRUST_BACK   || 100 || 1 || G || 0 || C || 1 || T || 0 || A || 2 || GCTA
+|-
+| 1  || 4  || LEG_IS_CIRCLE     || 100 || 1 || A || 0 || T || 1 || G || 0 || C || 0 || ATGC
+||
+* 0 (A/G/C) = No effect
+* 1 (T) = Legs are replaced with wheels
+|-
+| 4  || 3  || LEG_COUNT         || 100 || 1 || C || 1 || G || 1 || T || 2 || A || 7 || CGTA
+||
+Number of back leg joints.
+|-
+| 8  || 4  || LEG_SKEW          || 60 || 100 || T || 0 || C || 24 || G || -16 || A || 0 || TCGA
+|-
+| 8  || 6  || LEG_PENCIL        || 100 || 100 || A || 0 || T || 10 || G || 0 || C || 0 || ATGC
+|-
+| 2  || 7  || LEG_AND_ARM_LIMP  || 100 || 1 || T || 0 || A || 0 || G || 0 || C || 1 || TAGC
+||
+* 0 (A/T/G) = No effect
+* 1 (C) = Limbs are completely limp
+|-
+| 3  || 7  || HAS_KNEE          || 100 || 1 || T || 0 || C || 1 || G || 0 || A || 0 || TCGA
+|-
+| 3  || 8  || KNEE_MIN          || 100 || 1 || C || 0 || G || -90 || A || -15 || T || 0 || CGAT
+|-
+| 3  || 9  || KNEE_MAX          || 100 || 1 || T || 20 || A || 90 || G || 45 || C || 20 || TAGC
+|-
+| 4  || 5  || ARM_TAG           || 100 || 1 || G || 1 || T || 2 || A || 4 || C || 3 || GTAC
+||
+* 1 (G) = Torso's front leg joint spawns leg part
+* 2 (T) = Torso's front leg joint spawns arm part
+* 3 (C) = Torso's front leg joint spawns tail part
+* 4 (A) = Torso's front leg joint spawns neck part
+Note that rabbit-bodied horses (BIPED 0, QUADRUPED 0) have an arm joint where the front leg joint would usually be, so ARM_TAG has no effect on them - it is instead affected by UPARM_TAG.
+|-
+| 8  || 7  || ARM_TYPE          || 100 || 1 || C || 1 || G || 2 || A || 0 || T || 0 || CGAT
+||
+* 0 (A/T) = No arms
+* 2 (C) = Normal elongated arms
+* 4 (G) = Wide fish fin arms
+|-
+| 8  || 8  || ARM_LENGTH        || 90 || 100 || A || 80 || T || 50 || C || 120 || G || 25 || ATCG
+|-
+| 8  || 9  || ARM_STRETCH       || 60 || 100 || G || 0 || A || 14 || C || -14 || T || 0 || GACT
+|-
+| 0  || 8  || ARM_STRETCH2      || 100 || 100 || T || 0 || C || -16 || A || 16 || G || 0 || TCAG
+|-
+| 2  || 8  || ARM_STRENGTH      || 60 || 100 || A || 95 || T || 120 || C || 80 || G || 104 || ATCG
+|-
+| 4  || 6  || ARM_HAS_HAND      || 100 || 1 || C || 1 || G || 0 || T || 1 || A || 0 || CGTA
+||
+Controls if the arm parts have hands. Identical to HAS_HAND; if either is 0, arms have no hands.
+|-
+| 3  || 10 || ARM_JOINT_TYPE    || 100 || 1 || G || 0 || C || 1 || T || 2 || A || 0 || GCTA
+||
+* 0 (A/G) = Standard back-and-forth arm movement
+* 2 (C) = 360-degree arm movement
+* 4 (T) = Piston arm movement
+|-
+| 2  || 9  || ARM_FLEXIBILITY   || 100 || 1 || A || 30 || C || 20 || T || 40 || G || 30 || ACTG
+|-
+| 2  || 10 || ARM_FLEX_BIAS     || 100 || 1 || G || 15 || C || 20 || T || 10 || A || 0 || GCTA
+|-
+| 5  || 6  || ARM_FORWARD       || 100 || 1 || C || -20 || T || 0 || G || 60 || A || 40 || CTGA
+|-
+| 8  || 10 || ARM_SKEW          || 100 || 100 || T || 0 || C || 20 || G || -20 || A || 0 || TCGA
+|-
+| 8  || 11 || ARM_NODE_SCALE    || 50 || 100 || C || 100 || T || 70 || G || 130 || A || 100 || CTGA
+|-
+| 3  || 11 || HAS_ELBOW         || 100 || 1 || C || 0 || A || 1 || T || 0 || G || 0 || CATG
+|-
+| 3  || 12 || ELBOW_RANGE       || 100 || 1 || C || 30 || T || 90 || A || 10 || G || 30 || CTAG
+|-
+| 5  || 3  || UPARM_TAG         || 100 || 1 || A || 0 || T || 2 || C || 1 || G || 4 || ATCG
+||
+* 0 (A) = Torso's arm joints spawn nothing
+* 1 (C) = Torso's arm joints spawn leg parts
+* 2 (T) = Torso's arm joints spawn arm parts
+* 4 (G) = Torso's arm joints spawn neck parts
+|-
+| 5  || 4  || UPARM_Y           || 80 || 100 || C || 30 || T || 10 || A || 30 || G || 50 || CTAG
+|-
+| 5  || 7  || UPARM_ANGLE       || 100 || 1 || G || 0 || C || 30 || A || -30 || T || -45 || GCAT
+||
+How much arms are angled downwards
+|-
+| 5  || 5  || UPARM_GOOFY       || 100 || 1 || A || 0 || C || 1 || G || 2 || T || 3 || ACGT
+||
+* 0 (A) = Normal arms
+* 1 (C) = T-rex arms (Both in front joint)
+* 2 (G) = Only back arm
+* 3 (T) = Only front arm</br>
+Note: The combination of 1 (C) and UPARM_TAG of 4 (G) can result in a "hydra" phenotype where the two goofy uparms, replaced with heads, are at the same spot as the standard head, resulting in the appearance of a tripled head. (Quadrupeds can have UPARM joints if TAIL_BOTTOM is set or if TAIL_EXISTS is 0.)
+|-
+| 4  || 7  || NECK_TAG          || 100 || 1 || A || 4 || G || 3 || T || 1 || C || 2 || AGTC
+||
+* 1 (T) = Torso's neck joint spawns leg part
+* 2 (C) = Torso's neck joint spawns arm part
+* 3 (G) = Torso's neck joint spawns tail part
+* 4 (A) = Torso's neck joint spawns neck part
+|-
+| 6  || 6  || NECK_TYPE         || 100 || 1 || T || 1 || A || 1 || C || 2 || G || 0 || TACG
+||
+* 0 (G) = No neck, thus no head
+* 1 (T/A) = Normal neck and head
+* 2 (C) = Head is attached directly to torso - no neck, but still head
+|-
+| 6  || 7  || NECK_LENGTH       || 90 || 100 || A || 60 || T || 70 || G || 90 || C || 30 || ATGC
+|-
+| 6  || 8  || NECK_GIRAFFE      || 90 || 100 || T || 110 || C || 0 || A || 85 || G || 120 || TCAG
+|-
+| 6  || 9  || NECK_THICKNESS    || 60 || 100 || C || 95 || G || 110 || T || 120 || A || 80 || CGTA
+|-
+| 6  || 10 || NECK_ANGLE        || 90 || 1 || T || 45 || A || 30 || C || 60 || G || 75 || TACG
+||
+Determines placement angle of head on neck, as well as subtracting said angle from the part at the neck joint.
+|-
+| 6  || 11 || NECK_COCK         || 100 || 1 || C || 0 || G || 30 || A || 20 || T || -25 || CGAT
+|-
+| 3  || 13 || NECK_JOINT_TYPE   || 100 || 1 || T || 1 || G || 0 || C || 2 || A || 0 || TGCA
+||
+* 0 (A/G) = Standard back-and-forth neck movement
+* 2 (T) = 360-degree neck movement (the limb will be limp unless Neck_Stiff is set to (A/G))
+* 4 (C) = Piston neck movement
+|-
+| 2  || 11 || NECK_FLEXIBILITY  || 100 || 1 || G || 23 || T || 10 || C || 40 || A || 0 || GTCA
+|-
+| 2  || 12 || NECK_FLEX_BIAS    || 100 || 1 || G || -8 || A || 0 || T || -25 || C || 30 || GATC
+||
+Default angle of neck. 0 = ~45 degrees, positive = lower angle (closer to horizontal), negative = higher angle (closer to vertical).
+|-
+| 4  || 8  || NECK_SLOUCH       || 60 || 100 || C || 0 || T || 50 || G || 20 || A || 0 || CTGA
+||
+Y position of neck joint on torso
+|-
+| 4  || 9  || NECK_ONTOP        || 100 || 100 || G || 0 || T || 50 || C || 70 || A || 20 || GTCA
+|-
+| 0  || 10 || NECK_STIFF        || 100 || 1 || C || 0 || A || 1 || T || 0 || G || 1 || CATG
+||
+* 0 (T/C) = Limp neck
+* 2 (A/G) = Stiff neck
+Note: The neck will only be limp if the Neck_Joint_Type is set to TT.
+|-
+| 18 || 3  || NECK_SPEED        || 100 || 10 || A || 60 || G || 25 || C || 50 || T || 10 || AGCT
+|-
+| 9  || 1  || HAS_FOOT          || 100 || 1 || T || 1 || A || 0 || C || 1 || G || 0 || TACG
+|-
+| 9  || 2  || FOOT_SIZE         || 60 || 100 || G || 0 || T || 20 || A || 12 || C || 30 || GTAC
+|-
+| 9  || 3  || FOOT_CLOWN        || 100 || 100 || G || 0 || T || 30 || A || 0 || C || 0 || GTAC
+|-
+| 9  || 4  || FOOT_THICKNESS    || 80 || 100 || T || 20 || C || 15 || A || 30 || G || 7 || TCAG
+|-
+| 9  || 5  || FOOT_TOE          || 100 || 100 || A || 100 || G || 0 || C || 50 || T || 100 || AGCT
+|-
+| 1  || 5  || FOOT_IS_CIRCLE    || 100 || 1 || G || 0 || A || 1 || C || 0 || T || 0 || GACT
+|-
+| 9  || 6  || FOOT_BACKWARDS    || 100 || 1 || A || 0 || G || 1 || C || 0 || T || 2 || AGCT
+|-
+| 9  || 7  || HAS_HAND          || 100 || 1 || C || 0 || G || 1 || T || 0 || A || 1 || CGTA
+||
+Controls if the arm parts have hands. Identical to ARM_HAS_HAND; if either is 0, arms have no hands.
+|-
+| 9  || 8  || HAND_WIDTH        || 100 || 100 || G || 0 || A || 7 || C || 20 || T || 0 || GACT
+||
+Extra width of hands, on top of the width of the arm's connecting edge.
+|-
+| 9  || 9  || HAND_LENGTH       || 90 || 100 || C || 20 || G || 30 || A || 15 || T || 20 || CGAT
+|-
+| 9  || 10 || HAND_FINGER       || 80 || 100 || C || 0 || T || 100 || G || 0 || A || 50 || CTGA
+|-
+| 10 || 1  || HEAD_SIZE         || 95 || 100 || G || 100 || C || 50 || T || 133 || A || 75 || GCTA
+|-
+| 0  || 9  || HEAD_THICK_SKULL  || 100 || 100 || T || 0 || G || 20 || A || 0 || C || 0 || TGAC
+|-
+| 10 || 2  || HEAD_X_GROWTH     || 100 || 100 || A || 0 || C || 5 || G || 10 || T || -5 || ACGT
+|-
+| 10 || 3  || HEAD_Y_GROWTH     || 100 || 100 || T || 0 || A || 5 || C || -5 || G || 0 || TACG
+|-
+| 10 || 4  || HEAD_ASPECT       || 85 || 100 || T || 200 || C || 175 || A || 250 || G || 300 || TCAG
+||
+Determines aspect ratio of head, keeping the area constant. Overridden by HEAD_SQUARE if present.
+|-
+| 10 || 5  || HEAD_SQUARE       || 100 || 100 || C || 0 || T || 150 || A || 100 || G || 0 || CTAG
+||
+Clone of HEAD_ASPECT that overrides it if non-zero. Has more moderate values than HEAD_ASPECT.
+|-
+| 10 || 6  || HEAD_HAS_BACK     || 100 || 1 || G || 11 || T || 0 || C || 0 || A || 1 || GTCA
+||
+* 0 (T/C) = Head behind eyebox is flat
+* 1 (A) = Head behind eyebox is level with top of eyebox
+* 11 (G) = Same as 1 (A)
+|-
+| 10 || 7  || HEAD_GIANT        || 90 || 100 || C || 100 || T || 200 || A || 180 || G || 100 || CTAG
+|-
+| 10 || 8  || HEAD_SHRUNK       || 90 || 100 || C || 100 || A || 70 || T || 50 || G || 100 || CATG
+|-
+| 3  || 14 || HEAD_JOINTED      || 100 || 1 || C || 0 || A || 1 || T || 0 || G || 0 || CATG
+|-
+| 10 || 9  || HEAD_CHIMERA      || 100 || 1 || A || 0 || T || 1 || C || 0 || G || 0 || ATCG
+|-
+| 11 || 1  || EYE_STYLE         || 100 || 1 || C || 1 || A || 2 || T || 1 || G || 0 || CATG
+||
+* 0 (G) = No eyes
+* 1 (C/T) = ?
+* 2 (A) = ?
+|-
+| 11 || 2  || BUGEYE            || 100 || 1 || G || 0 || A || 1 || C || 0 || T || 2 || GACT
+||
+* 0 (G/C) = Normal eyebox position, use EYEBOX_X
+* 1 (A) = Eyebox is all the way to the front of the head, above the maxilla
+* 2 (T) = Eyebox is small, SKIN-colored, and centered in head
+|-
+| 10 || 10 || EYEBOX_X          || 90 || 100 || A || 33 || G || 0 || C || 50 || T || 15 || AGCT
+|-
+| 10 || 11 || EYEBOX_Y          || 100 || 100 || C || -100 || G || 0 || T || -50 || A || -25 || CGTA
+||
+Vertical position of eyebox.
+|-
+| 10 || 12 || EYEBOX_SIZE       || 60 || 100 || A || 25 || T || 15 || G || 33 || C || 50 || ATGC
+||
+Size of eyebox.
+|-
+| 11 || 3  || EYE_SIZE          || 100 || 100 || A || 50 || C || 75 || T || 125 || G || 50 || ACTG
+|-
+| 11 || 4  || PUPIL_SIZE        || 100 || 100 || C || 66 || A || 80 || G || 40 || T || 40 || CAGT
+|-
+| 11 || 5  || HAS_PUPIL         || 100 || 1 || A || 1 || T || 0 || C || 0 || G || 0 || ATCG
+||
+* 0 (T/C/G) = No pupil
+* 1 (A) = Pupil
+|-
+| 11 || 6 || BROW_SIZE         || 100 || 100 || G || 0 || A || 150 || T || 125 || C || 0 || GATC
+|-
+| 11 || 7 || BROW_SLANT        || 100 || 1 || G || 0 || T || -15 || A || 15 || C || 0 || GTAC
+|-
+| 11 || 9 || EAR_STYLE         || 100 || 1 || T || 1 || G || 2 || C || 0 || A || 0 || TGCA
+||
+* 0 (C/A) = No ears
+* 1 (T) = Upwards ears
+* 2 (G) = Downwards ears
+|-
+| 11 || 10 || EAR_SHAPE         || 100 || 1 || C || 2 || G || 1 || A || 4 || T || 2 || CGAT
+||
+* 1 (G) = Rectangular ears
+* 2 (C/T) = Triangular ears
+* 4 (A) = No ears
+|-
+| 11 || 15 || EAR_FLOP          || 100 || 1 || C || 0 || T || 30 || A || 60 || G || 200 || CTAG
+|-
+| 4  || 11 || EAR_X             || 90 || 100 || T || 0 || A || 100 || G || 50 || C || 0 || TAGC
+||
+Position of ear as a percentage forwards from the back along ???
+|-
+| 11 || 11 || EAR_SIZE          || 70 || 100 || T || 20 || C || 30 || G || 10 || A || 40 || TCGA
+||
+Scaling of ear. Ear size of 10 (GG) will cause the horse to have late starts.
+|-
+| 11 || 12 || EAR_ASPECT        || 100 || 100 || A || 100 || T || 250 || C || 300 || G || 100 || ATCG
+||
+Height of ear, as a percentage of width
+|-
+| 11 || 13 || EAR_SLANT         || 70 || 100 || G || 0 || A || 100 || C || 50 || T || -33 || GACT
+||
+For EAR_SHAPE 2 (Triangular ears), determines how much to shift the top vertex forwards by, as a percentage of ear width
+|-
+| 11 || 14 || EAR_INTERIOR      || 100 || 100 || T || 5 || A || 0 || G || 0 || C || 0 || TAGC
+||
+* 0 (A/G/C) = No effect
+* 5 (T) = Inside of ear is SKIN-colored
+|-
+| 12 || 1  || TEETH_SHAPE       || 100 || 1 || T || 0 || C || 1 || G || 2 || A || 3 || TCGA
+||
+* 0 (T) = No teeth
+* 1 (C) = Teeth are a single rectangle
+* 2 (G) = Teeth are a single right angle triangle, with right angle at outer end of the mouth
+* 3 (A) = Teeth are several spiky triangles. '''This makes the creature a carnivore!'''
+|-
+| 12 || 2  || HAS_MOUTH         || 100 || 1 || T || 1 || C || 1 || G || 0 || A || 1 || TCGA
+||
+Enables mouth. Creatures without mouths simply extend the upper jaw all the way down to the bottom of the head.
+|-
+| 12 || 3  || MOUTH_Y           || 80 || 100 || C || 70 || G || 84 || A || 50 || T || 100 || CGAT
+||
+Distance of mouth from top of head, as a percentage of the head height. 100 (T) removes the lower jaw.
+|-
+| 12 || 4  || MOUTH_SIZE        || 70 || 100 || C || 20 || T || 30 || G || 10 || A || 40 || CTGA
+||
+How far mouth goes into head.
+|-
+| 12 || 5  || JAW               || 50 || 100 || C || 0 || A || 15 || G || -8 || T || -13 || CAGT
+||
+Changes where front end of lower jaw ends relative to upper jaw. Positive = underbite, negative = overbite. No effect on where the jaw starts in the head. No lower jaw if the overbite-ness would go past where MOUTH_SIZE sets the mouth start position.
+|-
+| 12 || 6  || TEETH_UPPER       || 100 || 1 || G || 1 || A || 0 || T || 0 || C || 0 || GATC
+|-
+| 12 || 7  || TEETH_UPPER2      || 100 || 1 || C || 1 || A || 0 || T || 0 || G || 0 || CATG
+|-
+| 1  || 6  || TONGUE            || 100 || 100 || C || 0 || G || 40 || A || 60 || T || 0 || CGAT
+|-
+| 1  || 7  || TONGUE_SEGS       || 100 || 1 || A || 0 || C || 1 || G || 2 || T || 0 || ACGT
+|-
+| 12 || 8  || NOSE_STYLE        || 100 || 1 || G || 1 || T || 2 || C || 3 || A || 0 || GTCA
+||
+* 0 (A) = No nose
+* 1 (G) = Square nose
+* 2 (T) = Downwards triangle nose
+* 3 (C) = Circle nose
+|-
+| 12 || 9  || NOSE_INNY         || 100 || 1 || G || 0 || C || 1 || T || 0 || A || 0 || GCTA
+|-
+| 12 || 10  || NOSE_Y            || 90 || 100 || C || 0 || T || 100 || A || 50 || G || 0 || CTAG
+||
+Position of nose on upper jaw, in percentage away from top
+|-
+| 12 || 11 || NOSE_SIZE         || 70 || 100 || A || 10 || G || 5 || C || 20 || T || 100 || AGCT
+|-
+| 12 || 12 || NOSE_INTERIOR     || 100 || 100 || A || 0 || T || 100 || G || 50 || C || 0 || ATGC
+|-
+| 13 || 1  || HAS_ANTLERS       || 100 || 1 || C || 1 || T || 0 || G || 1 || A || 1 || CTGA
+|-
+| 13 || 2  || ANTLER_X          || 100 || 1 || T || 1 || G || 0 || A || 2 || C || 1 || TGAC
+||
+Controls X position of antlers on head
+|-
+| 13 || 3  || ANTLER_W          || 100 || 100 || T || 15 || A || 12 || C || 8 || G || 12 || TACG
+||
+Controls thickness of antler segments
+|-
+| 13 || 4  || ANTLER_H          || 80 || 100 || T || 65 || A || 45 || C || 100 || G || 25 || TACG
+||
+Controls length of antler segments
+|-
+| 13 || 5  || ANTLER_TAPER      || 100 || 100 || C || 0 || G || 100 || A || 50 || T || 100 || CGAT
+||
+* 0 = Rectangular antler tips
+* 50 = Trapezoidal antler tips
+* 100 = Triangular antler tips
+|-
+| 13 || 6  || ANTLER_POM        || 100 || 100 || C || 0 || T || 150 || G || 200 || A || 100 || CTGA
+|-
+| 13 || 7  || ANTLER_COLOR      || 100 || 1 || A || 2 || C || 8 || G || 1 || T || 3 || ACGT
+||
+* 1 (G) = SPOT-colored
+* 2 (A) = ALT-colored
+* 3 (T) = SKIN-colored
+* 8 (C) = EYE-colored
+|-
+| 13 || 8  || POM_COLOR         || 100 || 1 || G || 2 || C || 0 || T || 1 || A || 17 || GCTA
+||
+* 0 (C) = BASE-colored
+* 1 (T) = SPOT-colored (double check this?)
+* 2 (G) = ALT-colored
+* 17 (A) = Red (for apple tree)
+|-
+| 13 || 9  || POM_USECOLOR      || 100 || 1 || G || 1 || T || 0 || A || 0 || C || 0 || GTAC
+||
+Enables poms to use POM_COLOR instead of using the hat color
+|-
+| 14 || 1  || ANTLER_REC        || 100 || 1 || T || 2 || A || 1 || G || 3 || C || 0 || TAGC
+||
+Increases the number of iterations outwards that have ANTLER_ANGLE antlers. If HAT_EXISTS, there's one less interation for both front and back antler; now 0 (C) disables back antler.
+|-
+| 14 || 2  || ANTLER_REC2       || 100 || 1 || C || 2 || T || 1 || G || 3 || A || 0 || CTGA
+||
+Increases the number of iterations outwards that have ANTLER_ANGLE2 antlers. If HAT_EXISTS, there's one less interation for both front and back antler; now 0 (A) disables front antler.
+|-
+| 14 || 3  || ANTLER_FLIP       || 100 || 1 || T || 1 || A || 0 || C || 0 || G || 0 || TACG
+||
+Flips frontside antler
+|-
+| 14 || 4  || ANTLER_MOD        || 100 || 1 || T || 3 || C || 2 || A || 1 || G || 3 || TCAG
+||
+* 1 (A) = Branch set 1 enabled (ANGLE and T1 apply to iteration 2 branches, ANGLE2 and T2 apply to iteration 1 branches)
+* 2 (C) = Branch set 2 enabled (ANGLE2 and T2 apply to iteration 1 branches, ANGLE and T1 apply to iteration 2 branches)
+* 3 (T/G) = Both branch sets visible
+|-
+| 14 || 5  || ANTLER_SCALEH     || 80 || 100 || G || 100 || C || 75 || T || 40 || A || 100 || GCTA
+||
+Change in branch length by iteration
+|-
+| 14 || 6 || ANTLER_SCALEW     || 100 || 100 || T || 100 || C || 75 || G || 50 || A || 100 || TCGA
+||
+Change in branch thickness by iteration
+|-
+| 14 || 7  || ANTLER_ANGLE      || 100 || 1 || G || 45 || A || -45 || T || -25 || C || 25 || GATC
+||
+Degrees to turn specific branches counterclockwise (see ANTLER_MOD for which)
+|-
+| 14 || 8  || ANTLER_ANGLE2     || 100 || 1 || A || 45 || C || -45 || T || 90 || G || -90 || ACTG
+||
+Degrees to turn specific branches counterclockwise (see ANTLER_MOD for which)
+|-
+| 14 || 9  || ANTLER_ANGLE_RAND || 100 || 1 || G || 0 || T || 5 || A || 45 || C || 15 || GTAC
+||
+Scaling of randomness added to branch angles
+|-
+| 14 || 10 || ANTLER_T1         || 100 || 100 || C || 0 || G || 100 || A || 40 || T || 25 || CGAT
+||
+Distance specific branches sprout from, measured from base of parent branch  (see ANTLER_MOD for which)
+|-
+| 14 || 11 || ANTLER_T2         || 100 || 100 || A || 100 || T || 40 || G || 0 || C || 25 || ATGC
+||
+Distance specific branches sprout from, measured from base of parent branch  (see ANTLER_MOD for which)
+|-
+| 15 || 1  || HAT_EXISTS        || 100 || 1 || A || 1 || C || 0 || T || 0 || G || 0 || ACTG
+||
+Enables hat - this changes positioning of both antlers, making them sprout from the sides of the hat rather than from top of the head. Requires HAS_ANTLERS.
+|-
+| 15 || 2  || HAT_SIZE          || 85 || 100 || C || 60 || A || 40 || T || 100 || G || 20 || CATG
+||
+Scaling of hat. Does not affect antler scaling.
+Note: A larger hat size does have a minor effect on the horse's intellect.
+|-
+| 15 || 3 || HAT_RAKE          || 100 || 100 || A || 0 || G || 25 || T || -15 || C || 0 || AGTC
+||
+How far forwards hat is positioned.
+|-
+| 15 || 4  || HAT_ASPECT        || 85 || 100 || A || 100 || T || 300 || G || 200 || C || 100 || ATGC
+|-
+| 15 || 5  || HAT_TAPER         || 100 || 100 || T || 0 || G || 100 || C || 50 || A || 0 || TGCA
+||
+* 0 (T/A) = Rectangular hat
+* 50 (C) = Trapezoidal hat
+* 100 (G) = Triangular hat
+|-
+| 13 || 10 || HAT_POM           || 100 || 100 || T || 0 || G || 25 || A || 50 || C || 0 || TGAC
+||
+Size of the little circle on top of the hat, as a percentage of the hat size
+|-
+| 13 || 11 || HAT_POM_IS_LID    || 100 || 1 || T || 0 || A || 1 || G || 0 || C || 0 || TAGC
+|-
+| 15 || 6  || HAT_CLONE         || 100 || 100 || C || 0 || G || 33 || T || 66 || A || 0 || CGTA
+||
+* 0 (C/A) = One hat
+* 33 (G) = Two hats overlapping by 2/3
+* 66 (T) = Two hats overlapping by 1/3
+Doesn't double antlers, just the hat
+|-
+| 15 || 7  || HAT_BACK_SCALE    || 100 || 100 || T || 100 || A || 0 || G || 60 || C || 100 || TAGC
+||
+Scaling of back antler. No effect if HAT_EXISTS is 0.
+|-
+| 15 || 8  || HAT_FRONT_SCALE   || 100 || 100 || C || 100 || G || 0 || T || 60 || A || 100 || CGTA
+||
+Scaling of front antler. No effect if HAT_EXISTS is 0.
+|-
+| 15 || 9  || HAT_BACK_ANGLE    || 75 || 1 || A || 45 || C || 90 || G || 120 || T || 60 || ACGT
+||
+Angle of back antler on hat, measured counterclockwise from vertical.
+|-
+| 15 || 10 || HAT_FRONT_ANGLE   || 100 || 1 || C || -45 || G || -90 || A || -120 || T || -60 || CGAT
+|-
+| 15 || 11 || HAT_ANGLE_RAND    || 100 || 1 || T || 0 || C || 15 || G || 45 || A || 15 || TCGA
+|-
+| 15 || 12 || HAT_FLIP          || 100 || 1 || T || 0 || A || 1 || C || 0 || G || 0 || TACG
+|-
+| 15 || 13 || HAT_T             || 100 || 100 || G || 0 || T || 100 || A || 40 || C || 0 || GTAC
+|-
+| 16 || 1  || BASE_BROWN        || 100 || 1 || A || 0 || T || 1 || C || 2 || G || 0 || ATCG
+||
+* 0 (A/G) = BASE color is rich brown, SPOT color is light grey
+* 1 (T) = BASE color is medium-dark brown, SPOT color is light grey
+* 2 (C) = BASE color is dark brown, SPOT is latte brown
+Overridden by either BASE_RED or BASE_GREEN being non-zero
+|-
+| 16 || 2  || BASE_BLACK        || 100 || 1 || T || 0 || G || 1 || C || 0 || A || 1 || TGCA
+||
+* 0 (T/C) = No effect
+* 1 (G/A) = BASE and ALT colors are swapped
+If there are not PAT genes in effect, the torso will be overridden to be the former BASE color rather than being solid ALT.
+|-
+| 16 || 3  || BASE_RED          || 100 || 1 || G || 0 || T || 1 || C || 2 || A || 3 || GTCA
+||
+Combines with BASE_GREEN to produce the basic BASE and SPOT colors of the horse:
+* BASE_RED 0 (G) + BASE_GREEN 0 (T) = Use BASE_BROWN to determine BASE and SPOT colors instead.
+* BASE_RED 1 (T) + BASE_GREEN 0 (T) = BASE is red, SPOT is light grey
+* BASE_RED 2 (C) + BASE_GREEN 0 (T) = BASE is magenta, SPOT is pink
+* BASE_RED 3 (A) + BASE_GREEN 0 (T) = BASE is dim red, SPOT is pink
+* BASE_RED 0 (G) + BASE_GREEN 1 (C) = BASE is dark yellow, SPOT is light grey
+* BASE_RED 1 (T) + BASE_GREEN 1 (C) = BASE is dark yellow, SPOT is light grey
+* BASE_RED 2 (C) + BASE_GREEN 1 (C) = BASE is dim orange, SPOT is peach 
+* BASE_RED 3 (A) + BASE_GREEN 1 (C) = BASE is goldenrod, SPOT is light grey
+* BASE_RED 0 (G) + BASE_GREEN 2 (A) = BASE is green, SPOT is dim orange
+* BASE_RED 1 (T) + BASE_GREEN 2 (A) = BASE is green, SPOT is lime green
+* BASE_RED 2 (C) + BASE_GREEN 2 (A) = BASE is chartreuse, SPOT is emerald green
+* BASE_RED 3 (A) + BASE_GREEN 2 (A) = BASE is goldenrod, SPOT is light grey
+* BASE_RED 0 (G) + BASE_GREEN 3 (G) = BASE is dark green, SPOT is dark yellow
+* BASE_RED 1 (T) + BASE_GREEN 3 (G) = BASE is dark green, SPOT is dark yellow
+* BASE_RED 2 (C) + BASE_GREEN 3 (G) = BASE is dark green, SPOT is dark yellow
+* BASE_RED 3 (A) + BASE_GREEN 3 (G) = BASE is dark green, SPOT is dark yellow
+|-
+| 16 || 4  || BASE_GREEN        || 70 || 1 || T || 0 || C || 1 || A || 2 || G || 3 || TCAG
+||
+See BASE_RED.
+|-
+| 16 || 5  || GREEN_KNOCKOUT    || 100 || 1 || C || 0 || A || 1 || G || 0 || T || 0 || CAGT
+||
+* 0 (C/G/T) = No effect
+* 1 (A) = BASE_GREEN has no effect regardless of value.
+|-
+| 16 || 6  || BASE_CREAM        || 50 || 100 || A || 0 || G || 100 || C || 0 || T || 0 || AGCT
+||
+* 0 (A/C/T) = No effect
+* 100 (G) = Greatly lightens BASE and SPOT colors.
+|-
+| 16 || 7  || ALT_BLUE          || 100 || 1 || T || 0 || A || 1 || G || 2 || C || 3 || TAGC
+||
+* 0 (T) = ALT color is black
+* 1 (A) = ALT color is black
+* 2 (G) = ALT color is sky blue
+* 3 (C) = ALT color is green
+|-
+| 16 || 8  || SPOT_YELLOW       || 100 || 1 || T || 0 || G || 1 || C || 0 || A || 1 || TGCA
+||
+* 0 (T/C) = No effect
+* 1 (G/A) = SPOT color is yellow
+|-
+| 16 || 9  || SKIN_HUE          || 100 || 1 || C || 0 || G || 1 || A || 2 || T || 3 || CGAT
+||
+Combines with SKIN_HUE2 to dictate the SKIN color of the horse:
+* SKIN_HUE 0 (C) + SKIN_HUE2 0 (T) = SKIN color is pink
+* SKIN_HUE 1 (G) + SKIN_HUE2 0 (T) = SKIN color is light grey
+* SKIN_HUE 2 (A) + SKIN_HUE2 0 (T) = SKIN color is latte brown
+* SKIN_HUE 3 (T) + SKIN_HUE2 0 (T) = SKIN color is light orange
+* SKIN_HUE 0 (C) + SKIN_HUE2 1 (A) = SKIN color is medium pink
+* SKIN_HUE 1 (G) + SKIN_HUE2 1 (A) = SKIN color is medium grey
+* SKIN_HUE 2 (A) + SKIN_HUE2 1 (A) = SKIN color is medium yellow
+* SKIN_HUE 3 (T) + SKIN_HUE2 1 (A) = SKIN color is light yellow
+* SKIN_HUE 0 (C) + SKIN_HUE2 2 (G) = SKIN color is dark pink
+* SKIN_HUE 1 (G) + SKIN_HUE2 2 (G) = SKIN color is dark grey
+* SKIN_HUE 2 (A) + SKIN_HUE2 2 (G) = SKIN color is dark yellow
+* SKIN_HUE 3 (T) + SKIN_HUE2 2 (G) = SKIN color is brown
+* SKIN_HUE 0 (C) + SKIN_HUE2 3 (C) = SKIN color is dark blue
+* SKIN_HUE 1 (G) + SKIN_HUE2 3 (C) = SKIN color is pale teal
+* SKIN_HUE 2 (A) + SKIN_HUE2 3 (C) = SKIN color is white
+* SKIN_HUE 3 (T) + SKIN_HUE2 3 (C) = SKIN color is sky blue
+Notably, SKIN color seems to be particularly prone to random per-horse differences - if a horse's SKIN color doesn't seem to match this table, changing any other genes may fix it.
+|-
+| 16 || 10 || SKIN_HUE2         || 100 || 1 || T || 0 || A || 1 || G || 2 || C || 3 || TAGC
+||
+See SKIN_HUE
+|-
+| 16 || 11 || SWAP_BASE_SPOT    || 100 || 1 || A || 0 || T || 1 || C || 0 || G || 1 || ATCG
+||
+Swap BASE and SPOT colors. Overrides SWAP_BASE_ALT
+|-
+| 16 || 12 || SWAP_ALT_SPOT     || 100 || 1 || T || 0 || G || 1 || C || 0 || A || 1 || TGCA
+||
+Swap BASE and ALT colors. Overridden by SWAP_BASE_SPOT
+|-
+| 16 || 13 || WHITE             || 100 || 1 || T || 1 || A || 0 || G || 0 || C || 0 || TAGC
+||
+* 0 (A/G/C) = No effect
+* 1 (T) = BASE color is set to light grey.
+|-
+| 5  || 8  || WHITE_IS_LETHAL   || 100 || 1 || A || 0 || G || 1 || C || 0 || T || 0 || AGCT
+||
+* 0 (A/C/T) = No effect
+* 1 (G) = Enables simulation of [https://en.wikipedia.org/wiki/Lethal_white_syndrome lethal white syndrome]. Horses born with WHITE set to 1 will die on birth; this does not affect horses that were made white after birth with genetic modification. (TODO: check if this applies to any children of horse with gene, or only to horses born with the gene)
+|-
+| 11 || 8  || EYE_HUE           || 100 || 1 || G || 36 || C || 237 || T || 153 || A || 198 || GCTA
+||
+* 36 (G) = Hazel eyes
+* 237 (C) = Blue eyes
+* 153 (T) = Green eyes
+* 198 (A) = Cyan eyes
+|-
+| 16 || 14 || NOSE_HUE          || 100 || 1 || G || 0 || A || 1 || C || 2 || T || 3 || GACT
+||
+* 0 (G) = Nose is ALT-colored
+* 1 (A) = Nose is SKIN-colored
+* 2 (C) = Nose is SPOT-colored
+* 3 (T) = Nose is BASE-colored
+|-
+| 16 || 15 || HOOF_COLOR        || 100 || 1 || C || 0 || T || 1 || A || 2 || G || 0 || CTAG
+|-
+| 17 || 1  || AGOUTI            || 100 || 1 || A || 1 || T || 0 || G || 0 || C || 1 || ATGC
+||
+* 0 (T/G) = No effect
+* 1 (A/C) = Swaps the positions of BASE and SPOT colors on markings
+BASE_BLACK must be active for this to have an effect (?)
+|-
+| 1  || 8  || BELLY_ALT         || 100 || 1 || T || 0 || A || 1 || C || 2 || G || 1 || TACG
+|-
+| 10 || 13 || SKIN_HEAD         || 100 || 1 || G || 0 || C || 1 || A || 0 || T || 2 || GCAT
+||
+* 0 (G/A) = Head and torso are BASE-colored
+* 1 (C) = Head is SKIN-colored, torso is BASE-colored
+* 2 (T) = Head and torso are SKIN-colored
+|-
+| 9  || 11 || SKIN_HANDS        || 100 || 1 || G || 0 || C || 1 || A || 0 || T || 2 || GCAT
+||
+* 0 (G/A) = Limbs, tail, and hands are BASE-colored
+* 1 (C) = Limbs and tail are BASE color, hands are SKIN-colored
+* 2 (T) = Limbs, tail, and hands are SKIN-colored
+The second, outer segments added by HAS_KNEE and HAS_ELBOW are unaffected, always being BASE-colored.
+|-
+| 17 || 2  || FOOT_IS_HOOF      || 100 || 1 || G || 0 || A || 1 || C || 0 || T || 1 || GACT
+||
+* 0 (G/C) = Feet use legs' color
+* 1 (A/T) = Feet are ALT-colored
+Feet are SKIN-colored if SKIN_HANDS overrides
+|-
+| 17 || 3  || RACCOON_EYE          || 100 || 1 || G || 0 || C || 1 || A || 2 || T || 0 || GCAT
+||
+* 0 (G/T) = Eyebox uses head's color
+* 1 (C) = Eyebox is SPOT-colored
+* 2 (A) = Eyebox is ALT-colored
+|-
+| 17 || 4  || EAR_COMP          || 100 || 1 || G || 0 || T || 0 || C || 2 || A || 1 || GTCA
+||
+* 0 (G/T) = Ears use head's color
+* 1 (A) = Ears are ALT-colored
+* 2 (C) = Ears are SPOT-colored
+|-
+| 17 || 5  || TAIL_ALT          || 100 || 1 || C || 0 || G || 1 || T || 2 || A || 0 || CGTA
+||
+* 0 (C/A) = Tail uses torso's color
+* 1 (G) = Tail is SPOT-colored
+* 2 (T) = Tail is ALT-colored
+|-
+| 17 || 6  || PAT_SPLIT         || 100 || 100 || C || 0 || G || 100 || A || 65 || T || 0 || CGAT
+||
+* 0 (C/T) = Entire torso is ALT-colored.
+* 100 (G) = Front half of torso is ALT-colored
+* 65 (A) = Front ~17.5% of torso is ALT-colored
+|-
+| 1  || 9  || PAT_BELLY         || 100 || 100 || A || 100 || C || 50 || T || 33 || G || 75 || ACTG
+||
+Height of chest as a percentage of total torso height
+|-
+| 17 || 7  || PAT_STRIPE        || 100 || 100 || C || 0 || T || 90 || A || 51 || G || 0 || CTAG
+||
+* 0 (C/G) = No stripes
+* 51 (A) = Stripes of SPOT color
+* 90 (T) = Same as 51?
+|-
+| 17 || 8  || PAT_SPOT          || 100 || 100 || A || 0 || C || 90 || G || 51 || T || 0 || ACGT
+||
+Requires PAT_STRIPE to be non-zero.
+* 0 (A/T) = No spots
+* 51 (G) = Spots of SPOT color
+* 90 (C) = Same as 51?
+|-
+| 17 || 9  || PAT_PERLIN        || 100 || 100 || T || 0 || C || 100 || A || 60 || G || 0 || TCAG
+||
+* 0 (T/G) = Normal
+* 60 (A) = Perlin noise pattern in SPOT color, using top 30% brightness values of noise pattern as the SPOT-colored areas.
+* 100 (C) = Perlin noise pattern in SPOT color, using top 50% brightness values of noise pattern as the SPOT-colored areas.
+|-
+| 17 || 10 || PAT_PERLIN2       || 100 || 100 || G || 0 || T || 100 || C || 60 || A || 0 || GTCA
+||
+* 0 (G/A) = Normal
+* 60 (C) = Perlin noise pattern in ALT color, using top 30% brightness values of noise pattern as the SPOT-colored areas.
+* 100 (T) = Perlin noise pattern in ALT color, using top 50% brightness values of noise pattern as the SPOT-colored areas.
+PAT_PERLIN2 layers under PAT_PERLIN.
+|-
+| 17 || 11 || PAT_PERLIN_SIZE   || 100 || 1 || G || 8 || A || 2 || C || 4 || T || 4 || GACT
+||
+* 2 (A) = Perlin noise patterns are half-scaled.
+* 4 (C/T) = Perlin noise patterns are normal-scaled.
+* 8 (G) = Perlin noise patterns are double-scaled.
+|-
+| 18 || 4  || RAMPAGE           || 100 || 1 || G || 0 || A || 0 || T || 0 || C || 1 || GATC
+|-
+| 18 || 5  || SPINAL_LOCO       || 100 || 1 || C || 0 || T || 1 || G || 0 || A || 2 || CTGA
+|-
+| 2  || 13 || BRAIN_SPASTIC     || 100 || 1 || T || 0 || G || 1 || A || 2 || C || 0 || TGAC
+||
+* 0 (T/C) = No effect
+* 1 (G) = Creature will sometimes twitch erratically when running
+* 2 (A) = Creature will sometimes seize up when running
+|-
+| 18 || 6  || HIGH_INTELLECT    || 100 || 1 || C || 0 || T || 1 || A || 0 || G || 1 || CTAG
+||
+* 0 (C/A) = No effect
+* 1 (T/G) = Creature is capable of speaking and may refuse to participate in events. Creatures with this gene may form their own ranches if released into the wild. A head with an existent mouth is required to speak.
+|-
+| 1  || 12 || OMNIVORE          || 100 || 1 || C || 0 || A || 1 || T || 0 || G || 0 || CATG
+|-
+| 1  || 10 || LITTER_SIZE       || 100 || 1 || C || 1 || T || 2 || A || 3 || G || 5 || CTAG
+|-
+| 1  || 11 || OLD_AGE           || 100 || 1 || T || 0 || A || 0 || C || -1 || G || 2 || TACG
+||
+* 0 (T/A) = No effect
+* 2 (G) = 2 days are added to creature's total lifespan
+* -1 (C) = 1 day is removed from creature's total lifespan
+|-
+| 1  || 13 || LIMP              || 100 || 1 || A || 0 || G || 1 || T || 0 || C || 2 || AGTC
+||
+* 0 (A/T) = Normal
+* 1 (G) = Ragdoll physics - joints cannot be moved at all
+* 2 (C) = Joints can be moved, but they can't be stopped, resulting in what looks like exaggerated movements
+|-
+| 18 || 1  || NARCOLEPSY        || 100 || 1 || T || 0 || C || 0 || G || 1 || A || 0 || TCGA
+||
+* 0 (T/C/A) = No effect
+* 1 (G) = Creature may randomly fall asleep while running
+|-
+| 12 || 13 || FLU_IMMUNITY      || 100 || 1 || C || 0 || A || 0 || T || 0 || G || 1 || CATG
+|-
+| 7  || 8  || TAIL_WAG          || 100 || 1 || C || 1 || T || 0 || G || 0 || A || 0 || CTGA
+||
+* 0 (T/G/A) = No effect
+* 1 (C) = Creature will wag its tail when pet
+|-
+| 3  || 15 || STIFF_JOINTS      || 100 || 100 || C || 0 || G || 18 || A || 50 || T || 0 || CGAT
+|-
+| 18 || 7  || L_LEG_SIGNAL      || 100 || 1 || G || 1 || T || 1 || C || 1 || A || 2 || GTCA
+|-
+| 19 || 1  || L_LEG_FTOB_REACT  || 100 || 1 || T || 1 || C || 2 || A || 1 || G || 3 || TCAG
+|-
+| 19 || 2  || L_LEG_FTOB_EVENT  || 100 || 1 || G || 3 || A || 1 || T || 2 || C || 4 || GATC
+|-
+| 19 || 3  || L_LEG_BTOF_REACT  || 100 || 1 || A || 2 || C || 1 || G || 2 || T || 3 || ACGT
+|-
+| 19 || 4  || L_LEG_BTOF_EVENT  || 100 || 1 || T || 2 || G || 3 || A || 1 || C || 4 || TGAC
+|-
+| 18 || 8  || L_ARM_SIGNAL      || 100 || 1 || C || 2 || G || 2 || A || 2 || T || 1 || CGAT
+|-
+| 19 || 5  || L_ARM_FTOB_REACT  || 100 || 1 || A || 2 || C || 1 || G || 2 || T || 3 || ACGT
+|-
+| 19 || 6  || L_ARM_FTOB_EVENT  || 100 || 1 || T || 3 || G || 1 || A || 2 || C || 4 || TGAC
+|-
+| 19 || 7  || L_ARM_BTOF_REACT  || 100 || 1 || G || 1 || A || 2 || T || 1 || C || 3 || GATC
+|-
+| 19 || 8  || L_ARM_BTOF_EVENT  || 100 || 1 || C || 2 || A || 3 || T || 1 || G || 4 || CATG
+|-
+| 18 || 9  || L_TAIL_SIGNAL     || 100 || 1 || A || 3 || C || 1 || T || 2 || G || 4 || ACTG
+|-
+| 19 || 9  || L_TAIL_FTOB_REACT || 100 || 1 || C || 0 || G || 1 || A || 3 || T || 2 || CGAT
+|-
+| 19 || 10 || L_TAIL_FTOB_EVENT || 100 || 1 || T || 1 || C || 2 || G || 3 || A || 4 || TCGA
+|-
+| 19 || 11 || L_TAIL_BTOF_REACT || 100 || 1 || G || 0 || T || 1 || C || 3 || A || 2 || GTCA
+|-
+| 19 || 12 || L_TAIL_BTOF_EVENT || 100 || 1 || A || 2 || T || 1 || C || 3 || G || 4 || ATCG
+|-
+| 18 || 10 || L_NECK_SIGNAL     || 100 || 1 || T || 4 || G || 1 || A || 2 || C || 3 || TGAC
+|-
+| 19 || 13 || L_NECK_FTOB_REACT || 100 || 1 || G || 0 || T || 1 || A || 4 || C || 2 || GTAC
+|-
+| 19 || 14 || L_NECK_FTOB_EVENT || 100 || 1 || C || 1 || A || 2 || T || 3 || G || 4 || CATG
+|-
+| 19 || 15 || L_NECK_BTOF_REACT || 100 || 1 || T || 0 || C || 1 || A || 4 || G || 2 || TCAG
+|-
+| 19 || 16 || L_NECK_BTOF_EVENT || 100 || 1 || T || 2 || C || 1 || A || 3 || G || 4 || TCAG
+|-
+| 18 || 11 || LOCO_SYNC         || 100 || 1 || C || 0 || T || 1 || G || 0 || A || 0 || CTGA
+||
+* 0 (C/G/A) = No effect
+* 1 (T) = Body parts will attempt to move in sync
+|}
+
+== Sources ==
+https://docs.google.com/spreadsheets/d/e/2PACX-1vTQbutYf8LepZxtJlycU3oI5V03oQGTmyeuNBBeufL2Z6GpEvi2bmLFwKO8wbkH1g/pubhtml#gid=1651827132
+
+[[Category:Horse qualities]]
