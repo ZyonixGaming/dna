@@ -306,7 +306,7 @@ let completeMapping = new Map();
 const XML_URL = './data/genes.xml';
 
 
-async function loadGeneDataFromXml() {
+async function loadGeneDataFromXml(xmlString="") {
 	function precomputeValueMatrix(g,m) {
 	 // const n = entry.n;        // e.g. "TGCA" – priority order
 	  //const g = entry.g;        // array of 4 values, order follows n
@@ -350,13 +350,17 @@ async function loadGeneDataFromXml() {
 	  return matrix;
 	}
 	
-	
-  try {
-    const response = await fetch(XML_URL);
-    if (!response.ok) throw new Error(`Status ${response.status}`);
-    xmlText = await response.text();
-  }catch(e){
-	  
+  if(xmlString.length>0){
+	  xmlText=xmlString;
+  }
+  else{
+	  try {
+		const response = await fetch(XML_URL);
+		if (!response.ok) throw new Error(`Status ${response.status}`);
+		xmlText = await response.text();
+	  }catch(e){
+		  
+	  }
   }
   
   try{
