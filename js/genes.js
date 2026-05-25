@@ -1,4 +1,4 @@
-let xmlText = `
+const genesXmlText = `
 <exp>
     <gene name="SIZE" m="95" s="100" g0="100" g1="50" g2="35" g3="75" n="ATGC" />
     <gene name="ASPECT" m="95" s="100" g0="200" g1="310" g2="150" g3="250" n="GCAT" />
@@ -349,7 +349,7 @@ async function loadGeneDataFromXml(xmlString="") {
 	  //entry.valueMatrix = matrix;
 	  return matrix;
 	}
-	
+  let xmlText;
   if(xmlString.length>0){
 	  xmlText=xmlString;
   }
@@ -359,7 +359,7 @@ async function loadGeneDataFromXml(xmlString="") {
 		if (!response.ok) throw new Error(`Status ${response.status}`);
 		xmlText = await response.text();
 	  }catch(e){
-		  
+		xmlText=genesXmlText;
 	  }
   }
   

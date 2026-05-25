@@ -34,7 +34,7 @@ const HEADER_LINKS = [
     },	
     {
         name: 'Horsey Game Save Editor',
-        url: 'https://zyonixgaming.github.io/horsey-save-editor/',
+        url: 'https://zyonixgaming.github.io/dna/save-editor.html',
         icon: '📝'
     }
 	

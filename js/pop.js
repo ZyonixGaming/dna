@@ -1,4 +1,4 @@
-let popText = `
+const popXmlText = `
 <pops>
     <pop name="default">
         <gene name="SIZE" p0="1" />
@@ -2721,23 +2721,23 @@ const defaultWeights=[1,0,0,0];
 
 const POP_URL = './data/pop.xml';
 async function loadPopDataFromXml(xmlString="") {
-	
+  let xmlText;
   if(xmlString.length>0){
-	  popText=xmlString;
+	  xmlText=xmlString;
   }
   else{
 	  try {
 		const response = await fetch(POP_URL);
 		if (!response.ok) throw new Error(`Status ${response.status}`);
-		popText = await response.text();
+		xmlText = await response.text();
 	  }catch(e){
-		  
+		xmlText = popXmlText;
 	  }
   }
   try{
 	  
 	const parser = new DOMParser();
-	const xml = parser.parseFromString(popText, "text/xml");
+	const xml = parser.parseFromString(xmlText, "text/xml");
 	const result = {};	  
 	  
 	function resolvePop(node, parentGenes) {

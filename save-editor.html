@@ -1,0 +1,2718 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width,initial-scale=1" name="viewport" />
+        <title>Horsey Save Editor</title>
+		<link rel="stylesheet" href="save-editor.css">
+		<link rel="stylesheet" href="./css/headers.css">
+    <style>
+.header-bar {
+    max-width: 1500px;
+    margin: 0 auto;
+    width: 100%;
+}	
+        /* floating DNA button & side panel */
+        .floating-dna-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 20%, #f0f, #c084fc, #3b82f6);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,200,0.3);
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            backdrop-filter: blur(2px);
+        }
+        .floating-dna-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.6), 0 0 0 4px gold;
+        }
+        .dna-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 480px;
+            max-width: 94vw;
+            height: 100vh;
+            background: #0f172ad9;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(135deg, #0b1120ee, #111827ee);
+            border-left: 3px solid #48b5b5;
+            box-shadow: -8px 0 30px rgba(0,0,0,0.6);
+            z-index: 1050;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.2,0.9,0.4,1.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 18px;
+            gap: 20px;
+            overflow-y: auto;
+            font-family: 'Segoe UI', system-ui, monospace;
+        }
+        .dna-side-panel.open {
+            transform: translateX(0);
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #48b5b580;
+            padding-bottom: 12px;
+        }
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #a5f3fc, #c084fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+.close-panel {
+    background: #2d3e44;
+    border: none;
+    color: white;
+    font-size: 1.4rem;
+    border-radius: 40px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+.close-panel:hover { background: #f43f5e; }
+        .gene-box {
+            background: #0a0f1cbb;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid #48b5b5;
+        }
+        .gene-box label {
+            font-weight: bold;
+            color: #b9f3f0;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .gene-textarea {
+            width: 100%;
+            background: #030712;
+            border: 1px solid #2d3a46;
+            border-radius: 18px;
+            color: #cbd5e6;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            padding: 12px;
+            resize: vertical;
+            min-height: 130px;
+        }
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .mini-btn {
+            background: #1e293b;
+            border: 1px solid #48b5b5;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #b9c7d9;
+        }
+        .mini-btn:hover { background: #2d3e44; color: white; }
+        .apply-mutate {
+            background: linear-gradient(95deg, #c084fc, #3b82f6);
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 40px;
+            margin-top: 10px;
+            color: #010314;
+            width: 100%;
+            cursor: pointer;
+        }
+
+    </style>		
+    </head>
+    <body>
+		<header class="header-bar">
+			<div class="header-title">
+				<span>📝</span> Horsey Game Save Editor
+				
+			</div>
+			<span class="small mono">forked from <a href="https://github.com/alexjthomson/horsey-save-editor">https://github.com/alexjthomson/horsey-save-editor</a></span>
+			<div class="tools-dropdown" id="toolsDropdown">
+				<button class="tools-btn" id="toolsBtn">
+					🔧 Tools <span class="arrow">▼</span>
+				</button>
+				<div class="dropdown-menu" id="dropdownMenu">
+					<!-- Populated by headers.js -->
+				</div>
+			</div>
+		</header>
+        <main>
+            <aside class="stack">
+                <section class="card">
+                    <div class="hd">
+                        <h2>Save file</h2>						
+                        <span class="pill" id="status">No file</span>
+                    </div>
+                    <div class="bd stack">
+                        <button id="fileInput">Load Save</button>						
+                        <div class="row wrap">
+                            <button disabled="" id="downloadBtn">
+                                Export Save
+                            </button>
+                            <button
+                                class="secondary"
+                                disabled=""
+                                id="clearPatchesBtn"
+                            >
+                                Reset Changes
+                            </button>
+                        </div>
+                        <div class="small" id="summary">
+                            Load a <span class="mono">save1.dat</span> file.<br>
+							It is usually found at:<br>
+							<span class="mono small"><small>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\</small></span>
+                        </div>
+                        <div class="small" id="patchSummary"></div>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="hd">
+                        <h2>Horse records</h2>
+                        <span class="pill" id="recordCount">0</span>
+                    </div>
+                    <div class="bd stack">
+                        <input
+                            id="search"
+                            placeholder="Search horse name/location/id etc…"
+                            type="text"
+                        />
+                        <select id="filter">
+							<option value="hasgenome">Has data</option>
+							<option value="hasitem">Has item</option>
+							<option value="istired">Is tired</option>
+                            <option value="named">Named records</option>
+							<option value="inMap">On Map</option>
+							<option value="inTruck">In Truck</option>
+							<option value="inFarm">In Farms</option>
+							<option value="isJockey">Jockeys</option>
+							<option value="inOthers">In Other Locations</option>
+                            <option value="all">All records</option>
+                        </select>
+                        <div class="list" id="recordList"></div>
+                    </div>
+                </section>
+            </aside>
+            <section class="stack">
+                <section class="card">
+                    <div class="hd">
+                        <h2>Player</h2>
+                    </div>
+                    <div class="bd stack">
+                        <div class="prop-list" id="globalProps"></div>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="hd">
+                        <h2 id="selectedTitle">No horse selected</h2>
+                        <!--<span class="pill" id="selectedMeta">—</span>-->
+                    </div>
+                    <div class="bd stack">
+                        <div class="prop-list" id="horseProps"></div>
+                        <div id="rawDnaBlock"></div>
+                        <div id="detailBlocks"></div>
+                    </div>
+                </section>
+				<!--
+                <section class="card">
+                    <div class="hd">
+                        <h2>Patch list</h2>
+                        <span class="pill" id="patchCount">0 bytes</span>
+                    </div>
+                    <div class="bd">
+                        <div class="hex" id="patchList">No changes yet.</div>
+                    </div>
+                </section>
+				-->
+            </section>
+        </main>
+
+    <!-- FLOATING DNA BUTTON + SIDE PANEL (UPDATED) -->
+    <button class="floating-dna-btn" id="floatingDnaBtn" title="DNA Mutator">🧬✨</button>
+    <div id="dnaMutatorPanel" class="dna-side-panel">
+        <div class="panel-header">
+            <h3><span>🧬⚡</span> HORSE MUTAGEN</h3>
+            <button class="close-panel" id="closePanelBtn">✕</button>
+        </div>
+
+        <!-- Horse type checkboxes -->
+<div id="horseTypeCheckboxes" style="color:#b9f3f0; font-weight:bold; margin-top:10px;">
+    <div>Select horses to mutate:</div>
+    <label id="wildCheckLabel" style="display:none;"><input type="checkbox" id="mutateWild" checked> Wild Horses (on Map) <span id="wildCount"></span></label>
+    <label  title="Horses in Farms, Ranches, Stables, etc." id="farmCheckLabel" style="display:none;"><input type="checkbox" id="mutateFarm" checked> Farm Horses <span id="farmCount"></span></label>
+    <label id="jockeyCheckLabel" style="display:none;"><input type="checkbox" id="mutateJockey" checked> Jockeys <span id="jockeyCount"></span></label>
+    <label id="otherCheckLabel" style="display:none;"><input type="checkbox" id="mutateOther" checked> Other Horses <span id="otherCount"></span></label>
+</div>
+
+
+        <!-- Pop.xml loader (always visible) -->
+        <div id="xmlLoadArea" style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+            <button id="loadPopXmlBtn" class="mini-btn">📂 Load pop.xml</button>
+            <span id="xmlStatus" class="small" style="color:#9ab3d0;">Using default pop.xml</span>
+            <input type="file" id="xmlFileInput" accept=".xml" style="display:none;">
+        </div>
+
+        <!-- Mode switch buttons -->
+        <div style="display:flex; gap:8px; margin-top:6px;">
+            <button id="switchToXmlBtn" class="mini-btn">🧬 Switch to XML Mode</button>
+            <button id="switchToTextBtn" class="mini-btn" style="display:none;">🔄 Switch to Text Mode</button>
+        </div>
+
+        <!-- XML Mode UI (hidden initially) -->
+        <div id="xmlModeSection" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <label style="color:#b9f3f0; font-weight:bold;">🎯 Population:</label>
+                <select id="popSelect" style="width:100%; margin-top:4px;"></select>
+            </div>
+        </div>
+
+        <!-- Text‑mode pools (shown by default) -->
+        <div id="textModeBoxes">
+            <div class="gene-box">
+                <label>📗 DNA 1</label>
+                <textarea id="genomePoolA" class="gene-textarea" placeholder="00:ACGTGTCAAG&#10;00:ACTTATGAAG&#10;01:GGGGCCCC..."></textarea>
+                <div class="button-row"><button class="mini-btn" id="pastePoolA">📋 Paste</button><button class="mini-btn" id="clearPoolA">🗑 Clear</button></div>
+            </div>
+            <div class="gene-box">
+                <label>📘 DNA 2</label>
+                <textarea id="genomePoolB" class="gene-textarea" placeholder="00:ACGTGTCAAG&#10;00:ACTTATGAAG&#10;01:AAAACCCC..."></textarea>
+                <div class="button-row"><button class="mini-btn" id="pastePoolB">📋 Paste</button><button class="mini-btn" id="clearPoolB">🗑 Clear</button></div>
+            </div>
+        </div>
+
+        <button id="applyWildMutationBtn" class="apply-mutate">🧬 APPLY DNA TO SELECTED HORSES 🧬</button>
+        <div id="modeDescription" class="small" style="text-align:center; opacity:0.7;">Horses get their DNA replaced by a random mix of up to 2 DNA sequences.</div>
+    </div>	
+	    <script src="./js/genes.js"></script>
+	    <script src="./js/pop.js"></script>
+        <script>
+            "use strict";
+
+            const GAME_DNA = (() => {
+                const HELIX_COUNT = 20;
+                const VALID_BASE_RE = /[^ATCG]/g;
+                const BASES = ["A", "T", "C", "G"];
+                const BASE_INDEX = Object.freeze({ A: 0, T: 1, C: 2, G: 3 });
+
+                function createElement(tag, attrs = {}, children = []) {
+                    const e = document.createElement(tag);
+                    for (const [k, v] of Object.entries(attrs)) {
+                        if (v == null) continue;
+                        if (k === "class") e.className = v;
+                        else if (k === "text") e.textContent = v;
+                        else if (k === "html") e.innerHTML = v;
+                        else if (k === "value") e.value = v;
+                        else if (k === "checked") e.checked = Boolean(v);
+                        else if (k === "style") e.style.cssText = v;
+                        else if (k.startsWith("on") && typeof v === "function")
+                            e.addEventListener(k.slice(2), v);
+                        else e.setAttribute(k, v);
+                    }
+                    for (const child of Array.isArray(children)
+                        ? children
+                        : [children]) {
+                        if (child == null) continue;
+                        if (typeof child === "string")
+                            e.insertAdjacentHTML("beforeend", child);
+                        else e.appendChild(child);
+                    }
+                    return e;
+                }
+                function sanitizeSequence(value) {
+                    return String(value || "")
+                        .toUpperCase()
+                        .replace(VALID_BASE_RE, "");
+                }
+                function normalizeGenome(genome) {
+                    return genome.map(([s1 = "", s2 = ""]) => [
+                        sanitizeSequence(s1),
+                        sanitizeSequence(s2),
+                    ]);
+                }
+
+
+
+                function getHelixIndexFactory() {
+                    const m = new Map();
+                    let next = 0;
+                    return (raw) => {
+                        const label = String(raw).toUpperCase();
+                        if (/^\d{1,2}$/.test(label)) {
+                            const i = Number.parseInt(label, 10);
+                            return i >= 0 && i < HELIX_COUNT ? i : -1;
+                        }
+                        if (!m.has(label)) {
+                            if (next >= HELIX_COUNT) return -1;
+                            m.set(label, next++);
+                        }
+                        return m.get(label);
+                    };
+                }
+                function parseGenome(text) {
+                    const genome =  [...Array(20)].map(e => Array(2));
+                    const lines = String(text || "")
+                        .trim()
+                        .split("\n")
+                        .map((l) => l.trim())
+                        .filter(Boolean);
+                    const getHelixIndex = getHelixIndexFactory();
+                    let current = -1;
+                    const patterns = {
+                        newFormat: /^([A-Za-z0-9]+)\s*:\s*([atcg]+)$/i,
+                        numbered: /^(\d{1,2})\s*:\s*([atcg]+)$/i,
+                        verboseBoth:
+                            /^helix\s*([A-Za-z0-9]+)[^:)]*[:\)]\s*([atcg]+)\s*:\s*(?:second\s*strand|strand\s*2)[^:]*:\s*([atcg]+)$/i,
+                        verboseFirst:
+                            /^helix\s*([A-Za-z0-9]+)[^:)]*[:\)]\s*([atcg]+)$/i,
+                        verboseSecond:
+                            /^(?:second\s*strand|strand\s*2)[^:]*:\s*([atcg]+)$/i,
+                        bareStrand: /^[atcg]+$/i,
+                    };
+                    function assign(i, seq) {
+                        if (i < 0 || i >= HELIX_COUNT) return;
+                        if (!genome[i][0]) genome[i][0] = seq;
+                        else genome[i][1] = seq;
+                    }
+                    for (const line of lines) {
+                        let match = line.match(patterns.newFormat);
+                        if (match) {
+                            assign(
+                                getHelixIndex(match[1]),
+                                match[2].toUpperCase(),
+                            );
+                            continue;
+                        }
+                        match = line.match(patterns.numbered);
+                        if (match) {
+                            assign(
+                                Number.parseInt(match[1], 10),
+                                match[2].toUpperCase(),
+                            );
+                            continue;
+                        }
+                        match = line.match(patterns.verboseBoth);
+                        if (match) {
+                            current = getHelixIndex(match[1]);
+                            if (current >= 0) {
+                                genome[current][0] = match[2].toUpperCase();
+                                genome[current][1] = match[3].toUpperCase();
+                            }
+                            continue;
+                        }
+                        match = line.match(patterns.verboseFirst);
+                        if (match) {
+                            current = getHelixIndex(match[1]);
+                            if (current >= 0)
+                                genome[current][0] = match[2].toUpperCase();
+                            continue;
+                        }
+                        match = line.match(patterns.verboseSecond);
+                        if (match && current >= 0) {
+                            genome[current][1] = match[1].toUpperCase();
+                            continue;
+                        }
+                        if (
+                            current >= 0 &&
+                            !genome[current][1] &&
+                            patterns.bareStrand.test(line)
+                        )
+                            genome[current][1] = line.toUpperCase();
+                    }
+                    return normalizeGenome(genome);
+                }
+                function formatGenomeForExport(genome) {
+                    const lines = [];
+                    genome.forEach(([s1, s2], i) => {
+                        const label = String(i).padStart(2, "0");
+                        if (s1) lines.push(`${label}:${s1}`);
+                        if (s2) lines.push(`${label}:${s2}`);
+                    });
+                    return lines.join("\n");
+                }
+
+
+
+                return {
+                    HELIX_COUNT,
+                    BASES,
+                    BASE_INDEX,
+                    createElement,
+                    sanitizeSequence,
+                    normalizeGenome,                    
+                    parseGenome,
+                    formatGenomeForExport,
+                };
+            })();
+
+            let original = null;
+            let view = null;
+            let fileName = "save1.dat";
+            let records = [];
+			let wildHorses = [];
+			let farmHorses = [];
+			let jockeys = [];
+			let otherHorses = [];
+			let otherDna = [];
+			let locations = [];
+            let tableEnd = 0;
+            let selectedIndex = -1;
+            let patches = new Map();
+            
+
+            
+			const PERSONALITIES = ["Normal","Preppy","Grumpy","Brainy","Swaggy","Cutey","Baby","Haughty","Leprechaun","Algernon de Horsey","Sweetie","Car","Unknown(Normal?)","Rude"];
+			
+			const STATUSES = ["Normal","Hot","Tipsy","Sick","Drunk","?unknown?","Dead"];
+			//off + 6 could be horse status. 0 = ok 1= hot sauce,2=drunk ,3 =flu, 4=dead drunk?, 5=also drunk? 6=dead
+			
+			
+			const ITEMS = {
+				26:{name:"Sneakers",pos:5},
+				27:{name:"Bow Tie",pos:4},
+				28:{name:"Neck Tie",pos:4},
+				29:{name:"Top Hat",pos:7},
+				30:{name:"Beanie",pos:7},
+				31:{name:"Glasses",pos:9},
+				32:{name:"Sunglasses",pos:9},
+				33:{name:"Ball And Chain",pos:1},
+				34:{name:"Rocket",pos:3},
+				35:{name:"Balloon",pos:0},
+				36:{name:"Rollerblades",pos:5},
+				37:{name:"Stilts",pos:5},
+				38:{name:"Clown Nose",pos:12},
+				39:{name:"Biege Boots",pos:5},
+				40:{name:"Tan Boots",pos:5},
+				41:{name:"Purple Boots",pos:5},
+				42:{name:"Black Boots",pos:5},
+				43:{name:"Pink Ribbon",pos:18},
+				44:{name:"Yellow Ribbon",pos:18},
+				45:{name:"Orange Ribbon",pos:18},
+				46:{name:"Green Ribbon",pos:18}			
+			};
+/*
+5,26 Sneakers
+4,27  bow tie
+4,28  cravat (tie)
+7,29  top hat
+7,30  toque (beanie)
+9,31  glasses
+9,32  sunglasses
+1,33  Ball And Chain
+3,34  Rocket
+0,35  Balloon
+5,36  rollerblades
+5,37  Stilts
+12,38  ClownNose
+5,39  Cowboy Boots (light brown)
+5,40  Cowboy Boots (dark brown)
+5,41  Great Cowboy Boots (purple)
+5,42  Great Cowboy Boots (black)
+18,43  pink ribbon
+18,44  yellow ribbon
+18,45  orange ribbon 
+18,46  green ribbon
+
+*/
+					
+			const GENOME_MAP = [
+			  "03041011072026396254",
+			  "0e0f122d5b8586c1c9d4d5d3d6",
+			  "081c2a2b1e1d313a3d3e5051d1",
+			  "0b0c0d1a1b293233343c42434f6ada",
+			  "22282e2c353b4852531479",
+			  "090a4445473f46bc",
+			  "0001020506494a4b4c4d4e",
+			  "15161718191f21d9",
+			  "2324252f27303637384041",
+			  "565758595a5c5d5e5f60c3",
+			  "61636465666768696b6e6f70c2",
+			  "6c6d7172737475bd76777a7b7c7d78",
+			  "7e7f80818283848788898a8bd8",
+			  "8c8d8e8f9091929394a5a6",
+			  "95969798999a9b9c9d9e9f",
+			  "a0a1a2a3a4a7a8a9aaabacadae",
+			  "afb0b1b2b3b4b5b6b7b8b9babbbebf",
+			  "c0c4c5c6c7c8cacbcccdce",
+			  "d71355cfd0d2dbe0e5eaef",
+			  "dcdddedfe1e2e3e4e6e7e8e9ebecedee"
+			].map(line =>			  
+			  line.match(/.{1,2}/g).map(h => parseInt(h, 16))
+			);
+/*			
+const makeCRCTable = () => {
+    let c;
+    const crcTable = [];
+    for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+            c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+			//c = ((c & 1) ? (0x82F63B78 ^ (c >>> 1)) : (c >>> 1));
+			//c = ((c & 1) ? (0x741B8CD7 ^ (c >>> 1)) : (c >>> 1));
+        }
+        crcTable[n] = c;
+    }
+    return crcTable;
+};
+
+const crc32 = (bytes) => {
+    const crcTable = window.crcTable || (window.crcTable = makeCRCTable());
+    let crc = 0 ^ (-1);
+
+    for (let i = 0; i < bytes.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xFF];
+    }
+
+    return (crc ^ (-1)) >>> 0; // Return unsigned 32-bit integer
+};		
+	
+function crc32Slice(offset = 0, length = 240) {
+	const crcTable = window.crcTable || (window.crcTable = makeCRCTable());
+    let crc = 0 ^ (-1);
+    const end = offset + length;
+
+    // Bounds check validation
+    if (end > original.length || offset < 0) {
+        throw new RangeError("Offset or length out of buffer bounds");
+    }
+
+    for (let i = offset; i < end; i++) {
+		const byteVal = patches.has(i) ? patches.get(i) : original[i];
+	
+        crc = (crc >>> 8) ^ crcTable[(crc ^ byteVal) & 0xFF];
+    }
+
+    return (crc ^ (-1)) >>> 0;
+}
+*/
+            function pairToByte(rawIndex, pair) {
+                const entry = geneById.get(rawIndex);
+                if (!entry || !entry.n) return null;
+				const p1 = pair[0];
+				const p2 = pair[1];
+				const n1 = entry.n.indexOf(p1)+1;
+				const n2 = entry.n.indexOf(p2)+1;
+				return (n2*8)+n1;
+            }
+
+            function byteToPair(rawIndex, byte) {
+                const entry = geneById.get(rawIndex);
+                if (!entry || !entry.n) return "??";
+			    const targetBytes = new Set([9, 10, 11, 12, 17, 18, 19, 20, 25, 26, 27, 28, 33, 34, 35, 36]);
+				if(!targetBytes.has(byte)) return "??";
+				const n1 = byte % 8;
+				const n2 = (byte-n1)/8;				
+				const p1 = entry.n[n1-1];
+				const p2 = entry.n[n2-1];
+				return p1+""+p2;
+            }
+
+
+            const $ = (id) => document.getElementById(id);
+
+            function hex(n, width = 0) {
+                const s = Number(n).toString(16);
+                return "0x" + (width ? s.padStart(width, "0") : s);
+            }
+            function u32(off) {
+                return view.getUint32(off, true);
+            }
+            function i32(off) {
+                return view.getInt32(off, true);
+            }
+            function f32(off) {
+                return view.getFloat32(off, true);
+            }
+            function getByte(off) {
+                return patches.has(off) ? patches.get(off) : original[off];
+            }
+            function getU32Patched(off) {
+                return (
+                    getByte(off) |
+                    (getByte(off + 1) << 8) |
+                    (getByte(off + 2) << 16) |
+                    ((getByte(off + 3) << 24) >>> 0)
+                );
+            }
+            function getI32Patched(off) {
+                const v = getU32Patched(off);
+                return v > 0x7fffffff ? v - 0x100000000 : v;
+            }
+            function setByte(off, value) {
+                value = Number(value) & 0xff;
+                if (value === original[off]) patches.delete(off);
+                else patches.set(off, value);
+                renderPatchState();
+            }
+				
+            function setU32(off, value) {
+                value = Number(value) >>> 0;
+                for (let i = 0; i < 4; i++)
+                    setByte(off + i, (value >>> (8 * i)) & 0xff);
+            }
+            function setI32(off, value) {
+                setU32(off, Number(value) >>> 0);
+            }
+            function bytesHex(off, len) {
+                const out = [];
+                for (let i = 0; i < len && off + i < original.length; i++)
+                    out.push(
+                        getByte(off + i)
+                            .toString(16)
+                            .padStart(2, "0"),
+                    );
+                return out.join(" ");
+            }
+
+            function parseSave() {
+                records = [];
+				wildHorses = [];
+				farmHorses = [];
+				jockeys = [];
+				otherHorses = [];
+				otherDna = [];
+				locations = [];
+                if (!original || original.length < 0x14)
+                    throw new Error("File too small");
+                const count = u32(0x10);
+                let off = 0x14;
+                for (let idx = 0; idx < count; idx++) {
+                    if (off + 4 > original.length)
+                        throw new Error(
+                            `Record ${idx}: missing name length at ${hex(off)}`,
+                        );
+                    const nameLen = u32(off);
+                    const nameStart = off + 4;
+                    const nameEnd = nameStart + nameLen;
+                    const fixedOffset = nameEnd;
+                    const fixedEnd = fixedOffset + 18;
+                    const linkCountOffset = fixedEnd;
+                    if (
+                        nameEnd > original.length ||
+                        linkCountOffset + 4 > original.length
+                    ) {
+                        throw new Error(
+                            `Record ${idx}: truncated at ${hex(off)}`,
+                        );
+                    }
+                    const nameBytes = original.slice(nameStart, nameEnd);
+                    const name = new TextDecoder("utf-8", {
+                        fatal: false,
+                    }).decode(nameBytes);
+                    const linkCount = u32(linkCountOffset);
+                    const linksOffset = linkCountOffset + 4;
+                    const next = linksOffset + linkCount * 4;
+                    if (next > original.length)
+                        throw new Error(
+                            `Record ${idx}: truncated links at ${hex(linksOffset)}`,
+                        );
+                    const links = [];
+                    for (let j = 0; j < linkCount; j++)
+                        links.push(u32(linksOffset + j * 4));
+                    records.push({
+                        idx,
+                        offset: off,
+                        nameLen,
+                        name,
+                        fixedOffset,
+                        linkCountOffset,
+                        linksOffset,
+                        links,
+                        end: next,
+                    });
+                    off = next;
+                }
+                tableEnd = off;                
+				findDnaRuns();
+            }
+
+			function hasGenome(r) {
+				if(r.detail_off) return true;
+				return false;
+			}
+
+			function hasItem(r){
+				if(r.detail_off){
+					const detailBlocks = findHorseDetailBlocks(r.idx);
+					const primaryDetail = detailBlocks.length
+						? detailBlocks[detailBlocks.length - 1]
+						: null;
+					const itemcount = (primaryDetail && primaryDetail.off + 31 +3 < original.length) ? i32(primaryDetail.off + 31) : 0;					
+					
+					if(itemcount>0){
+						return true;
+					}
+
+				}
+				return false;				
+			}
+			
+			function inMap(r){
+				if(r.location){
+					if(r.location=="Map"){
+						return true;
+					}
+
+				}
+				return false;				
+			}			
+			function inTruck(r){
+				if(r.location){
+					if(r.location=="My Truck"){
+						return true;
+					}
+
+				}
+				return false;				
+			}
+			function inFarm(r){
+				
+				if(r.inFarm){
+					return true;
+				}
+
+				return false;				
+			}
+			function isJockey(r){
+				
+				if(r.isJockey){
+					return true;
+				}
+
+				
+				return false;				
+			}			
+			function inOthers(r){
+				if(r.location&&!r.isJockey&&!r.inFarm){
+					if(r.location!="Map"&&r.location!="My Truck"){
+						return true;
+					}
+
+				}
+				return false;				
+			}
+			
+			function isTired(r){
+				if(r.detail_off){
+					const detailBlocks = findHorseDetailBlocks(r.idx);
+					const primaryDetail = detailBlocks.length
+						? detailBlocks[detailBlocks.length - 1]
+						: null;
+					const tiredFlag = (primaryDetail && primaryDetail.off + 14 < original.length) ? getByte(primaryDetail.off + 14) : 0;					
+					
+					if((tiredFlag&0x08) !== 0 ){
+						return true;
+					}
+
+				}
+				return false;				
+			}
+
+            function recordName(idx) {
+                if (idx < 0 || idx >= records.length) return "none";
+                const n = records[idx].name || "(blank)";
+                return `${n} #${idx}`;
+            }
+			/*
+            function allOccurrencesU32(value, start = 0) {
+                const b0 = value & 255,
+                    b1 = (value >>> 8) & 255,
+                    b2 = (value >>> 16) & 255,
+                    b3 = (value >>> 24) & 255;
+                const hits = [];
+                for (let i = start; i + 3 < original.length; i++) {
+                    if (
+                        original[i] === b0 &&
+                        original[i + 1] === b1 &&
+                        original[i + 2] === b2 &&
+                        original[i + 3] === b3
+                    )
+                        hits.push(i);
+                }
+                return hits;
+            }
+			*/
+			
+            function findHorseDetailBlocks(idx) {
+                if (!original) return [];
+				const detailBlocks = [];
+				//if (idx<11) return [];
+				for (let i in records[idx].detail_off){
+					const off = records[idx].detail_off[i];
+					if(!off) return [];
+					//const hits = allOccurrencesU32(idx >>> 0, tableEnd);
+					
+					const status =
+						off + 6 < original.length ? getByte(off + 6) : null;
+					const age =
+						off + 7 < original.length ? getByte(off + 7) : null;
+					const personality =
+						off + 9 < original.length ? getByte(off + 9) : null;	
+						/*
+						https://horseygame.miraheze.org/wiki/Personality
+						0 = Normal
+						1 = Preppy
+						2 = Grump
+						3 = Brainy
+						4 = Swaggy
+						5 = Cutey
+						6 = Baby
+						7 = Haughty
+						8 = Leprechaun 
+						9 = Algernon de Horsey
+						10 = Sweetie
+						11 = Car
+						12 = Unknown
+						13 = Rude
+						14 onwards will crash
+						
+						*/
+					//off + 14 = tiredness? i think 8 (8) or above is tired. Need to Test
+					// maybe it is a flag 8 = sleepy, 4 = hungry, 16 = ragdoll
+					
+					//off + 6 could be horse status. 0 = ok 1= hot sauce,2=drunk ,3 =flu, 4=dead drunk?, 5=also drunk? 6=dead
+					//off + 31 itemcount (+8 length per item)
+					//off + 35 item position?
+					//off + 39 item id
+					const ownerFlag =
+						off + 10 < original.length ? getByte(off + 10) : null;
+						
+
+
+					const nearbyDna = [{ start: off-248, end: off-8, len:240, near:idx }];
+					//if((age>0||idx>10)&&age>=0&&age<=11&&personality>=0&&personality<PERSONALITIES.length&&status>=0&&status<7){
+					detailBlocks.push({ off, age, ownerFlag, nearbyDna });
+					//}
+				}
+              			
+				return detailBlocks;
+            }
+			
+            function findDnaRuns() {
+				findVariableStrings(original,tableEnd);
+				//let wildHorseCount=0;
+				const codeSet = new Set([9, 10, 11, 12, 17, 18, 19, 20, 25, 26, 27, 28, 33, 34, 35, 36]);				
+                
+                let i = tableEnd;
+				let loc_index=1;
+				let loc_pos_index=0;
+				//console.log(i + " / " + original.length);
+                while (i < original.length) {
+                    if (!codeSet.has(original[i])) {
+                        i++;
+                        continue;
+                    }
+                    let j = i;
+					
+                    while (j < original.length && codeSet.has(original[j])&& (j-i+1<=240)) j++;
+                    const len = j - i;
+                    if (len >= 240) {
+
+						//for(let k=0;k<(len-239);k++){
+						for(let k=0;k<1;k++){	 //temporary fixed at 1. need to rethink logic. might not need this check.
+							const b0=original[j+8+k];					
+							const b1=original[j+9+k];
+							const b2=original[j+10+k];
+							const b3=original[j+11+k];
+							
+							const tempindex=(((b3*256+b2)*256+b1)*256+b0)|0;						
+							if(tempindex>=-1&&tempindex<records.length){
+								
+/*
+								if(tempindex<=11){
+									console.log("length: "+len+", start: "+i+", end: "+j+", k: "+k+ ", idx: "+tempindex);
+								}
+*/								
+
+								//console.log ("position: ("+pos_x+", "+pos_y+")");
+								const off=j+8;
+								const status =
+									off + 6 < original.length ? getByte(off + 6) : null;
+								const age =
+									off + 7 < original.length ? getByte(off + 7) : null;
+								const personality =
+									off + 9 < original.length ? getByte(off + 9) : null;	
+								const flags =
+									off + 14 < original.length ? getByte(off + 14) : null;										
+								const itemcount = (off + 31 +3 < original.length) ? getI32Patched(off + 31) : 0;	
+								
+								const checking = getI32Patched(off -4);
+								
+								if (tempindex>=0&&tempindex<=10){
+									//console.log("checking: "+checking+", index: "+tempindex+ " age: "+age+ " personality: "+personality +" status: "+status +" itemcount: "+itemcount+ " flags: "+flags +" loc: "+loc_index);
+									//console.log("checking: "+checking+", index: "+tempindex+ " age: "+age+ " personality: "+personality +" status: "+status +" flags: "+flags +" loc: "+loc_index+"position: ("+pos_x+", "+pos_y+")");
+								}
+								
+								if((age>0||tempindex<0||tempindex>10)&&age>=0&&age<=11&&personality>=0&&personality<PERSONALITIES.length&&status>=0&&status<7){
+									if(checking<-1||checking>0) console.log("c, "+checking+", "+tempindex);
+									while(loc_index<locations.length&&locations[loc_index].offset<i){
+									
+										loc_index++;
+										loc_pos_index = 0;
+									
+									}
+									const location = locations[loc_index-1];
+									//if(tempindex==136) console.log("yes");
+									if (tempindex>=0){
+										if(!records[tempindex].detail_off){
+											records[tempindex].detail_off = [];
+											records[tempindex].location = location.value;
+											records[tempindex].detail_off.push(j+8);
+											records[tempindex].pos_x = 0;
+											records[tempindex].pos_y = 0;
+										}else{
+											console.log("potential issue: "+tempindex);
+											
+										}
+										//console.log ("index: "+tempindex+ " at "+location.value + " position: ("+pos_x+", "+pos_y+")");
+
+											
+										if(location.value=="Map"){
+											const pos_x = i - 13 < original.length ? f32(i-16) : null;
+											const pos_y = i - 9 < original.length ? f32(i-12) : null;
+											
+											records[tempindex].pos_x = pos_x;
+											records[tempindex].pos_y = pos_y;
+											wildHorses.push(i);											
+										}else if(location.value=="The Jockey Club"){
+											records[tempindex].isJockey=true;
+											jockeys.push(i);
+										}
+										if(location.isFarm){
+											records[tempindex].inFarm=true;
+											if(loc_pos_index>0) farmHorses.push(i);
+										}
+										
+										
+									}else{
+										if(location.value=="Map"){
+											wildHorses.push(i);
+											
+										}else{
+											otherHorses.push(i);
+										}
+									}
+									loc_pos_index++;
+								}else{
+									otherDna.push(i);
+								}								
+
+
+							}else{
+								//console.log(tempindex);
+							}
+						}
+						
+                    }
+                    i = j;
+					
+                }
+				console.log("wild horses: "+wildHorses.length);
+				console.log("farm  horses: "+farmHorses.length);
+				console.log("jockeys: "+jockeys.length);
+				console.log("other horses: "+otherHorses.length);
+				console.log("other dna: "+otherDna.length);
+                
+            }
+			
+			
+/**
+ * Searches a buffer for strings prefixed by a 4-byte length.
+ * @param {Buffer|Uint8Array} buffer - The file buffer to search.
+ * @param {number} startPos - The position to begin the search.
+ * @param {boolean} littleEndian - Byte order of the 4-byte length (default true).
+ */
+function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
+    //const foundStrings = [];
+	locations = [];
+    const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+	let stillFarm = true;
+
+    // Iterate through each byte where a 4-byte length could still fit
+    for (let i = startPos; i <= buffer.length - 4; i++) {
+        // Read 4 bytes as an unsigned integer (the potential length)
+        const length = view.getUint32(i, littleEndian);
+		const length2 = (i + 8 + length) <= buffer.length ? view.getUint32(i+4+length, littleEndian):-1;
+		
+
+        // Heuristic Check: Is this a plausible string?
+        // 1. Length must be greater than 0.
+        // 2. The string must fit within the remaining buffer space.
+        if (length > 3 && (i + 4 + length) <= buffer.length&&length2>=0&&length2<=1000) {
+            try {
+                // Extract the segment and convert to string
+                const stringBuffer = buffer.slice(i + 4, i + 4 + length);
+                let decodedString = new TextDecoder('utf-8').decode(stringBuffer);
+
+                // Optional: Check if the decoded string contains valid text 
+                // (e.g., no null bytes or control characters)
+                if (/^[\x20-\x7E\s]*$/.test(decodedString)) {
+					
+					if(decodedString=="unknown"){
+						if(locations.length<=10){
+							decodedString = "Map"
+						}else{
+							decodedString = "My Truck"
+						}
+					}else if(decodedString=="Race Track"){
+						stillFarm=false;
+					}
+					let isFarm = false;
+					
+					if(locations.length>=2&&stillFarm){
+						isFarm=true;
+						//console.log("farm: "+ decodedString);
+					}						
+					locations.push({
+						offset: i,
+						length: length,
+						value: decodedString,
+						isFarm: isFarm,
+					});
+					
+					// Optimization: Skip past this string to find the next one
+					// Remove this line if strings can overlap or are nested
+					i += (3 + length); 
+				
+                }
+            } catch (e) {
+                // Not a valid UTF-8 string, continue search
+            }
+        }
+    }
+	//console.log (locations);
+    return locations;
+}
+
+			
+
+
+            function makeNumberInput(
+                value,
+                min,
+                max,
+                onChange,
+                width = "120px",
+            ) {
+                const input = document.createElement("input");
+                input.type = "number";
+                input.value = value;
+                if (min !== null) input.min = min;
+                if (max !== null) input.max = max;
+                input.style.width = width;
+                input.addEventListener("change", () => onChange(input.value));
+                return input;
+            }
+
+            function makeCheckbox(checked, onChange) {
+                const input = document.createElement("input");
+                input.type = "checkbox";
+                input.checked = !!checked;
+                input.addEventListener("change", () => onChange(input.checked));
+                return input;
+            }
+
+            function propRow(name, valueEl, derivedText = "", cls = "") {
+                const row = document.createElement("div");
+                row.className = "prop " + cls;
+                const label = document.createElement("label");
+                label.textContent = name;
+                const val = document.createElement("div");				
+                if (valueEl instanceof Node) val.appendChild(valueEl);
+                else val.textContent = valueEl;
+                const derived = document.createElement("div");
+                derived.className = "derived";
+                derived.textContent = derivedText;
+                row.append(label, val, derived);
+                return row;
+            }
+
+            function renderAll() {
+                renderSummary();
+                renderGlobalProps();
+                renderRecords();
+                renderSelected();
+                renderPatchState();
+            }
+
+            function renderSummary() {
+                $("status").textContent = original ? "Loaded" : "No file";
+                $("status").className = "pill " + (original ? "good" : "");
+                $("recordCount").textContent = records.length.toString();
+                if (!original) return;
+                $("summary").innerHTML =
+                    `<div>File: <span class="mono">${fileName}</span></div>` +
+                    `<div>Size: <span class="mono">${original.length}</span> bytes</div>` +
+					`<div><strong>Remember to backup your save!</strong></div>`;
+					
+					/*
+					
+                    `<div>Header count: <span class="mono">${records.length}</span></div>` +
+                    `<div>Object table ends at: <span class="mono">${hex(tableEnd)}</span></div>` +
+                    `<div>Trailing blob: <span class="mono">${original.length - tableEnd}</span> bytes</div>`;
+					*/
+            }
+
+            function renderGlobalProps() {
+                const box = $("globalProps");
+                box.innerHTML = "";
+                if (!original) return;
+                const moneyOff = tableEnd + 0x14;
+                const money = getU32Patched(moneyOff);
+                box.appendChild(
+                    propRow(
+                        "Money",
+                        makeNumberInput(
+                            money,
+                            0,
+                            0xffffffff,
+                            (v) => {
+                                setU32(moneyOff, Number(v));
+                                renderGlobalProps();
+                            },
+                            "160px",
+                        ),
+                        null,
+                    ),
+                );
+            }
+
+            function renderRecords() {
+                const list = $("recordList");
+                list.innerHTML = "";
+                if (!original) return;
+                const q = $("search").value.trim().toLowerCase();
+                const filter = $("filter").value;
+                let rows = records;
+                //if (filter === "horses") rows = rows.filter(isLikelyHorse);
+				if (filter === "hasgenome") rows = rows.filter(hasGenome);
+				if (filter === "hasitem") rows = rows.filter(hasItem);
+				if (filter === "inMap") rows = rows.filter(inMap);
+				if (filter === "inTruck") rows = rows.filter(inTruck);
+				if (filter === "inFarm") rows = rows.filter(inFarm);
+				if (filter === "isJockey") rows = rows.filter(isJockey);
+				if (filter === "inOthers") rows = rows.filter(inOthers);
+				if (filter === "istired") rows = rows.filter(isTired);
+                if (filter === "named")
+                    rows = rows.filter((r) => r.name.length);
+                if (q)
+                    rows = rows.filter(
+                        (r) =>
+                            String(r.idx).includes(q) ||
+                            r.name.toLowerCase().includes(q) ||
+							r.location.toLowerCase().includes(q)||
+                            recordName(view.getInt32(r.fixedOffset + 6, true))
+                                .toLowerCase()
+                                .includes(q) ||
+                            recordName(view.getInt32(r.fixedOffset + 10, true))
+                                .toLowerCase()
+                                .includes(q),
+                    );
+                rows.slice(0, 500).forEach((r) => {
+                    const div = document.createElement("div");
+                    div.className =
+                        "item" + (r.idx === selectedIndex ? " active" : "");
+                    const flags = getByte(r.fixedOffset);
+                    const total = getByte(r.fixedOffset + 2);
+                    const regular = getByte(r.fixedOffset + 3);
+                    const sumo = getByte(r.fixedOffset + 4);
+                    const pA = getI32Patched(r.fixedOffset + 6);
+                    const pB = getI32Patched(r.fixedOffset + 10);
+                    div.innerHTML =
+                        `<div class="name">${r.name || "(blank)"} <span class="small">#${r.idx}</span></div>` +
+                      //  `<div class="small mono">${hex(r.offset)} · fixed ${hex(r.fixedOffset)}</div>` +
+                        `<div class="small">flags ${flags} · races ${total} · wins ${regular} · sumo ${sumo}</div>` +
+                        `<div class="small">parents: ${pA >= 0 ? recordName(pA) : "none"} / ${pB >= 0 ? recordName(pB) : "none"} · offsprings: ${r.links.length}</div>`;
+                    div.addEventListener("click", () => {
+                        selectedIndex = r.idx;
+                        renderRecords();
+                        renderSelected();
+                    });
+                    list.appendChild(div);
+                });
+				$("recordCount").textContent = rows.length.toString() + "/" + records.length.toString();
+            }
+
+            function renderSelected() {
+				
+                const props = $("horseProps");
+                props.innerHTML = "";
+                $("detailBlocks").innerHTML = "";
+                $("rawDnaBlock").innerHTML = "";
+                if (
+                    !original ||
+                    selectedIndex < 0 ||
+                    selectedIndex >= records.length
+                ) {
+                    $("selectedTitle").textContent = "No horse selected";
+                 //   $("selectedMeta").textContent = "—";
+                    return;
+                }
+                const r = records[selectedIndex];
+                $("selectedTitle").textContent =
+                    `${r.name || "(blank)"} #${r.idx}`;
+               // $("selectedMeta").textContent = `fixed ${hex(r.fixedOffset)}`;
+
+                const fixed0Off = r.fixedOffset;
+                const flags = getByte(fixed0Off);
+                const flagDefs = [
+                    //[0x01, "Unknown Flag"],
+                    [0x02, "Championship Horse"],
+                    [0x04, "GMO Horse"],
+                    [0x08, "Won Diving Medal"],
+                    [0x10, "Won Strong Horse Medal"],
+                    [0x20, "Won Trampoline Medal"],
+                    [0x40, "Won Acrobat Medal"],
+                    //[0x80, "Unknown Flag"],
+                ];
+                for (const [bit, name] of flagDefs) {
+                    props.appendChild(
+                        propRow(
+                            name,
+                            makeCheckbox((flags & bit) !== 0, (checked) => {
+                                const current = getByte(fixed0Off);
+                                setByte(
+                                    fixed0Off,
+                                    checked ? current | bit : current & ~bit,
+                                );
+                                renderSelected();
+                                renderRecords();
+                            }),
+                            null,
+                        ),
+                    );
+                }
+
+                props.appendChild(
+                    propRow(
+                        "Name color",
+                        makeNumberInput(
+                            getByte(r.fixedOffset + 1),
+                            0,
+                            255,
+                            (v) => {
+                                setByte(r.fixedOffset + 1, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                        ),
+                        //getByte(r.fixedOffset + 1) === 0
+                        //    ? "Player Group"
+                        //    : "NPC Group",
+						""
+                    ),
+                );
+                props.appendChild(
+                    propRow(
+                        "Races participated",
+                        makeNumberInput(
+                            getByte(r.fixedOffset + 2),
+                            0,
+                            255,
+                            (v) => {
+                                setByte(r.fixedOffset + 2, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                        ),
+                        null,
+                    ),
+                );
+                props.appendChild(
+                    propRow(
+                        "Regular races won",
+                        makeNumberInput(
+                            getByte(r.fixedOffset + 3),
+                            0,
+                            255,
+                            (v) => {
+                                setByte(r.fixedOffset + 3, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                        ),
+                        null,
+                    ),
+                );
+                props.appendChild(
+                    propRow(
+                        "Sumo wins",
+                        makeNumberInput(
+                            getByte(r.fixedOffset + 4),
+                            0,
+                            255,
+                            (v) => {
+                                setByte(r.fixedOffset + 4, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                        ),
+                        null,
+                    ),
+                );
+
+				/*
+                const parentAOff = r.fixedOffset + 6;
+                const parentBOff = r.fixedOffset + 10;
+                props.appendChild(
+                    propRow(
+                        "Parent A",
+                        makeNumberInput(
+                            getI32Patched(parentAOff),
+                            -1,
+                            2147483647,
+                            (v) => {
+                                setI32(parentAOff, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                            "160px",
+                        ),
+                        recordName(getI32Patched(parentAOff)),
+                    ),
+                );
+                props.appendChild(
+                    propRow(
+                        "Parent B",
+                        makeNumberInput(
+                            getI32Patched(parentBOff),
+                            -1,
+                            2147483647,
+                            (v) => {
+                                setI32(parentBOff, v);
+                                renderSelected();
+                                renderRecords();
+                            },
+                            "160px",
+                        ),
+                        recordName(getI32Patched(parentBOff)),
+                    ),
+                );
+				*/
+				
+                const detailBlocks = findHorseDetailBlocks(r.idx);
+				
+                const primaryDetail = detailBlocks.length
+                    ? detailBlocks[detailBlocks.length - 1]
+                    : null;
+					
+				if (primaryDetail && r.location) {
+					let locationName=r.location;
+					if(locationName=="Map") locationName+=" ( "+r.pos_x.toFixed(1)+" , "+r.pos_y.toFixed(1)+" )";
+					//32.0,7136.0 (bottom left corner)
+					//12736.0,32.0 (top right corner)
+					
+					//int *32 = float 
+					
+					//x = left to right
+					//y = up to down
+				
+                    props.appendChild(
+                        propRow(
+                            "Location",
+                            locationName,
+                            null,
+                        ),
+                    );
+                }
+				
+                if (primaryDetail && primaryDetail.off + 8 < original.length) {
+                    props.appendChild(
+                        propRow(
+                            "Age",
+                            makeNumberInput(
+                                getByte(primaryDetail.off + 7),
+                                1,
+                                10,
+                                (v) => {
+                                    setByte(primaryDetail.off + 7, v);
+                                    renderSelected();
+                                    renderRecords();
+                                },
+                            ),
+                            null,
+                        ),
+                    );
+                }
+				
+				
+				const personalityVal = (primaryDetail && primaryDetail.off + 9 < original.length) ? getByte(primaryDetail.off + 9) : null;				
+				if (personalityVal !== null) {
+					const personalitySelect = document.createElement('select');
+					personalitySelect.style.width = '160px';
+					
+					// Populate options 0..13 (personalities that won't crash)
+					for (let i = 0; i < PERSONALITIES.length; i++) {
+						const opt = document.createElement('option');
+						opt.value = i;
+						opt.textContent = PERSONALITIES[i];
+						personalitySelect.appendChild(opt);
+					}
+					
+					// Set current value, but clamp to 0..13; if the saved byte is out of range, you might want to handle that
+					const clampedVal = Math.min(Math.max(personalityVal, 0), 13);
+					personalitySelect.value = clampedVal;
+					
+					personalitySelect.addEventListener('change', () => {
+						const newVal = parseInt(personalitySelect.value);
+						setByte(primaryDetail.off + 9, newVal);
+						renderSelected();
+						renderRecords();
+					});
+					
+					props.appendChild(propRow('Personality', personalitySelect, null));
+				}
+
+//off + 6 could be horse status. 0 = ok 1= hot sauce,2=drunk ,3 =flu, 4=dead drunk?, 5=also drunk? 6=dead
+				
+				const statusVal = (primaryDetail && primaryDetail.off + 6 < original.length) ? getByte(primaryDetail.off + 6) : null;
+							
+				if (statusVal !== null&&statusVal>=0&&statusVal<=6) {
+					const statusSelect = document.createElement('select');
+					statusSelect.style.width = '160px';
+					
+					// Populate options 0..13 (personalities that won't crash)
+					for (let i = 0; i < STATUSES.length; i++) {
+						//if(STATUSES[i].length>0){
+							const opt = document.createElement('option');
+							opt.value = i;
+							opt.textContent = STATUSES[i];
+							statusSelect.appendChild(opt);									
+						//}
+					}
+					
+					// Set current value, but clamp to 0..13; if the saved byte is out of range, you might want to handle that
+					const clampedVal = Math.min(Math.max(statusVal, 0), 6);
+					statusSelect.value = clampedVal;
+					
+					statusSelect.addEventListener('change', () => {
+						const newVal = parseInt(statusSelect.value);
+						setByte(primaryDetail.off + 6, newVal);
+						renderSelected();
+						renderRecords();
+					});
+					
+					props.appendChild(propRow('Status', statusSelect, null));
+				}else if (primaryDetail && primaryDetail.off + 6 < original.length) {
+                    props.appendChild(
+                        propRow(
+                            "Status",
+                            makeNumberInput(
+                                getByte(primaryDetail.off + 6),
+                                0,
+                                255,
+                                (v) => {
+                                    setByte(primaryDetail.off + 6, v);
+                                    renderSelected();
+                                    renderRecords();
+                                },
+                            ),
+                            null,
+                        ),
+                    );
+                }
+				
+
+				
+				//const itemcount = i32(primaryDetail.off  + 31);
+				let itemcount = (primaryDetail && primaryDetail.off + 31 +3 < original.length) ? getI32Patched(primaryDetail.off + 31) : 0;		
+				let itemoffset = 0;
+				if (itemcount<0||itemcount>=10){
+					itemoffset=12;
+					console.log("is "+r.name + " Sweetie?");
+					console.log(getByte(primaryDetail.off + 23));
+					itemcount= (primaryDetail && primaryDetail.off + itemoffset + 31 +3 < original.length) ? getI32Patched(primaryDetail.off + itemoffset + 31) : 0;	
+					if (itemcount<0||itemcount>=10){
+						itemcount=0;
+						//prevent error
+					}
+				}
+					//off + 31 < original.length ? getByte(off + 31) : 0;						
+				
+				
+				if(itemcount>0){
+					const items=new Array(itemcount)
+					const itemSlots = new Set();
+					for(let itemidx=0;itemidx<itemcount;itemidx++){
+						const itemoff=35+(8*itemidx);
+						const item_pos=getI32Patched(primaryDetail.off + itemoffset+itemoff);
+						const item_id=getI32Patched(primaryDetail.off + itemoffset+itemoff+4);							
+						items[itemidx]={pos:item_pos,id:item_id};
+						const itemIds=Object.keys(ITEMS);
+						
+						if(!itemSlots.has(item_pos)) itemSlots.add(item_pos);
+						
+						if (Object.hasOwn(ITEMS, item_id)) {
+							const itemSelect = document.createElement('select');
+							itemSelect.style.width = '160px';
+							
+							// Populate options 0..13 (personalities that won't crash)
+							for (let i = 0; i < itemIds.length; i++) {
+								//if(STATUSES[i].length>0){
+									const opt = document.createElement('option');
+									opt.value = itemIds[i];
+									opt.textContent = ITEMS[itemIds[i]].name;
+									itemSelect.appendChild(opt);									
+								//}
+								
+							}
+							
+							// Set current value, but clamp to 0..13; if the saved byte is out of range, you might want to handle that
+							//const clampedVal = Math.min(Math.max(item_id, 0), 6);
+							//itemSelect.value = clampedVal;
+							itemSelect.value = item_id;
+							
+							itemSelect.addEventListener('change', () => {													
+								const newVal = parseInt(itemSelect.value);
+								const newPos = ITEMS[newVal].pos;
+								
+								if(newPos==item_pos||(!itemSlots.has(newPos))){
+								
+									setI32(primaryDetail.off + itemoffset + itemoff, newPos);
+									setI32(primaryDetail.off + itemoffset + itemoff + 4, newVal);
+								}else{
+									alert("There is another equipment in the same position as " + ITEMS[newVal].name +".");
+									
+								}
+								renderSelected();
+								renderRecords();
+							});
+							
+							props.appendChild(propRow("Item "+(itemidx+1), itemSelect, null));						
+						}else{
+							props.appendChild(
+								propRow(
+									"Item "+(itemidx+1)+" position",
+									makeNumberInput(
+										getByte(primaryDetail.off + itemoffset + itemoff),
+										0,
+										255,
+										(v) => {
+											setByte(primaryDetail.off + itemoffset + itemoff, v);
+											renderSelected();
+											renderRecords();
+										},
+									),
+									null,
+								),
+							);
+							props.appendChild(
+								propRow(
+									"Item "+(itemidx+1)+" ID",
+									makeNumberInput(
+										getByte(primaryDetail.off + itemoffset + itemoff + 4),
+										0,
+										255,
+										(v) => {
+											setByte(primaryDetail.off + itemoffset + itemoff + 4, v);
+											renderSelected();
+											renderRecords();
+										},
+									),
+									null,
+								),
+							);
+						}
+					
+					}
+					
+					
+					
+					
+					
+				}else{
+					const items=[];
+				}
+
+
+
+				/*
+                if (primaryDetail && primaryDetail.off + 14 < original.length) {
+                    props.appendChild(
+                        propRow(
+                            "Tiredness",
+                            makeNumberInput(
+                                getByte(primaryDetail.off + 14),
+                                0,
+                                255,
+                                (v) => {
+                                    setByte(primaryDetail.off + 14, v);
+                                    renderSelected();
+                                    renderRecords();
+                                },
+                            ),
+                            null,
+                        ),
+                    );
+                }
+				*/
+				
+				
+				if (primaryDetail && primaryDetail.off + 14 < original.length) {
+					const flagOff = primaryDetail.off+14;
+					const flags = getByte(flagOff);
+					const flagDefs = [
+						//[0x01, "Unknown Flag"],
+						//[0x02, "Unknown Flag"],
+						[0x04, "Hungry"],
+						[0x08, "Tired"],
+						//[0x10, "Unknown Flag"],
+						[0x20, "Ragdoll"],
+						//[0x40, "Unknown Flag"],
+						//[0x80, "Unknown Flag"],
+					];
+					for (const [bit, name] of flagDefs) {
+						props.appendChild(
+							propRow(
+								name,
+								makeCheckbox((flags & bit) !== 0, (checked) => {
+									const current = getByte(flagOff);
+									setByte(
+										flagOff,
+										checked ? current | bit : current & ~bit,
+									);
+									renderSelected();
+									renderRecords();
+								}),
+								null,
+							),
+						);
+					}					
+				}
+				
+				/*
+                if (primaryDetail && primaryDetail.off + 11 < original.length) {
+                    props.appendChild(
+                        propRow(
+                            "Owner flag",
+                            makeNumberInput(
+                                getByte(primaryDetail.off + 10),
+                                0,
+                                255,
+                                (v) => {
+                                    setByte(primaryDetail.off + 10, v);
+                                    renderSelected();
+                                    renderRecords();
+                                },
+                            ),
+                            null,
+                        ),
+                    );
+                }
+				
+				
+
+                const links = document.createElement("div");
+                links.className = "row wrap";
+				
+				
+                if (r.links.length === 0)
+                    links.innerHTML = `<span class="small">No offspring links.</span>`;
+                for (const l of r.links) {
+                    const b = document.createElement("button");
+                    b.className = "secondary";
+                    b.textContent = recordName(l);
+                    b.addEventListener("click", () => {
+                        selectedIndex = l;
+                        renderRecords();
+                        renderSelected();
+                    });
+                    links.appendChild(b);
+                }
+                props.appendChild(propRow("Offspring", links, null));
+				*/
+				
+                renderRawDnaBlock(detailBlocks);
+                renderDetailBlocks(detailBlocks);
+				
+            }
+
+
+			
+			function readGenome(genomeStart){
+				let rows = HELIX_LENGTHS.length;
+				let arr = new Array(rows);		
+			
+				for (let i = 0; i < rows; i++) {
+                    let strand1 = "";
+                    let strand2 = "";				
+					for (let j = 0; j < HELIX_LENGTHS[i]; j++) {
+						
+						const rawIndex=GENE_MAP[i][j];
+						//const entry=geneById.get(rawIndex);
+						
+
+
+						const pair = byteToPair(rawIndex, getByte(genomeStart + rawIndex));
+						
+						if (!pair ||pair.length !== 2||pair.includes("?") ){
+							return [];
+						}
+						
+						strand1 += pair[0];
+						strand2 += pair[1];
+
+					}
+					arr[i] = [strand1,strand2];
+				}
+				return arr;
+			
+			}		
+			function formatGenome(genome) {
+				const lines = [];
+				genome.forEach(([s1, s2], i) => {
+					const label = String(i).padStart(2, "0");
+					if (s1) lines.push(`${label}:${s1}`);
+					if (s2) lines.push(`${label}:${s2}`);
+				});
+				return lines.join("<br>");
+			}			
+
+            function renderRawDnaBlock(blocks) {
+                const host = $("rawDnaBlock");
+                host.innerHTML = "";
+                if (!blocks.length) {
+                    const box = document.createElement("details");
+                    box.open = true;
+                    const sum = document.createElement("summary");
+                    sum.textContent = "DNA: no genome found";
+                    box.appendChild(sum);
+                    const p = document.createElement("p");
+                    p.className = "small";
+                    p.textContent =
+                        "A 240-byte genome block is expected immediately before the selected horse detail block, but no keyed detail block was found.";
+                    box.appendChild(p);
+                    host.appendChild(box);
+                    return;
+                }
+
+                const detail = blocks[blocks.length - 1].off;
+                const genomeStart = detail - 248;
+                const genomeLen = 240;
+                const adjacentStart = genomeStart + genomeLen;
+				const idx=u32(detail);
+
+                const box = document.createElement("details");
+                box.open = true;
+                const sum = document.createElement("summary");
+                sum.textContent = "DNA";
+                box.appendChild(sum);
+
+                if (
+                    genomeStart < tableEnd ||
+                    adjacentStart + 8 > original.length
+                ) {
+                    const warn = document.createElement("div");
+                    warn.className = "warnbox small";
+                    warn.textContent = `Could not place the genome block safely. detail=${hex(detail)}, genomeStart=${hex(genomeStart)}.`;
+                    box.appendChild(warn);
+                    host.appendChild(box);
+                    return;
+                }
+
+                const G = GAME_DNA;
+
+				let genome = readGenome(genomeStart);
+				
+				//console.log(crc32Slice(genomeStart,240).toString(16));
+				
+                const writeByteSilently = (off, value) => {
+                    value = Number(value) & 0xff;
+                    if (value === original[off]) patches.delete(off);
+                    else patches.set(off, value);
+                };
+				
+				function applyGenomeToSave(nextGenome){
+					applyGenomeToSaveX(nextGenome,genomeStart);
+				}
+                const applyGenomeToSaveX = (nextGenome,genomeStart) => {
+					const dnaStatus = document.getElementById("dna-status");
+					let failures = [];
+					let rows = HELIX_LENGTHS.length;	
+				
+					for (let i = 0; i < rows; i++) {
+
+						for (let j = 0; j < HELIX_LENGTHS[i].length; j++) {
+							
+							const rawIndex=GENE_MAP[i][j];
+                            if (rawIndex === null) {
+                                failures.push(`${i}:${j} no raw index`);
+                                continue;
+                            }							
+							//const entry=geneById.get(rawIndex);
+							
+							const p1 = nextGenome[i][0][j];
+							const p2 = nextGenome[i][1][j];
+							const pair = p1+""+p2;
+							if(p1&&p2){
+							}else{
+								failures.push(`${i}:${j} no data`);
+								for (let i = 0; i < genomeLen; i++) patches.delete(genomeStart + i);
+								renderPatchState();
+								//console.log(`Helix ${i}, Pair ${j}: ${rawIndex} ${entry.desc} ${pair}`);
+								
+								dnaStatus.textContent ="Invalid DNA"
+								dnaStatus.className= "pill bad";
+								return null;
+							}
+							//console.log(`Helix ${i}, Pair ${j}: ${rawIndex} ${entry.desc} ${pair}`);
+							
+							const nextByte = pairToByte(rawIndex, pair);
+							if (nextByte === null) {
+								failures.push(
+									`${i}:${j} raw[${rawIndex}] cannot encode ${pair}`,
+								);
+							}else{
+								writeByteSilently(genomeStart + rawIndex, nextByte);	
+							}							
+
+						}
+						
+						
+							dnaStatus.textContent ="Valid DNA";
+							dnaStatus.className= "pill good";
+					}
+					
+					
+                  
+                    renderPatchState();
+                    if (failures.length) {
+                        /*
+						alert(
+                            "Some DNA values could not be written:\n" +
+                                failures.slice(0, 12).join("\n") +
+                                (failures.length > 12
+                                    ? `\n…${failures.length - 12} more`
+                                    : ""),
+                        );
+						*/
+                    }
+                    //renderRawDnaBlock(findHorseDetailBlocks(idx));
+                };
+
+                const resetSelectedDna = () => {
+                    for (let i = 0; i < genomeLen; i++)
+                        patches.delete(genomeStart + i);
+                    renderPatchState();
+                    renderRawDnaBlock(findHorseDetailBlocks(idx));
+                };
+
+
+
+
+
+
+                const changedGenomeBytes = Array.from(
+                    { length: genomeLen },
+                    (_, i) => genomeStart + i,
+                ).filter((off) => patches.has(off)).length;
+
+                const editor = document.createElement("div");
+                editor.className = "game-dna-editor";
+
+                const toolbar = G.createElement("div", {
+                    class: "game-dna-toolbar",
+                });
+				
+                toolbar.appendChild(
+                    G.createElement("div", { class: "game-dna-legend" }, [
+                        G.createElement("span", {
+							id: "dna-status",
+                            class: "pill good",
+                            text: "Valid DNA",
+                        }),
+						/*
+                        G.createElement("span", {
+                            class: "pill",
+                            text: `detail ${hex(detail)}`,
+                        }),
+                        G.createElement("span", {
+                            class: "pill",
+                            text: `genome ${hex(genomeStart)}..${hex(genomeStart + genomeLen)}`,
+                        }),
+                        G.createElement("span", {
+                            class: "pill",
+                            text: `${changedGenomeBytes} DNA byte patch(es)`,
+                        }),
+						*/
+                    ]),
+                );
+				
+                const actions = G.createElement("div", { class: "row wrap" });
+                toolbar.appendChild(actions);
+                editor.appendChild(toolbar);
+
+                const inputWrap = G.createElement("div", {
+                    class: "game-dna-input",
+                });
+                const genomeInput = G.createElement("textarea", {
+                    rows: "8",
+                    value: G.formatGenomeForExport(genome),
+                    placeholder: "00:TTTTTTTTTT\n00:CCCCCCCCCC",
+                });
+				genomeInput.oninput  = (e) => {
+					applyGenomeToSave(G.parseGenome(genomeInput.value));
+				};				
+                inputWrap.appendChild(genomeInput);
+                editor.appendChild(inputWrap);
+
+/*
+                const analyzeButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Apply genome changes",
+                });
+*/				
+                const blankButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Load blank A genome",
+                });
+				/*
+                const randomButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Randomize genome",
+                });
+				*/
+                const copyButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Copy Genome",
+                });
+                const pasteButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Paste Genome",
+                });				
+                const resetButton = G.createElement("button", {
+                    type: "button",
+                    class: "secondary",
+                    text: "Reset DNA changes",
+                });
+                actions.append(
+                    
+                    //randomButton,
+                    copyButton,
+					pasteButton,
+					//analyzeButton,
+                    resetButton,
+                );
+/*
+                analyzeButton.addEventListener("click", () =>
+                    applyGenomeToSave(G.parseGenome(genomeInput.value)),
+                );
+*/				
+				/*
+                randomButton.addEventListener("click", () => {
+                    const randomGenome = Array.from(
+                        { length: G.HELIX_COUNT },
+                        (_, hi) => {
+                            const n = GENOME_MAP[hi]?.length ?? 0;
+                            const randomBase = () =>
+                                G.BASES[
+                                    Math.floor(Math.random() * G.BASES.length)
+                                ];
+                            return [
+                                Array.from({ length: n }, randomBase).join(""),
+                                Array.from({ length: n }, randomBase).join(""),
+                            ];
+                        },
+                    );
+                    applyGenomeToSave(randomGenome);
+                });
+				*/
+                copyButton.addEventListener("click", async () => {
+                    genomeInput.value = G.formatGenomeForExport(genome);
+                    try {
+                        await navigator.clipboard.writeText(genomeInput.value);
+                        copyButton.textContent = "Copied";
+                        window.setTimeout(
+                            () => (copyButton.textContent = "Copy Genome"),
+                            1200,
+                        );
+                    } catch {
+                        genomeInput.focus();
+                        genomeInput.select();
+                        copyButton.textContent = "Select & Copy";
+                        window.setTimeout(
+                            () => (copyButton.textContent = "Copy Genome"),
+                            1200,
+                        );
+                    }
+                });
+                pasteButton.addEventListener("click", async () => {
+                    genomeInput.value = G.formatGenomeForExport(genome);
+                    try {
+						const text = await navigator.clipboard.readText();
+						genomeInput.value = text;
+						applyGenomeToSave(G.parseGenome(genomeInput.value));
+                        pasteButton.textContent = "Pasted";
+                        window.setTimeout(
+                            () => (pasteButton.textContent = "Paste Genome"),
+                            1200,
+                        );
+                    } catch {
+                        genomeInput.focus();
+                        genomeInput.select();
+                        pasteButton.textContent = "Select & Paste";
+                        window.setTimeout(
+                            () => (pasteButton.textContent = "Paste Genome"),
+                            1200,
+                        );
+                    }
+                });				
+                resetButton.addEventListener("click", resetSelectedDna);
+
+
+
+
+                box.appendChild(editor);
+                host.appendChild(box);
+            }
+
+            function renderDetailBlocks(blocks) {
+				return null;
+                const host = $("detailBlocks");
+                host.innerHTML = "";                
+                const card = document.createElement("details");
+                card.open = false;
+                const summary = document.createElement("summary");                
+				summary.textContent = `Entity/detail blocks: ${blocks.length}`;
+                card.appendChild(summary);
+
+                if (blocks.length === 0) {
+                    const p = document.createElement("p");
+                    p.className = "small";
+                    p.textContent =
+                        "No keyed detail block found after the object table.";
+                    card.appendChild(p);
+                }
+
+                blocks.forEach((b, bi) => {
+                    const wrap = document.createElement("div");
+                    wrap.className = "stack";
+                    wrap.style.marginTop = "10px";
+                    const title = document.createElement("div");
+                    title.innerHTML = `<span class="pill">block ${bi + 1}</span> <span class="mono">${hex(b.off)}</span>`;
+                    wrap.appendChild(title);
+
+                    const plist = document.createElement("div");
+                    plist.className = "prop-list";
+                    plist.appendChild(
+                        propRow(
+                            "Block bytes",
+                            document.createTextNode(
+                                bytesHex(
+                                    b.off-8,
+                                    Math.min(55, original.length - b.off+8),
+                                ),
+                            ),
+                            "first 55 bytes",
+                        ),
+                    );
+                    wrap.appendChild(plist);
+
+                    if (b.nearbyDna.length) {
+                        const d = document.createElement("div");
+                        d.className = "goodbox small";
+						d.innerHTML = `Nearby DNA-like run(s): ${b.nearbyDna.map(r => 
+  '<span class="mono">' + hex(r.start) + ' (' + r.len + ' bytes) <br>' + formatGenome(readGenome(r.start)) + '</span>'
+).join(", ")}`;
+                        wrap.appendChild(d);
+						
+                    }
+                    card.appendChild(wrap);
+                });
+
+                host.appendChild(card);
+            }
+
+ 
+
+
+
+            function renderPatchState() {
+				
+                $("downloadBtn").disabled = !original;
+                $("clearPatchesBtn").disabled = !original || patches.size === 0;
+                //$("patchCount").textContent = `${patches.size} bytes`;
+                $("patchSummary").textContent = patches.size
+                    ? `${patches.size} byte change(s).`
+                    : "No changes.";
+					
+				return null;
+                if (!patches.size) {
+                    $("patchList").textContent = "No changes yet.";
+                    return;
+                }
+                const entries = [...patches.entries()].sort(
+                    (a, b) => a[0] - b[0],
+                );
+                $("patchList").textContent = entries
+                    .map(
+                        ([off, val]) =>
+                            `${hex(off, 6)}: ${original[off].toString(16).padStart(2, "0")} -> ${val.toString(16).padStart(2, "0")}`,
+                    )
+                    .join("\n");
+            }
+			
+						
+	
+let lastUsedFileHandle = null;
+
+// --- INDEXEDDB HELPERS ---
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("FileHandleDB", 1);
+    request.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore("handles");
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+async function saveHandle(handle) {
+  const db = await openDB();
+  const tx = db.transaction("handles", "readwrite");
+  tx.objectStore("handles").put(handle, "lastUsed");
+  return tx.complete;
+}
+
+async function loadHandle() {
+  const db = await openDB();
+  return new Promise((resolve) => {
+    const request = db.transaction("handles").objectStore("handles").get("lastUsed");
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => resolve(null);
+  });
+}
+
+// --- PERMISSION CHECKER ---
+async function verifyPermission(fileHandle, readWrite) {
+	return true;
+  const options = {};
+  if (readWrite) options.mode = 'readwrite';
+  
+  // Check if permission was already granted in this session
+  if ((await fileHandle.queryPermission(options)) === 'granted') return true;
+  
+  // Explicitly request permission from the user
+  if ((await fileHandle.requestPermission(options)) === 'granted') return true;
+  
+  return false;
+}
+
+// --- INITIALIZE APPLICATION ON LOAD ---
+window.addEventListener("DOMContentLoaded", async () => {
+			  await loadGeneDataFromXml();
+			 await loadPopDataFromXml();
+
+  lastUsedFileHandle = await loadHandle();
+  
+});
+
+
+
+	
+// 1. Open the file using the modern API
+
+/*
+$("fileInputx").addEventListener("click", async () => {
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{
+        description: "DAT Files",
+        accept: { "application/octet-stream": [".dat"] }
+      }]
+    });
+    
+    lastUsedFileHandle = handle;
+    const file = await handle.getFile();
+    
+    // Process your file here (e.g., read into 'original' array buffer)
+    const buf = await file.arrayBuffer();
+    original = new Uint8Array(buf);
+                view = new DataView(buf);
+                patches.clear();
+                selectedIndex = -1;
+                try {
+                    parseSave();
+                    renderAll();
+                } catch (e) {
+                    original = null;
+                    view = null;
+                    records = [];
+                    tableEnd = 0;
+                    
+                    alert("Could not parse save: " + e.message);
+                    renderAll();
+                }	
+    
+  } catch (err) {
+    console.log("Open cancelled");
+  }
+});
+*/
+$("fileInput").addEventListener("click", async () => {
+  try {
+    const options = {	  
+	  suggestedName: "save1.dat",
+      types: [{		
+        description: "DAT Files",
+        accept: { "application/x-dat": [".dat"] }
+      }]
+    };
+
+    // If a saved handle exists from a previous session, start the dialog there
+    if (lastUsedFileHandle) {
+      options.startIn = lastUsedFileHandle;
+    }
+
+    const [handle] = await window.showOpenFilePicker(options);
+    lastUsedFileHandle = handle;
+    
+    // Persist this handle in IndexedDB for future visits
+    await saveHandle(handle);
+
+    const file = await handle.getFile();
+    const buf = await file.arrayBuffer();
+    original = new Uint8Array(buf);
+	
+                view = new DataView(buf);
+                patches.clear();
+                selectedIndex = -1;
+                try {
+					fileName=file.name;
+                    parseSave();					
+                    renderAll();
+                } catch (e) {
+                    original = null;
+                    view = null;
+                    records = [];
+					wildHorses = [];
+					farmHorses = [];
+					jockeys = [];
+					otherHorses = [];
+					otherDna = [];
+					locations = [];
+                    tableEnd = 0;
+                    
+                    alert("Could not parse save: " + e.message);
+                    renderAll();
+                }
+    
+  } catch (err) {
+    if (err.name !== "AbortError") console.error("Open cancelled or failed:", err);
+  }
+});
+
+			
+
+            $("search").addEventListener("input", renderRecords);
+            $("filter").addEventListener("change", renderRecords);
+/*
+            $("downloadBtn").addEventListener("click", () => {
+                if (!original) return;
+                const out = new Uint8Array(original);
+                for (const [off, val] of patches) out[off] = val;
+                const blob = new Blob([out], {
+                    type: "application/octet-stream",
+                });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "save1.dat";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    URL.revokeObjectURL(a.href);
+                    a.remove();
+                }, 1000);
+            });
+			*/
+// 2. Save the file
+// --- UPDATED DOWNLOAD LOGIC ---
+$("downloadBtn").addEventListener("click", async () => {
+  if (!original) return;
+
+  //const out = new Uint8Array(original);
+  const out = original.slice();
+  for (const [off, val] of patches) out[off] = val;
+
+  const options = {
+    suggestedName: fileName,
+    types: [{
+      description: "DAT Files",
+      accept: { "application/x-dat": [".dat"] }
+    }]
+  };
+
+  if (lastUsedFileHandle) {
+    // Crucial: Check permissions if retrieving an old handle across browser restarts
+    const hasPermission = await verifyPermission(lastUsedFileHandle, true);
+    if (hasPermission) {
+      options.startIn = lastUsedFileHandle;
+    }
+  }
+
+  try {
+    const handle = await window.showSaveFilePicker(options);
+    
+    // Overwrite the saved handle to track the new output path
+    lastUsedFileHandle = handle;
+    await saveHandle(handle);
+
+    const writable = await handle.createWritable();
+    await writable.write(out);
+    await writable.close();
+  } catch (err) {
+    if (err.name !== "AbortError") console.error("Save failed:", err);
+  }
+});
+
+            $("clearPatchesBtn").addEventListener("click", () => {
+                patches.clear();
+                renderAll();
+            });
+
+            renderAll();
+        </script>
+    <script>
+        ( async function() {
+
+            // Wait for the original editor to fully load its globals
+            function initMutator() {
+                if (typeof wildHorses === 'undefined' || typeof original === 'undefined') {
+                    setTimeout(initMutator, 200);
+                    return;
+                }
+
+
+                // ----- Default pop.xml string -----
+
+                
+                let xmlMode = false;  // default text mode
+
+                // ----- helper: apply full genome array to specific offset -----
+                function applyGenomeToOffset(genomeArray, genomeStart) {
+                    if (!original || genomeStart < tableEnd || genomeStart+240 > original.length) return false;
+                    let ok = true;
+                    for (let i = 0; i < 20; i++) {
+                        const genesThisHelix = GENOME_MAP[i];
+                        const s1 = genomeArray[i]?.[0] || "";
+                        const s2 = genomeArray[i]?.[1] || "";
+                        for (let j = 0; j < genesThisHelix.length; j++) {
+                            const rawIndex = genesThisHelix[j];
+                            const p1 = s1[j], p2 = s2[j];
+                            if (!p1 || !p2 || !"ATCG".includes(p1) || !"ATCG".includes(p2)) { ok = false; continue; }
+                            const newByte = pairToByte(rawIndex, p1+p2);
+                            if (newByte === null) { ok = false; continue; }
+                            setByte(genomeStart + rawIndex, newByte);
+                        }
+                    }
+                    return ok;
+                }
+
+                function computeAllowedSets2(mapA, mapB) {
+                    const allowed = Array(20).fill().map(() => []);
+                    let valid = true;
+                    for (let h = 0; h < 20; h++) {
+                        const expectedLen = GENOME_MAP[h].length;
+						const pairLenA = mapA[h].length;
+						const pairLenB = mapB[h].length;					                      
+                        for (let pos = 0; pos < expectedLen; pos++) {					
+                            const set = new Set();
+							for (let p = 0; p<pairLenA;p++){
+								const seqA = mapA[h][p] || "";
+								if (pos < seqA.length && "ATCG".includes(seqA[pos])) set.add(seqA[pos]);
+							}
+							for (let p = 0; p<pairLenB;p++){
+								const seqB = mapB[h][p] || "";
+								if (pos < seqB.length && "ATCG".includes(seqB[pos])) set.add(seqB[pos]);
+							}								
+                                                        
+                            if (set.size === 0) valid = false;
+                            allowed[h][pos] = set;
+                        }
+                    }
+                    return { allowed, valid };
+                }				
+
+                function buildRandomGenomeFromPools(allowed) {
+                    const newGenome = Array(20).fill().map(() => ["", ""]);
+                    for (let h = 0; h < 20; h++) {
+                        const helixPosCount = GENOME_MAP[h].length;
+                        let strand1 = "", strand2 = "";
+                        for (let pos = 0; pos < helixPosCount; pos++) {
+                            const allowedSet = allowed[h]?.[pos];
+                            if (!allowedSet || allowedSet.size === 0) return null;
+                            const bases = Array.from(allowedSet);
+                            const randBase1 = bases[Math.floor(Math.random() * bases.length)];
+                            const randBase2 = bases[Math.floor(Math.random() * bases.length)];
+                            strand1 += randBase1;
+                            strand2 += randBase2;
+                        }
+                        newGenome[h] = [strand1, strand2];
+                    }
+                    return newGenome;
+                }
+
+                // XML mode weighted random
+                function weightedRandom(weights) {
+                    let inverseWeights = weights.map(w => w === 0 ? 0 : 1 / w);
+                    let sum = inverseWeights.reduce((s, w) => s + w, 0);
+                    if (sum === 0) return 0;
+                    let r = Math.random() * sum;
+                    for (let i = 0; i < inverseWeights.length; i++) {
+                        r -= inverseWeights[i];
+                        if (r <= 0) return i;
+                    }
+                    return inverseWeights.length - 1;
+                }
+
+                function generateGenomeFromPop(popName) {
+                    const popConfig = window.popData[popName];
+                    if (!popConfig) return null;
+                    const genome = Array(20).fill().map(() => ["", ""]);
+                    for (let h = 0; h < HELIX_LENGTHS.length; h++) {
+                        let seq1 = "", seq2 = "";
+                        let positions = HELIX_LENGTHS[h];
+                        for (let p = 0; p < positions; p++) {
+                            let gene = arrayHp[h][p];
+                            if (!gene) { seq1 += "?"; seq2 += "?"; continue; }
+                            let weights = popConfig[gene.desc] || [1, 0, 0, 0];
+                            let allele1 = weightedRandom(weights);
+                            let allele2 = weightedRandom(weights);
+                            seq1 += gene.n[allele1];
+                            seq2 += gene.n[allele2];
+                        }
+                        genome[h] = [seq1, seq2];
+                    }
+                    return genome;
+                }
+
+                function getTargetOffsets() {
+                    let offsets = [];
+                    if (document.getElementById('mutateWild')?.checked) offsets = offsets.concat(wildHorses);
+                    if (document.getElementById('mutateFarm')?.checked) offsets = offsets.concat(farmHorses);
+                    if (document.getElementById('mutateJockey')?.checked) offsets = offsets.concat(jockeys);
+                    if (document.getElementById('mutateOther')?.checked) offsets = offsets.concat(otherHorses);
+                    return offsets;
+                }
+
+                async function applyMutation() {
+                    if (!original) { alert("No save file loaded."); return; }
+                    const offsets = getTargetOffsets();
+                    if (offsets.length === 0) { alert("No horses selected or no horses of those types found."); return; }
+
+                    if (xmlMode) {
+                        const popName = document.getElementById('popSelect').value;
+                        if (!popName || !window.popData[popName]) { alert("No population selected."); return; }
+                        if (!confirm(`🧬 Mutate ${offsets.length} horse(s) using population "${popName}"?`)) return;
+                        let success = 0;
+                        for (let off of offsets) {
+                            const randGenome = generateGenomeFromPop(popName);
+                            if (randGenome && applyGenomeToOffset(randGenome, off)) success++;
+                        }
+                        if (typeof renderPatchState === 'function') renderPatchState();
+                        if (typeof renderSelected === 'function') renderSelected();
+                        alert(`✅ Done! ${success}/${offsets.length} horses mutated.`);
+                    } else {
+                        const G = GAME_DNA;
+                        const rawA = document.getElementById("genomePoolA").value;
+                        const rawB = document.getElementById("genomePoolB").value;
+                        const { allowed, valid } = computeAllowedSets2(G.parseGenome(rawA), G.parseGenome(rawB));
+                        if (!valid) {
+                            alert("❌ Invalid DNA: some genes do not have valid bases(A/T/C/G).");
+                            return;
+                        }
+                        if (!confirm(`🧬 Mutate ${offsets.length} horse(s) using manual pools?`)) return;
+                        let success = 0;
+                        for (let off of offsets) {
+                            const randGenome = buildRandomGenomeFromPools(allowed);
+                            if (randGenome && applyGenomeToOffset(randGenome, off)) success++;
+                        }
+                        if (typeof renderPatchState === 'function') renderPatchState();
+                        if (typeof renderSelected === 'function') renderSelected();
+                        alert(`✅ Done! ${success}/${offsets.length} horses mutated.`);
+                    }
+                }
+				
+function updateModeDescription() {
+    const desc = document.getElementById('modeDescription');
+    if (desc) {
+        desc.textContent = xmlMode 
+            ? "Horses get their DNA replaced by DNA generated from pop.xml" 
+            : "Horses get their DNA replaced by a random mix of up to 2 DNA sequences.";
+    }
+}				
+
+function updateCheckboxesVisibility() {
+    const setCount = (id, arr) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = arr.length ? 'block' : 'none';
+            const span = el.querySelector('span');
+            if (span) span.textContent = arr.length ? ` (${arr.length})` : '';
+        }
+    };
+    setCount('wildCheckLabel', wildHorses);
+    setCount('farmCheckLabel', farmHorses);
+    setCount('jockeyCheckLabel', jockeys);
+    setCount('otherCheckLabel', otherHorses);
+}
+
+                function switchToXmlMode() {
+                    xmlMode = true;
+                    document.getElementById('textModeBoxes').style.display = 'none';
+                    document.getElementById('xmlModeSection').style.display = 'block';
+                    document.getElementById('switchToXmlBtn').style.display = 'none';
+                    document.getElementById('switchToTextBtn').style.display = 'block';
+                    // populate population dropdown
+                    const sel = document.getElementById('popSelect');
+                    sel.innerHTML = '';
+                    Object.keys(window.popData).forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        sel.appendChild(opt);
+                    });
+					updateModeDescription();
+                }
+
+                function switchToTextMode() {
+                    xmlMode = false;
+                    document.getElementById('textModeBoxes').style.display = 'block';
+                    document.getElementById('xmlModeSection').style.display = 'none';
+                    document.getElementById('switchToXmlBtn').style.display = 'block';
+                    document.getElementById('switchToTextBtn').style.display = 'none';
+					updateModeDescription();
+                }
+
+                // Load pop.xml from user file
+                function loadPopXml() {
+                    const input = document.getElementById('xmlFileInput');
+                    input.accept = '.xml';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (!file){
+							tryAutoLoadPopXml();
+							return;
+						};
+                        const text = await file.text();
+                        try {
+							await loadPopDataFromXml(text);
+                            document.getElementById('xmlStatus').textContent = 'pop.xml loaded ✔';
+                            if (xmlMode) {
+                                // refresh dropdown
+                                const sel = document.getElementById('popSelect');
+                                sel.innerHTML = '';
+                                Object.keys(window.popData).forEach(name => {
+                                    const opt = document.createElement('option');
+                                    opt.value = name;
+                                    opt.textContent = name;
+                                    sel.appendChild(opt);
+                                });
+                            }
+                        } catch (err) { alert('Failed to parse pop.xml'); }
+                    };
+                    input.click();
+                }
+
+                // Attempt to auto-load pop.xml from server (optional)
+                async function tryAutoLoadPopXml() {
+                    try {
+						await loadPopDataFromXml();
+
+						document.getElementById('xmlStatus').textContent = 'Loaded from server pop.xml ✔';
+						if (xmlMode) {
+							const sel = document.getElementById('popSelect');
+							sel.innerHTML = '';
+							Object.keys(window.popData).forEach(name => {
+								const opt = document.createElement('option');
+								opt.value = name;
+								opt.textContent = name;
+								sel.appendChild(opt);
+							});
+						}
+
+                    } catch (e) {
+                        document.getElementById('xmlStatus').textContent = 'Using default pop.xml';
+                    }
+                }
+
+                // Panel UI setup
+                const panel = document.getElementById("dnaMutatorPanel");
+                const floatingBtn = document.getElementById("floatingDnaBtn");
+                floatingBtn.onclick = () => { panel.classList.add("open"); updateCheckboxesVisibility(); };
+                document.getElementById("closePanelBtn").onclick = () => panel.classList.remove("open");
+                document.addEventListener("click", (e) => {
+                    if (panel.classList.contains("open") && !panel.contains(e.target) && e.target !== floatingBtn && !floatingBtn.contains(e.target))
+                        panel.classList.remove("open");
+                });
+
+                document.getElementById("pastePoolA").onclick = async () => { try { const t = await navigator.clipboard.readText(); document.getElementById("genomePoolA").value = t; } catch(e) {} };
+                document.getElementById("clearPoolA").onclick = () => { document.getElementById("genomePoolA").value = ""; };
+                document.getElementById("pastePoolB").onclick = async () => { try { const t = await navigator.clipboard.readText(); document.getElementById("genomePoolB").value = t; } catch(e) {} };
+                document.getElementById("clearPoolB").onclick = () => { document.getElementById("genomePoolB").value = ""; };
+
+                document.getElementById("applyWildMutationBtn").onclick = applyMutation;
+
+                document.getElementById("switchToXmlBtn").onclick = switchToXmlMode;
+                document.getElementById("switchToTextBtn").onclick = switchToTextMode;
+                document.getElementById("loadPopXmlBtn").onclick = loadPopXml;
+
+                // Default to text mode: show textareas, hide XML section
+                document.getElementById('textModeBoxes').style.display = 'block';
+                document.getElementById('xmlModeSection').style.display = 'none';
+                document.getElementById('switchToXmlBtn').style.display = 'block';
+                document.getElementById('switchToTextBtn').style.display = 'none';
+
+                // refresh badge when file loads
+                const origRenderAll = window.renderAll;
+                window.renderAll = function() {
+                    origRenderAll();
+                    
+                    updateCheckboxesVisibility();
+                };
+
+                tryAutoLoadPopXml();
+                updateCheckboxesVisibility();
+            }
+            initMutator();
+        })();
+    </script>
+
+		<script src="./js/headers.js"></script>
+    </body>
+</html>
