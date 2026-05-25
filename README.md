@@ -39,7 +39,7 @@ Please refer to the wiki at https://horseygame.miraheze.org/wiki/Genome for the 
 * You can paste in DNA to check if the DNA fits into a pre-defined.
 
 ---
-## Horsey Game Save Editor https://zyonixgaming.github.io/horsey-save-editor/
+## Horsey Game Save Editor https://zyonixgaming.github.io/dna/save-editor.html
 * Load your save file, make changes, and export the edited file.
 * Edit horse stuff not affected by genes: Age, Personality, Hunger, Tiredness, Race stats, etc.
 * Mass apply DNA to all wild horses and horses in farms/ranches/stables/etc.
