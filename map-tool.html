@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Unofficial Horsey Game Savegame Map Manipulation and Modification Utility Tool</title>
+	
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e2f;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Use 100svh for better mobile toolbar support */
+  box-sizing: border-box;
+  padding: 16px;
+  
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Keeps container locked to viewport height */
+  box-sizing: border-box;
+  padding: 16px;
+
+  /* --- NEW CENTERING RULES --- */
+  max-width: 780px; /* Restricts the maximum width */
+  width: 100%;       /* Ensures responsiveness on smaller screens */
+  margin: 0 auto;    /* Centers the container horizontally */
+  
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin-top: 0;
+            color: #ffd966;
+        }
+        /* Hide the entire HEX/CSV panels */
+        .flex-row {
+            display: none;
+        }
+        .info {
+            background: #252532;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            border-left: 4px solid #ffd966;
+        }
+        .status {
+            font-weight: bold;
+            color: #ffaa66;
+        }
+        /* Hide the dimension controls inputs and extra buttons, but keep the export button inside */
+        .dim-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            background: #1e1e2a;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        /* Hide width/height labels and the two buttons (apply/update) */
+        .dim-controls label,
+        #applyDimensionsBtn,
+        #updateCoordsBtn {
+            display: none;
+        }
+        button {
+            background: #3a6ea5;
+            border: none;
+            color: white;
+            font-size: 0.85rem;
+            padding: 8px 18px;
+            margin-top: 12px;
+            margin-right: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #2c5282;
+            transform: scale(1.02);
+        }
+        .locations-table {
+            margin-top: 20px;
+            background: #1e1e2a;
+            border-radius: 8px;
+            padding: 12px;
+            height: auto;
+            overflow-y: auto;
+  flex: 1; 
+  overflow-y: auto; /* This makes the table body scrollable */
+  border: 1px solid #ddd;
+  
+        }
+        .locations-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .locations-table th, .locations-table td {
+            border: 1px solid #4a4a5a;
+            padding: 6px;
+            text-align: left;
+        }
+        .locations-table th {
+            background: #2d2d3a;
+			  position: sticky;
+			  top: 0;
+			  
+			  z-index: 1;			
+        }
+        .coord-input {
+            width: 90px;
+            background: #2d2d3a;
+            border: 1px solid #4a4a5a;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .info-text {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #aaa;
+        }
+		
+/* ---- Header Bar ---- */
+        .header-bar {
+			width: 100%;              /* not strictly necessary if using block/flex */
+            background: #0b1218;
+            border-bottom: 2px solid #2d3a46;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .header-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #48b5b5;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-title span {
+            font-size: 1.5rem;
+        }
+        .tools-dropdown {
+            position: relative;
+        }
+        .tools-btn {
+            background: #1e293b;
+            border: 2px solid #3b4e6b;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #b9c7d9;
+            font-family: monospace;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tools-btn:hover {
+            background: #2d3e44;
+            border-color: #48b5b5;
+            color: #fff;
+        }
+        .tools-btn .arrow {
+            font-size: 0.65rem;
+            transition: 0.2s;
+        }
+        .tools-btn.open .arrow {
+            transform: rotate(180deg);
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            min-width: 200px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.15s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: #cbd5e6;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-family: monospace;
+            transition: 0.15s;
+            border-bottom: 1px solid #1e293b;
+        }
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-menu a:hover {
+            background: #1e293b;
+            color: #48b5b5;
+        }
+        .dropdown-menu a .tool-icon {
+            font-size: 1rem;
+            width: 22px;
+            text-align: center;
+        }
+		
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>The Unofficial Horsey Game Savegame Map Manipulation and Modification Utility Tool</h1>
+	<div class="tools-dropdown" id="toolsDropdown">
+            <button class="tools-btn" id="toolsBtn">
+                🔧 Other Tools <span class="arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <!-- Populated by header-links.js -->
+            </div>
+        </div>
+
+    <!-- Hidden panels (HEX and CSV) – kept in DOM for functionality but hidden -->
+    <div class="flex-row">
+        <div class="panel">
+            <h2>📤 RLE Hex (input)</h2>
+            <textarea id="hexInput" placeholder="Paste hex string here..."></textarea>
+            <button id="decodeBtn">⬇️ Decode Hex → CSV</button>
+            <button id="clearHexBtn">Clear hex</button>
+        </div>
+        <div class="panel">
+            <h2>📥 CSV Grid</h2>
+            <textarea id="csvOutput" placeholder="Decoded CSV will appear here..."></textarea>
+            <button id="encodeBtn">⬆️ Encode CSV → Hex</button>
+            <button id="clearCsvBtn">Clear CSV</button>
+        </div>
+    </div>
+
+    <div class="info">
+        <span class="status">ℹ️ Info</span><br>
+		• Change the position of your buildings in your save.<br>
+		• Load a tmx file from a map editor to replace your map.<br><br>
+        <div id="dimInfo">No files loaded.</div><br>
+        Saves are typically in this folder:<br>
+		C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\save1.dat<br><br>
+		Use at your own risk! Remember to make backups.
+        <br><br>
+        <span id="byteDeltaDisplay">Byte change: —</span>
+        <div class="dim-controls">
+            <!-- hidden width/height inputs -->
+            <label>Map Width: <input type="number" id="mapWidth" value="400" step="1" min="1"></label>
+            <label>Map Height: <input type="number" id="mapHeight" value="225" step="1" min="1"></label>
+            <button id="applyDimensionsBtn" style="display:none;">Apply Dimensions</button>
+			<button id="fileInput">1. Load Save (save1.dat) 📂</button>
+			<button id="tmxInput">2. Load Map (horsey.tmx) 🗺️</button>
+            <button id="replaceMapBtn">3. Export Save File 💾</button>
+            <button id="updateCoordsBtn" style="display:none;">Update Coordinates</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 12px;">
+        
+        
+    </div>
+
+    <div id="locationsPanel" class="locations-table" style="display: none;">        
+        <table id="locationsTable">
+            <thead><tr><th>Name</th><th>X</th><th>Y</th></tr></thead>
+            <tbody id="locationsTbody"></tbody>
+        </table>
+        
+    </div>
+</div>
+
+<script>
+// ------------------------------------------------------------------
+//  LOOKUP TABLE (final tile number → raw encoding data) – unchanged
+// ------------------------------------------------------------------
+const lookup = {
+  "1": { n:"Plain1", pre:0, tmx:1, tile:1, hasHealth:false },
+  "2": { n:"Plain2", pre:0, tmx:2, tile:2, hasHealth:false },
+  "3": { n:"Plain3", pre:0, tmx:3, tile:3, hasHealth:false },
+  "4": { n:"Plain4", pre:0, tmx:4, tile:4, hasHealth:false },
+  "5": { n:"GrassLand", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "6": { n:"BogLand", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "7": { n:"PalmLand", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "8": { n:"CactusLand", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "9": { n:"Water", pre:6, tmx:9, tile:9, hasHealth:false },
+  "10": { n:"Pond", pre:20, tmx:10, tile:10, hasHealth:false },
+  "11": { n:"Bush", pre:0, tmx:11, tile:11, hasHealth:false },
+  "12": { n:"Stump", pre:0, tmx:12, tile:12, hasHealth:false },
+  "13": { n:"Birch", pre:0, tmx:13, tile:13, hasHealth:false },
+  "14": { n:"BridgeH", pre:7, tmx:14, tile:14, hasHealth:false },
+  "15": { n:"BridgeV", pre:7, tmx:15, tile:15, hasHealth:false },
+  "16": { n:"BadLand", pre:5, tmx:16, tile:16, hasHealth:false  },
+  "17": { n:"Mountain1",  pre:15, tmx:17, tile:17, hasHealth:false },
+  "18": { n:"Mountain2",  pre:15, tmx:18, tile:18, hasHealth:false },
+  "19": { n:"Mountain3",  pre:15, tmx:19, tile:19, hasHealth:false },
+  "20": { n:"Mountain4",  pre:15, tmx:20, tile:20, hasHealth:false },
+  "21": { n:"Fir", pre:0, tmx:21, tile:21, hasHealth:false },
+  "22": { n:"Un1", pre:0, tmx:22, tile:22, hasHealth:false },
+  "23": { n:"Un2", pre:0, tmx:23, tile:23, hasHealth:false },
+  "24": { n:"Boulder", pre:0, tmx:24, tile:24, hasHealth:false },
+  "25": { n:"AcaciaLand", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "26": { n:"AppleTree", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "27": { n:"DeadTree", pre:13, tmx:27, tile:27, hasHealth:false },
+  "28": { n:"Cave", pre:14, tmx:28, tile:28, hasHealth:false },
+  "29": { n:"FenceIcon", pre:0x40, tmx:29, tile:29, hasHealth:false  },
+  "30": { n:"FenceIconNotNeeded", pre:0x80, tmx:30, tile:30, hasHealth:false  },
+  "31": { n:"Tumbleweed", pre:0, tmx:31, tile:31, hasHealth:false },
+  "32": { n:"Pebbles", pre:0, tmx:32, tile:32, hasHealth:false },
+  "33": { n:"PowerFence", pre:17, tmx:33, tile:33, hasHealth:false },
+  "34": { n:"Road1", pre:7, tmx:34, tile:34, hasHealth:false },
+  "35": { n:"Road2", pre:7, tmx:35, tile:35, hasHealth:false },
+  "36": { n:"Road3", pre:7, tmx:36, tile:36, hasHealth:false },
+  "37": { n:"Road4", pre:7, tmx:37, tile:37, hasHealth:false },
+  "38": { n:"Road5", pre:7, tmx:38, tile:38, hasHealth:false },
+  "39": { n:"Road6", pre:7, tmx:39, tile:39, hasHealth:false },
+  "40": { n:"Road7", pre:7, tmx:40, tile:40, hasHealth:false },
+  "41": { n:"Road8", pre:7, tmx:41, tile:41, hasHealth:false },
+  "42": { n:"Road9", pre:7, tmx:42, tile:42, hasHealth:false },
+  "43": { n:"RoadA", pre:7, tmx:43, tile:43, hasHealth:false },
+  "44": { n:"RoadB", pre:7, tmx:44, tile:44, hasHealth:false },
+  "45": { n:"RoadC", pre:7, tmx:45, tile:45, hasHealth:false },
+  "46": { n:"RoadD", pre:7, tmx:46, tile:46, hasHealth:false },
+  "47": { n:"RoadE", pre:7, tmx:47, tile:47, hasHealth:false },
+  "48": { n:"RoadF", pre:7, tmx:48, tile:48, hasHealth:false },
+  "49": { n:"PowerTower", pre:16, tmx:49, tile:49, hasHealth:false },
+  "50": { n:"DirtRoad1", pre:8, tmx:50, tile:50, hasHealth:false },
+  "51": { n:"DirtRoad2", pre:8, tmx:51, tile:51, hasHealth:false },
+  "52": { n:"DirtRoad3", pre:8, tmx:52, tile:52, hasHealth:false },
+  "53": { n:"DirtRoad4", pre:8, tmx:53, tile:53, hasHealth:false },
+  "54": { n:"DirtRoad5", pre:8, tmx:54, tile:54, hasHealth:false },
+  "55": { n:"DirtRoad6", pre:8, tmx:55, tile:55, hasHealth:false },
+  "56": { n:"DirtRoad7", pre:8, tmx:56, tile:56, hasHealth:false },
+  "57": { n:"DirtRoad8", pre:8, tmx:57, tile:57, hasHealth:false },
+  "58": { n:"DirtRoad9", pre:8, tmx:58, tile:58, hasHealth:false },
+  "59": { n:"DirtRoadA", pre:8, tmx:59, tile:59, hasHealth:false },
+  "60": { n:"DirtRoadB", pre:8, tmx:60, tile:60, hasHealth:false },
+  "61": { n:"DirtRoadC", pre:8, tmx:61, tile:61, hasHealth:false },
+  "62": { n:"DirtRoadD", pre:8, tmx:62, tile:62, hasHealth:false },
+  "63": { n:"DirtRoadE", pre:8, tmx:63, tile:63, hasHealth:false },
+  "64": { n:"DirtRoadF", pre:8, tmx:64, tile:64, hasHealth:false },
+  "65": { n:"Goop", pre:4, tmx:65, tile:65, hasHealth:false },
+  "66": { n:"Goop", pre:4, tmx:66, tile:66, hasHealth:false },
+  "67": { n:"Glass", pre:18, tmx:67, tile:67, hasHealth:false },
+  "68": { n:"GlassBG", pre:0, tmx:68, tile:68, hasHealth:false },
+  "69": { n:"Gray", pre:0, tmx:69, tile:69, hasHealth:false },
+  "70": { n:"NGrassLand", pre:2, tmx:70, tile:101, hasHealth:20 },
+  "71": { n:"Grass", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "72": { n:"Grass", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "73": { n:"Grass", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "74": { n:"Grass", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "75": { n:"Grass", pre:1, tmx:5, tile:71, hasHealth:20 },
+  "76": { n:"Reeds", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "77": { n:"Reeds", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "78": { n:"Reeds", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "79": { n:"Reeds", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "80": { n:"Reeds", pre:3, tmx:6, tile:76, hasHealth:20 },
+  "81": { n:"Acacia", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "82": { n:"Acacia", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "83": { n:"Acacia", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "84": { n:"Acacia", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "85": { n:"Acacia", pre:9, tmx:25, tile:81, hasHealth:180 },
+  "86": { n:"Apple", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "87": { n:"Apple", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "88": { n:"Apple", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "89": { n:"Apple", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "90": { n:"Apple", pre:10, tmx:26, tile:86, hasHealth:80 },
+  "91": { n:"Palm", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "92": { n:"Palm", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "93": { n:"Palm", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "94": { n:"Palm", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "95": { n:"Palm", pre:11, tmx:7, tile:91, hasHealth:120 },
+  "96": { n:"Cactus", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "97": { n:"Cactus", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "98": { n:"Cactus", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "99": { n:"Cactus", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "100": { n:"Cactus", pre:12, tmx:8, tile:96, hasHealth:80 },
+  "101": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 },
+  "102": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 },
+  "103": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 },
+  "104": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 },
+  "105": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 }
+};
+
+let WIDTH = 400;
+let HEIGHT = 225;
+let view = null;
+let original = null;
+let lastDecodedBytes = 0;
+let cachedMapStartOffset = 0;
+let cachedMapEndOffset = 0;
+let cachedWorldEndOffset = 0;
+let currentSaveHandle = null;
+let records = [];
+let wildHorses = [], farmHorses = [], jockeys = [], otherHorses = [], otherDna = [];
+let locations = [];
+
+// DOM elements (hidden panels still exist for internal use)
+const hexInput = document.getElementById('hexInput');
+const csvOutput = document.getElementById('csvOutput');
+const decodeBtn = document.getElementById('decodeBtn');
+const encodeBtn = document.getElementById('encodeBtn');
+const clearHexBtn = document.getElementById('clearHexBtn');
+const clearCsvBtn = document.getElementById('clearCsvBtn');
+const byteDeltaSpan = document.getElementById('byteDeltaDisplay');
+const mapWidthInput = document.getElementById('mapWidth');
+const mapHeightInput = document.getElementById('mapHeight');
+const dimInfoDiv = document.getElementById('dimInfo');
+const locationsPanel = document.getElementById('locationsPanel');
+const locationsTbody = document.getElementById('locationsTbody');
+
+function updateDimInfo() {
+    dimInfoDiv.innerHTML = `<strong>Width = ${WIDTH}</strong>, <strong>Height = ${HEIGHT}</strong> → exactly <strong>${WIDTH * HEIGHT}</strong> tiles.`;
+}
+updateDimInfo();
+
+// ------------------------------------------------------------------
+//  UTILITIES (unchanged)
+// ------------------------------------------------------------------
+function hex(n, width = 0) {
+    const s = Number(n).toString(16);
+    return "0x" + (width ? s.padStart(width, "0") : s);
+}
+function u32(off) { return view.getUint32(off, true); }
+function f32(off) { return view.getFloat32(off, true); }
+function writeF32(off, val) { view.setFloat32(off, val, true); }
+function hexToBytes(hexStr) {
+    const clean = hexStr.replace(/\s/g, '');
+    if (clean.length % 2 !== 0) throw new Error('Hex string must have even length');
+    const bytes = [];
+    for (let i = 0; i < clean.length; i += 2) {
+        bytes.push(parseInt(clean.substr(i, 2), 16));
+    }
+    return bytes;
+}
+function bytesToHex(bytes) {
+    return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+}
+function getByteLength(hexStr) { return hexStr.replace(/\s/g, '').length / 2; }
+function isBitSet(number, bitNumber) {
+    const position = bitNumber - 1;
+    return (number & (1 << position)) !== 0;
+}
+function getByte(off) { return original[off]; }
+function getU32Patched(off) {
+    return (getByte(off) | (getByte(off+1)<<8) | (getByte(off+2)<<16) | ((getByte(off+3)<<24)>>>0));
+}
+function getI32Patched(off) {
+    const v = getU32Patched(off);
+    return v > 0x7fffffff ? v - 0x100000000 : v;
+}
+
+// ------------------------------------------------------------------
+//  COORDINATE SEARCH IN BYTE RANGE
+// ------------------------------------------------------------------
+function findCoordinatesInRange(x, y, startOffset, endOffset) {
+    const targetBytes = new Uint8Array(8);
+    const xBuf = new ArrayBuffer(4);
+    const yBuf = new ArrayBuffer(4);
+    new Float32Array(xBuf)[0] = x;
+    new Float32Array(yBuf)[0] = y;
+    targetBytes.set(new Uint8Array(xBuf), 0);
+    targetBytes.set(new Uint8Array(yBuf), 4);
+    for (let off = startOffset; off <= endOffset - 8; off++) {
+        let match = true;
+        for (let k = 0; k < 8; k++) {
+            if (original[off + k] !== targetBytes[k]) { match = false; break; }
+        }
+        if (match) return [off, off + 4];
+    }
+    return [-1, -1];
+}
+
+// ------------------------------------------------------------------
+//  LOCATION EDITOR UI (hide offset columns)
+// ------------------------------------------------------------------
+function renderLocationsTable() {
+    if (!locations.length) {
+        locationsPanel.style.display = 'none';
+        return;
+    }
+    locationsPanel.style.display = 'block';
+    locationsTbody.innerHTML = '';
+    for (let i = 0; i < locations.length; i++) {
+        const loc = locations[i];
+        const row = locationsTbody.insertRow();
+        row.insertCell(0).textContent = loc.value;
+        const xCell = row.insertCell(1);
+        const yCell = row.insertCell(2);
+        const xInput = document.createElement('input');
+        xInput.type = 'number';
+        xInput.step = 'any';
+        xInput.value = loc.x;
+        xInput.classList.add('coord-input');
+        xInput.dataset.idx = i;
+        xInput.dataset.coord = 'x';
+        const yInput = document.createElement('input');
+        yInput.type = 'number';
+        yInput.step = 'any';
+        yInput.value = loc.y;
+        yInput.classList.add('coord-input');
+        yInput.dataset.idx = i;
+        yInput.dataset.coord = 'y';
+        xCell.appendChild(xInput);
+        yCell.appendChild(yInput);
+        // No offset columns
+    }
+    document.querySelectorAll('.coord-input').forEach(inp => {
+        inp.removeEventListener('change', handleCoordChange);
+        inp.addEventListener('change', handleCoordChange);
+    });
+}
+function handleCoordChange(e) {
+    const idx = parseInt(e.target.dataset.idx, 10);
+    const coord = e.target.dataset.coord;
+    const newVal = parseFloat(e.target.value);
+    if (isNaN(newVal)) return;
+    if (coord === 'x') locations[idx].x = newVal;
+    else locations[idx].y = newVal;
+}
+
+// ------------------------------------------------------------------
+//  DECODER (unchanged)
+// ------------------------------------------------------------------
+function decodeRLE(startOffset, opt_bytes) {
+    const data = opt_bytes || original;
+    if (!data) throw new Error("No data source");
+    const array2D = [...Array(WIDTH)].map(() => Array(HEIGHT).fill(null));
+    const result = [];
+    let i = 0;
+    let tilecount = 0;
+    const getByte = (idx) => data[startOffset + idx];
+    try {
+        while (tilecount < WIDTH * HEIGHT) {
+            const first = getByte(i);
+            const leftFence = isBitSet(first, 8);
+            const upFence = isBitSet(first, 7);
+            const realFirst = first & 0b00111111;
+            if (first >= 0x3B && first <= 0x3E) {
+                const row = Math.floor(tilecount / WIDTH);
+                const col = tilecount % WIDTH;
+                array2D[col][row] = { flag:0, upFence:false, leftFence:false,
+                    tile: (first - 0x3A), tmx: (first - 0x3A), desc:"sand", x:col, y:row, extra_bytes:null };
+                tilecount++; i += 1;
+            } else if (first === 0x3F) {
+                if (i + 1 > data.length - startOffset - 1) throw new Error("Truncated water run");
+                const repeat = getByte(i+1);
+                for (let k = 0; k < repeat; k++) {
+                    const row = Math.floor(tilecount / WIDTH);
+                    const col = tilecount % WIDTH;
+                    array2D[col][row] = { flag:6, upFence:false, leftFence:false,
+                        tile:0x09, tmx:9, desc:"water", x:col, y:row, extra_bytes:null };
+                    tilecount++;
+                }
+                i += 2;
+            } else {
+                if (i + 1 > data.length - startOffset - 1) throw new Error("Truncated tile data");
+                const tile = getByte(i+1);
+                const row = Math.floor(tilecount / WIDTH);
+                const col = tilecount % WIDTH;
+                let tmx = tile, desc = "undefined", extra_bytes = null;
+                if (lookup[tile]) { tmx = lookup[tile].tmx; desc = lookup[tile].n; }
+                if (tile >= 0x47) {
+                    if (i + 2 > data.length - startOffset - 1) throw new Error("Missing health byte");
+                    extra_bytes = getByte(i+2);
+                    i += 1;
+                }
+                array2D[col][row] = { flag:realFirst, upFence, leftFence,
+                    tile, tmx, desc, x:col, y:row, extra_bytes };
+                tilecount++;
+                i += 2;
+            }
+            if (tilecount >= WIDTH * HEIGHT) break;
+        }
+        for (let y = 0; y < HEIGHT; y++) {
+            for (let x = 0; x < WIDTH; x++) {
+                const sq = array2D[x][y];
+                if (sq.upFence) {
+                    sq.tmx = 29;
+                    if (x+1 < WIDTH) array2D[x+1][y].tmx = 29;
+                }
+                if (sq.leftFence) {
+                    sq.tmx = 30;
+                    if (y+1 < HEIGHT) array2D[x][y+1].tmx = 30;
+                }
+                result.push(sq.tmx);
+            }
+        }
+        lastDecodedBytes = i;
+        return result;
+    } catch (err) {
+        console.error(`Decoding failed at byte ${i}`, err);
+        throw err;
+    }
+}
+
+function toCSV(tiles, width, height) {
+    const rows = [];
+    for (let row = 0; row < height; row++) {
+        rows.push(tiles.slice(row*width, (row+1)*width).join(','));
+    }
+    return rows.join(',\n');
+}
+
+function parseCSV(csvStr, width, height) {
+    const numbers = [];
+    const lines = csvStr.split(/\r?\n/);
+    for (const line of lines) {
+        if (line.trim() === '') continue;
+        const parts = line.split(',');
+        for (const part of parts) {
+            const trimmed = part.trim();
+            if (trimmed === '') continue;
+            const num = parseInt(trimmed, 10);
+            if (isNaN(num)) throw new Error(`Invalid number: ${trimmed}`);
+            numbers.push(num);
+        }
+    }
+    if (numbers.length !== width * height) throw new Error(`CSV has ${numbers.length} numbers, expected ${width*height}`);
+    for (let i=0; i<numbers.length; i++) if (numbers[i]<0 || numbers[i]>255) throw new Error(`Tile out of range: ${numbers[i]}`);
+    return numbers;
+}
+
+// ------------------------------------------------------------------
+//  ENCODER (unchanged)
+// ------------------------------------------------------------------
+function encodeRLE(width, height, tiles) {
+    const bytes = [];
+    let waterBuffer = 0;
+    function flushWater() {
+        if (waterBuffer > 0) {
+            while (waterBuffer >= 255) { bytes.push(0x3F, 0xFF); waterBuffer -= 255; }
+            if (waterBuffer > 0) { bytes.push(0x3F, waterBuffer); waterBuffer = 0; }
+        }
+    }
+    const workTiles = tiles.slice();
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = y * width + x;
+            let finalTile = workTiles[idx];
+            let rawTile = lookup[finalTile.toString()];
+            let fenceFlag = 0;
+            if ([29,30].includes(finalTile)) {
+                let tempIdx = idx;
+                if (x+1 < width && [29,30].includes(workTiles[idx+1])) { fenceFlag |= 0x40; tempIdx = idx - width; }
+                if (y+1 < height && [29,30].includes(workTiles[idx+width])) { fenceFlag |= 0x80; tempIdx = idx - 1; }
+                if (tempIdx >= 0 && tempIdx !== idx) {
+                    finalTile = workTiles[tempIdx];
+                    rawTile = lookup[finalTile.toString()];
+                    workTiles[idx] = finalTile;
+                } else {
+                    finalTile = 2;
+                    rawTile = lookup["2"];
+                    workTiles[idx] = 2;
+                }
+            }
+            if (!rawTile) throw new Error(`Unknown tile: ${finalTile} at (${x},${y})`);
+            let finalPre = rawTile.pre;
+            if (x===0 || y===0 || x===width-1 || y===height-1) finalPre = 15;
+            finalPre |= fenceFlag;
+            const isCompressibleWater = (rawTile.tile === 9 && finalPre === 6);
+            if (isCompressibleWater) {
+                waterBuffer++;
+                if (waterBuffer === 255) flushWater();
+                continue;
+            }
+            flushWater();
+            if (finalPre === 0 && rawTile.tile >= 1 && rawTile.tile <= 4) {
+                bytes.push(0x3A + rawTile.tile);
+            } else if (rawTile.tile >= 17 && rawTile.tile <= 20) {
+                const randomNumber = Math.floor(Math.random() * 4) + 17;
+                bytes.push(finalPre, randomNumber);
+            } else {
+                bytes.push(finalPre, rawTile.tile);
+                if (rawTile.hasHealth > 0) bytes.push(rawTile.hasHealth);
+            }
+        }
+    }
+    flushWater();
+    return bytes;
+}
+
+// ------------------------------------------------------------------
+//  INDEXEDDB HANDLERS (unchanged)
+// ------------------------------------------------------------------
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("FileHandleDB", 1);
+        request.onupgradeneeded = (e) => e.target.result.createObjectStore("handles");
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+async function saveHandleByKey(key, handle) {
+    const db = await openDB();
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(handle, key);
+    return tx.complete;
+}
+async function loadHandleByKey(key) {
+    const db = await openDB();
+    return new Promise((resolve) => {
+        const request = db.transaction("handles").objectStore("handles").get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => resolve(null);
+    });
+}
+let lastUsedTMXHandle = null;
+
+// ------------------------------------------------------------------
+//  FIND VARIABLE STRINGS – UPDATED FOR MULTI-LANGUAGE
+// ------------------------------------------------------------------
+function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
+    const lookupMap = new Map();
+    function addOffset(x, y, xoff, yoff) { lookupMap.set(`${x},${y}`, [xoff, yoff]); }
+    function getOffset(x, y) {
+        const key = `${x},${y}`;
+        if (lookupMap.has(key)) return lookupMap.get(key);
+        if (cachedMapEndOffset && cachedWorldEndOffset) {
+            const found = findCoordinatesInRange(x, y, cachedMapEndOffset, cachedWorldEndOffset);
+            if (found[0] !== -1) {
+                addOffset(x, y, found[0], found[1]);
+                return found;
+            }
+        }
+        return [-1, -1];
+    }
+    lookupMap.clear();
+    const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    let stillFarm = true;
+    // Unicode regex: letters, numbers, punctuation, spaces, symbols (printable across many languages)
+    const printableRegex = /^[\p{L}\p{N}\p{P}\p{Z}\p{S}]+$/u;
+    for (let i = startPos; i <= buffer.length - 4; i++) {
+        const length = dv.getUint32(i, littleEndian);
+        const length2 = (i + 8 + length) <= buffer.length ? dv.getUint32(i+4+length, littleEndian) : -1;
+        if (length2 > 255 || length2 < 0) continue;
+        if (length > 3 && (i + 4 + length) <= buffer.length && length2 >= 0 && length2 <= 255) {
+            try {
+                const stringBuffer = buffer.slice(i + 4, i + 4 + length);
+                let decodedString = new TextDecoder('utf-8').decode(stringBuffer);
+                // Accept any string that consists solely of printable Unicode characters (no control codes)
+                if (printableRegex.test(decodedString)) {
+                    if (decodedString == "unknown") {
+                        if (locations.length > 10) continue;
+                        let xoff = i+4+length+37;
+                        let yoff = xoff+4;
+                        let x = f32(xoff);
+                        let y = f32(yoff);
+                        locations.push({
+                            offset: -1, length: -1, value: "Truck", isFarm: false, crowd: -1,
+                            xoff, yoff, xoff2: -1, yoff2: -1, x, y
+                        });
+                        let flag = 1;
+                        let temp_position = xoff + 0x3d;
+                        while (flag > 0 && flag < 3) {
+                            const xoff2 = temp_position;
+                            const yoff2 = temp_position + 4;
+                            const x2 = f32(xoff2);
+                            const y2 = f32(yoff2);
+                            addOffset(x2, y2, xoff2, yoff2);
+                            flag = dv.getUint32(temp_position + 16, littleEndian);
+                            temp_position += 0x29;
+                        }
+                        i = temp_position;
+                        continue;
+                    } else if (decodedString == "Race Track") {
+                        stillFarm = false;
+                    } else if (decodedString == "My House") {
+                        cachedWorldEndOffset = i;
+                    }
+                    let isFarm = (locations.length >= 2 && stillFarm);
+                    let xoff = 0, yoff = 0, x = 0, y = 0;
+                    let horseOffset = 0;
+                    for (let idx = 0; idx < length2; idx++) {
+                        horseOffset += 0xF0;
+                        if ((i+8+length+horseOffset+31+3) > original.length) break;
+                        let voiceStrLen = dv.getUint32(i+8+length+horseOffset+31, littleEndian);
+                        if (voiceStrLen > 255 || voiceStrLen < 0) voiceStrLen = 0;
+                        horseOffset += 39 + voiceStrLen;
+                        let itemcount = dv.getUint32(i+8+length+horseOffset, littleEndian);
+                        if (itemcount > 10 || itemcount < 0) itemcount = 0;
+                        horseOffset += 4 + (itemcount * 8) + 8 + 4;
+                    }
+                    if ((i+12+length+horseOffset+3) > original.length) continue;
+                    let length3 = dv.getUint32(i+12+length+horseOffset, littleEndian);
+                    if (length3 > 255) continue;
+                    let itemlength3 = 0;
+                    for (let idx3 = 0; idx3 < length3; idx3++) {
+                        let hasDna = dv.getUint32(i+12+length+horseOffset+itemlength3+12, littleEndian);
+                        if (hasDna) itemlength3 += 0xF0;
+                        itemlength3 += 49;
+                    }
+                    xoff = i + 16 + length + itemlength3 + horseOffset;
+                    yoff = xoff + 4;
+                    x = f32(xoff);
+                    y = f32(yoff);
+					if(x<32||y<32) continue;
+                    let offset2 = getOffset(x, y);
+                    if (offset2[0] < 0) {
+                        console.log(decodedString+" cannot find off2");
+                    }
+                    locations.push({
+                        offset: i, length, value: decodedString, isFarm, crowd: length2,
+                        xoff, yoff, xoff2: offset2[0], yoff2: offset2[1], x, y
+                    });
+                }
+            } catch(e) { console.log(e); }
+        }
+    }
+    console.log(locations);
+    return locations;
+}
+
+function findDnaRuns() {
+    findVariableStrings(original, cachedMapEndOffset);
+    const codeSet = new Set([9,10,11,12,17,18,19,20,25,26,27,28,33,34,35,36]);
+    let i = cachedMapEndOffset;
+    let loc_index = 1;
+    let loc_pos_index = 0;
+    cachedWorldEndOffset = original.length;
+    while (i < original.length) {
+        if (!codeSet.has(original[i])) { i++; continue; }
+        let j = i;
+        while (j < original.length && codeSet.has(original[j]) && (j-i+1 <= 240)) j++;
+        const len = j - i;
+        if (len >= 240) {
+            for (let k = 0; k < 1; k++) {
+                const b0 = original[j+8+k];
+                const b1 = original[j+9+k];
+                const b2 = original[j+10+k];
+                const b3 = original[j+11+k];
+                const tempindex = (((b3*256+b2)*256+b1)*256+b0) | 0;
+                if (tempindex >= -1 && tempindex < records.length) {
+                    const off = j+8;
+                    const status = off+6 < original.length ? getByte(off+6) : null;
+                    const age = off+7 < original.length ? getByte(off+7) : null;
+                    const personality = off+9 < original.length ? getByte(off+9) : null;
+                    const flags = off+14 < original.length ? getByte(off+14) : null;
+                    const checking = getI32Patched(off-4);
+                    if (age>=0 && age<=11 && personality>=0 && personality<15 && status>=0 && status<7) {
+                        while (loc_index < locations.length && locations[loc_index].offset < i) { loc_index++; loc_pos_index = 0; }
+                        const location = locations[loc_index-1];
+                        if (tempindex >= 0) {
+                            if (!records[tempindex].detail_off) {
+                                records[tempindex].detail_off = [];
+                                records[tempindex].location = location.value;
+                                records[tempindex].detail_off.push(j+8);
+                                records[tempindex].pos_x = 0;
+                                records[tempindex].pos_y = 0;
+                            }
+                            if (location.value == "Map") {
+                                const pos_x = i-13 < original.length ? f32(i-16) : null;
+                                const pos_y = i-9 < original.length ? f32(i-12) : null;
+                                records[tempindex].pos_x = pos_x;
+                                records[tempindex].pos_y = pos_y;
+                                wildHorses.push(i);
+                            } else if (location.value == "The Jockey Club") {
+                                records[tempindex].isJockey = true;
+                                jockeys.push(i);
+                            }
+                            if (location.isFarm) {
+                                records[tempindex].inFarm = true;
+                                if (loc_pos_index > 0) farmHorses.push(i);
+                            }
+                        } else {
+                            if (location.value == "Map") wildHorses.push(i);
+                            else otherHorses.push(i);
+                        }
+                        loc_pos_index++;
+                    } else {
+                        otherDna.push(i);
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    //console.log("wild:", wildHorses.length, "farm:", farmHorses.length, "jockeys:", jockeys.length, "other:", otherHorses.length, "other dna:", otherDna.length);
+}
+
+// ------------------------------------------------------------------
+//  PARSE SAVE FILE (unchanged)
+// ------------------------------------------------------------------
+function parseSave() {
+    if (!original || original.length < 0x14) throw new Error("File too small");
+    const count = u32(0x10);
+    let off = 0x14;
+    records = [];
+    for (let idx = 0; idx < count; idx++) {
+        if (off+4 > original.length) throw new Error(`Record ${idx}: missing name length`);
+        const nameLen = u32(off);
+        const nameStart = off+4;
+        const nameEnd = nameStart + nameLen;
+        const fixedOffset = nameEnd;
+        const fixedEnd = fixedOffset+18;
+        const linkCountOffset = fixedEnd;
+        if (nameEnd > original.length || linkCountOffset+4 > original.length) throw new Error(`Record ${idx}: truncated`);
+        const nameBytes = original.slice(nameStart, nameEnd);
+        const name = new TextDecoder("utf-8").decode(nameBytes);
+        const linkCount = u32(linkCountOffset);
+        const linksOffset = linkCountOffset+4;
+        const next = linksOffset + linkCount*4;
+        if (next > original.length) throw new Error(`Record ${idx}: truncated links`);
+        const links = [];
+        for (let j=0; j<linkCount; j++) links.push(u32(linksOffset + j*4));
+        records.push({ idx, offset: off, nameLen, name, fixedOffset, linkCountOffset, linksOffset, links, end: next });
+        off = next;
+    }
+    const tableEnd = off;
+    const xoff = tableEnd + 0x34;
+    const yoff = tableEnd + 0x38;
+    const x = f32(xoff);
+    const y = f32(yoff);
+    locations = [];
+    locations.push({ offset: -1, length: -1, value: "vial world", isFarm: false, crowd: -1, xoff, yoff, xoff2: -1, yoff2: -1, x, y });
+    const offset1 = tableEnd + 0xF0;
+    const some_count = u32(offset1);
+    const offset2 = offset1 + 4 + (8*some_count);
+    WIDTH = u32(offset2);
+    HEIGHT = u32(offset2+4);
+    mapWidthInput.value = WIDTH;
+    mapHeightInput.value = HEIGHT;
+    updateDimInfo();
+    cachedMapStartOffset = offset2 + 8;
+    const tiles = decodeRLE(cachedMapStartOffset, original);
+    cachedMapEndOffset = cachedMapStartOffset + lastDecodedBytes;
+    const mapHex = bytesToHex(Array.from(original.slice(cachedMapStartOffset, cachedMapEndOffset)));
+    hexInput.value = mapHex;
+    const csvString = toCSV(tiles, WIDTH, HEIGHT);
+    csvOutput.value = csvString;
+    findDnaRuns();
+    renderLocationsTable();
+    //console.log(`Map data at offset ${hex(cachedMapStartOffset)} length ${lastDecodedBytes} bytes`);
+}
+
+// ------------------------------------------------------------------
+//  LOAD SAVE BUTTON
+// ------------------------------------------------------------------
+document.getElementById('fileInput').addEventListener('click', async () => {
+    try {
+        const options = { suggestedName: "save1.dat", types: [{ description: "DAT Files", accept: { "application/x-dat": [".dat"] } }] };
+        if (currentSaveHandle) options.startIn = currentSaveHandle;
+        const [handle] = await window.showOpenFilePicker(options);
+        currentSaveHandle = handle;
+        await saveHandleByKey("lastUsedSave", handle);
+        const file = await handle.getFile();
+        const buf = await file.arrayBuffer();
+        original = new Uint8Array(buf);
+        view = new DataView(buf);
+        try { parseSave(); } catch(e) { original = null; alert("Could not parse save: " + e.message); }
+    } catch(err) { if (err.name !== "AbortError") console.error(err); }
+});
+
+// ------------------------------------------------------------------
+//  TMX LOADER (object-to-location mapping)
+// ------------------------------------------------------------------
+function mapObjectTypeToLocationName(type, objectName) {
+    const directMap = {
+        "hacienda": "Hacienda Picante",
+        "willaby": "Willaby Ranch",
+        "home": "My House",
+        "track": "Race Track",
+        "paddock": "Paddock",
+        "surebreed": "Surebreed Steeples",
+        "supply": "Lasso-Mart",
+        "crispr": "CRISPR Lab",
+        "saloon": "Saloon",
+        "acres": "O'er Yonder Acres",
+        "sumo": "Sumo Ring",
+        "ecologist": "Tent",
+        "circled": "Circle-D Corral",
+        "powerplant": "Power Plant",
+        "paradise": "Paradise Pastures",
+        "zoo": "The Secret Zoo",
+        "club": "The Jockey Club",
+        "hermit": "Cave",
+        "circus": "The Circus",
+        "abandoned": "Old Abandoned Track",
+        "truck": "Truck",
+        "vial world": "vial world",
+        "bobs": "'s Farm",
+        "mabels": "'s Stables",
+        "sweetie": "'s House",
+        "hutch": "'s Hutch",
+        "glue": "'s Glues",
+        "car lot": "'s Rides",
+        "biohackers": "Normal Suburban House Bio-Hacker",
+        "junk": "Junk Shop",
+    };
+    if (directMap[type]) return directMap[type];
+    return null;
+}
+
+function convertCoordinates(x, y, isVialWorld = false) {
+    if (isVialWorld) {
+        return { x: Math.floor(x / 32) * 32, y: Math.ceil(y / 32) * 32 - 32 };
+    } else {
+        return { x: Math.floor(x / 32) * 32 + 16, y: Math.ceil(y / 32) * 32 - 16 };
+    }
+}
+
+function parseObjectsFromTMX(xmlDoc) {
+    const objects = [];
+    const objectGroups = xmlDoc.querySelectorAll("objectgroup");
+    for (const group of objectGroups) {
+        const objList = group.querySelectorAll("object");
+        for (const obj of objList) {
+            const type = obj.getAttribute("type") || "";
+            const name = obj.getAttribute("name") || "";
+            const x = parseFloat(obj.getAttribute("x"));
+            const y = parseFloat(obj.getAttribute("y"));
+            if (isNaN(x) || isNaN(y)) continue;
+            objects.push({ type: type.toLowerCase(), name, x, y });
+        }
+    }
+    return objects;
+}
+
+document.getElementById('tmxInput').addEventListener('click', async () => {
+    try {
+        const options = { suggestedName: "map.tmx", types: [{ description: "TMX Files", accept: { "application/x-tmx": [".tmx"] } }] };
+        if (lastUsedTMXHandle) options.startIn = lastUsedTMXHandle;
+        const [handle] = await window.showOpenFilePicker(options);
+        lastUsedTMXHandle = handle;
+        await saveHandleByKey("lastUsedTMX", handle);
+        const file = await handle.getFile();
+        const text = await file.text();
+        const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+        const mapElem = xmlDoc.querySelector("map");
+        if (!mapElem) throw new Error("Invalid TMX");
+        const width = parseInt(mapElem.getAttribute("width"),10);
+        const height = parseInt(mapElem.getAttribute("height"),10);
+        let layer = xmlDoc.querySelector("layer[name='Tiles']") || xmlDoc.querySelector("layer");
+        if (!layer) throw new Error("No layer found");
+        const dataElem = layer.querySelector("data");
+        if (!dataElem) throw new Error("No data");
+        if (dataElem.getAttribute("encoding") !== "csv") throw new Error("Only CSV encoding supported");
+        const csvText = dataElem.textContent;
+        const numberMatches = csvText.match(/\d+/g);
+        if (!numberMatches) throw new Error("No numbers found");
+        const numbers = numberMatches.map(n => parseInt(n,10));
+        if (numbers.length !== width * height) throw new Error(`Tile count mismatch: ${numbers.length} vs ${width*height}`);
+        WIDTH = width; HEIGHT = height;
+        mapWidthInput.value = WIDTH; mapHeightInput.value = HEIGHT;
+        updateDimInfo();
+        const rows = [];
+        for (let row=0; row<height; row++) rows.push(numbers.slice(row*width, (row+1)*width).join(","));
+        csvOutput.value = rows.join(",\n");
+        const encoded = encodeRLE(width, height, numbers);
+        hexInput.value = bytesToHex(encoded);
+        originalHexBytes = null;
+        byteDeltaSpan.innerHTML = `Byte change: — (TMX loaded, encoded to ${encoded.length} bytes)`;
+
+        if (original && view) {
+            const tmxObjects = parseObjectsFromTMX(xmlDoc);
+            let updatedCount = 0;
+            for (const obj of tmxObjects) {
+                let locationName = mapObjectTypeToLocationName(obj.type, obj.name);
+                if (!locationName) continue;
+                const locEntry = locations.find(loc => loc.value.includes(locationName) || locationName.includes(loc.value));
+                if (!locEntry) {
+                    console.warn(`Location "${locationName}" not found in save file, skipping`);
+                    continue;
+                }
+                const isVial = (locationName === "vial world");
+                const converted = convertCoordinates(obj.x, obj.y, isVial);
+                locEntry.x = converted.x;
+                locEntry.y = converted.y;
+                if (locEntry.xoff !== undefined && locEntry.xoff >= 0 && locEntry.xoff+4 <= original.length) {
+                    writeF32(locEntry.xoff, converted.x);
+                    writeF32(locEntry.yoff, converted.y);
+                }
+                if (locEntry.xoff2 !== undefined && locEntry.xoff2 !== -1 && locEntry.xoff2+4 <= original.length) {
+                    writeF32(locEntry.xoff2, converted.x);
+                    writeF32(locEntry.yoff2, converted.y);
+                }
+                updatedCount++;
+            }
+            renderLocationsTable();
+            alert(`Updated ${updatedCount} location coordinates from TMX objects.`);
+        } else {
+            console.log("No save file loaded – only map data was imported.");
+        }
+    } catch(err) { if (err.name !== "AbortError") alert("TMX load error: "+err.message); }
+});
+
+// ------------------------------------------------------------------
+//  EXPORT BUTTON: updates coordinates, replaces map, saves file
+// ------------------------------------------------------------------
+document.getElementById('replaceMapBtn').addEventListener('click', async () => {
+    if (!original || !view) { alert("No save file loaded."); return; }
+
+    // 1. Apply all current location coordinates to memory
+    for (let loc of locations) {
+        if (loc.xoff !== undefined && loc.xoff >= 0 && loc.xoff+4 <= original.length) {
+            writeF32(loc.xoff, loc.x);
+            writeF32(loc.yoff, loc.y);
+        }
+        if (loc.xoff2 !== undefined && loc.xoff2 !== -1 && loc.xoff2+4 <= original.length) {
+            writeF32(loc.xoff2, loc.x);
+            writeF32(loc.yoff2, loc.y);
+        }
+    }
+
+    // 2. Get the current map hex (the RLE encoded map data)
+    const hexStr = hexInput.value.trim();
+    if (!hexStr) { alert("Hex input is empty. Load a TMX or decode first."); return; }
+    const newMapBytes = hexToBytes(hexStr);
+    const newWidth = parseInt(mapWidthInput.value,10);
+    const newHeight = parseInt(mapHeightInput.value,10);
+    if (isNaN(newWidth) || isNaN(newHeight) || newWidth<1 || newHeight<1) { alert("Invalid dimensions"); return; }
+
+    // Recompute offsets to update dimensions in the file
+    let off = 0x14;
+    const count = u32(0x10);
+    for (let i=0; i<count; i++) {
+        const nameLen = u32(off);
+        off += 4 + nameLen + 18 + 4 + u32(off+4+nameLen+18)*4;
+    }
+    const tableEnd = off;
+    const offset1 = tableEnd + 0xF0;
+    const some_count = u32(offset1);
+    const offset2 = offset1 + 4 + (8*some_count);
+
+    // Build new file buffer
+    const headerSize = cachedMapStartOffset;
+    const footerSize = original.length - cachedMapEndOffset;
+    const newTotalSize = headerSize + newMapBytes.length + footerSize;
+    const newBuffer = new Uint8Array(newTotalSize);
+    newBuffer.set(original.slice(0, headerSize), 0);
+    newBuffer.set(newMapBytes, headerSize);
+    newBuffer.set(original.slice(cachedMapEndOffset), headerSize + newMapBytes.length);
+    const newView = new DataView(newBuffer.buffer);
+    newView.setUint32(offset2, newWidth, true);
+    newView.setUint32(offset2+4, newHeight, true);
+
+    // Save to disk
+    try {
+        const saveOptions = {
+            suggestedName: currentSaveHandle ? (await currentSaveHandle.getFile()).name : "modified_save.dat",
+            types: [{ description: "DAT Files", accept: { "application/x-dat": [".dat"] } }]
+        };
+        if (currentSaveHandle) saveOptions.startIn = currentSaveHandle;
+        const saveHandle = await window.showSaveFilePicker(saveOptions);
+        const writable = await saveHandle.createWritable();
+        await writable.write(newBuffer);
+        await writable.close();
+        alert("Save file exported successfully with updated map and coordinates.");
+    } catch(err) { if (err.name !== "AbortError") alert("Save cancelled or failed: " + err.message); }
+});
+
+// ------------------------------------------------------------------
+//  DECODE / ENCODE / CLEAR (still exist but hidden – not needed for UI)
+// ------------------------------------------------------------------
+let originalHexBytes = null;
+function updateByteDelta(newHexStr) {
+    if (originalHexBytes === null) { byteDeltaSpan.innerText = `Byte change: — (no original hex loaded)`; return; }
+    const newLen = getByteLength(newHexStr);
+    const diff = newLen - originalHexBytes;
+    byteDeltaSpan.innerHTML = `Byte change: ${diff>=0?'+':''}${diff}  (original: ${originalHexBytes} bytes, new: ${newLen} bytes)`;
+}
+
+decodeBtn.addEventListener('click', () => { /* kept for internal use, not shown */ });
+encodeBtn.addEventListener('click', () => { /* kept for internal use */ });
+clearHexBtn.addEventListener('click', () => { hexInput.value = ''; originalHexBytes = null; });
+clearCsvBtn.addEventListener('click', () => { csvOutput.value = ''; });
+
+// Restore persistent save handle on page load
+(async () => {
+    const savedSaveHandle = await loadHandleByKey("lastUsedSave");
+    if (savedSaveHandle) { currentSaveHandle = savedSaveHandle; console.log("Restored save handle from IndexedDB"); }
+    lastUsedTMXHandle = await loadHandleByKey("lastUsedTMX");
+})();
+</script>
+<script src="./js/headers.js"></script>
+</body>
+</html>

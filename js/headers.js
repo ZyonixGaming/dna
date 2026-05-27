@@ -33,6 +33,11 @@ const HEADER_LINKS = [
         icon: '✓'
     },	
     {
+        name: 'Save Game Map Tool',
+        url: 'https://zyonixgaming.github.io/dna/map-tool.html',
+        icon: '📝'
+    },	
+    {
         name: 'Horsey Game Save Editor',
         url: 'https://zyonixgaming.github.io/dna/save-editor.html',
         icon: '📝'
