@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta content="width=device-width,initial-scale=1" name="viewport" />
         <title>Horsey Save Editor</title>
-		<link rel="stylesheet" href="./css/save-editor.css">
+		<link rel="stylesheet" href="save-editor.css">
 		<link rel="stylesheet" href="./css/headers.css">
     <style>
 .header-bar {
@@ -1544,17 +1544,20 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 
 				
 				//const itemcount = i32(primaryDetail.off  + 31);
-				let itemcount = (primaryDetail && primaryDetail.off + 31 +3 < original.length) ? getI32Patched(primaryDetail.off + 31) : 0;		
+				let voiceStrLen=0;
+				voiceStrLen=(primaryDetail && primaryDetail.off + 31 +3-8 < original.length) ? getI32Patched(primaryDetail.off + 31-8) : 0;		
+				
+
+				let itemcount = (primaryDetail && primaryDetail.off+voiceStrLen + 31 +3 < original.length) ? getI32Patched(primaryDetail.off+voiceStrLen + 31) : 0;		
 				let itemoffset = 0;
+				
+
+				
 				if (itemcount<0||itemcount>=10){
-					itemoffset=12;
-					console.log("is "+r.name + " Sweetie?");
-					console.log(getByte(primaryDetail.off + 23));
-					itemcount= (primaryDetail && primaryDetail.off + itemoffset + 31 +3 < original.length) ? getI32Patched(primaryDetail.off + itemoffset + 31) : 0;	
-					if (itemcount<0||itemcount>=10){
+
 						itemcount=0;
 						//prevent error
-					}
+
 				}
 					//off + 31 < original.length ? getByte(off + 31) : 0;						
 				
@@ -1564,8 +1567,8 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 					const itemSlots = new Set();
 					for(let itemidx=0;itemidx<itemcount;itemidx++){
 						const itemoff=35+(8*itemidx);
-						const item_pos=getI32Patched(primaryDetail.off + itemoffset+itemoff);
-						const item_id=getI32Patched(primaryDetail.off + itemoffset+itemoff+4);							
+						const item_pos=getI32Patched(primaryDetail.off+voiceStrLen + itemoffset+itemoff);
+						const item_id=getI32Patched(primaryDetail.off+voiceStrLen + itemoffset+itemoff+4);							
 						items[itemidx]={pos:item_pos,id:item_id};
 						const itemIds=Object.keys(ITEMS);
 						
@@ -1597,8 +1600,8 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 								
 								if(newPos==item_pos||(!itemSlots.has(newPos))){
 								
-									setI32(primaryDetail.off + itemoffset + itemoff, newPos);
-									setI32(primaryDetail.off + itemoffset + itemoff + 4, newVal);
+									setI32(primaryDetail.off+voiceStrLen + itemoffset + itemoff, newPos);
+									setI32(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4, newVal);
 								}else{
 									alert("There is another equipment in the same position as " + ITEMS[newVal].name +".");
 									
@@ -1613,11 +1616,11 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 								propRow(
 									"Item "+(itemidx+1)+" position",
 									makeNumberInput(
-										getByte(primaryDetail.off + itemoffset + itemoff),
+										getByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff),
 										0,
 										255,
 										(v) => {
-											setByte(primaryDetail.off + itemoffset + itemoff, v);
+											setByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff, v);
 											renderSelected();
 											renderRecords();
 										},
@@ -1629,11 +1632,11 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 								propRow(
 									"Item "+(itemidx+1)+" ID",
 									makeNumberInput(
-										getByte(primaryDetail.off + itemoffset + itemoff + 4),
+										getByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4),
 										0,
 										255,
 										(v) => {
-											setByte(primaryDetail.off + itemoffset + itemoff + 4, v);
+											setByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4, v);
 											renderSelected();
 											renderRecords();
 										},
