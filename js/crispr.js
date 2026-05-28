@@ -670,7 +670,11 @@ function parseAndLoadFromTextarea(){
   updateDnaUrl();
 }
 function renderTable(){
-  let filtered=currentGenePairs.filter(p=>p.desc.toLowerCase().includes(currentFilter.toLowerCase()));
+	const filterWords = currentFilter.toLowerCase().trim().split(/\s+/);
+
+	let filtered = currentGenePairs.filter(p => 
+	  filterWords.some(word => p.desc.toLowerCase().includes(word))
+	);
   const hasCompare=compareModeActive;
   const thead=document.getElementById("dynamicThead");
   thead.innerHTML=`<th style="width:45px;">⭐</th><th>Helix</th><th>Position</th><th>m</th><th>Description <a href="https://horseygame.miraheze.org/wiki/Genome" target="_blank">(?)</a></th><th colspan="2">Pair 1</th><th colspan="2">Pair 2</th><th>Value <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3704208519" target="_blank">(?)</a></th>${hasCompare?"<th>Compare</th>":""}`;

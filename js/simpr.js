@@ -113,9 +113,11 @@ function coloredPairSpans(pairStr) {
 
 // ---------- Override renderTable (uses gp.h, gp.p) ----------
 window.renderTable = function () {
-    let filtered = currentGenePairs.filter(p =>
-        p.desc.toLowerCase().includes(currentFilter.toLowerCase())
-    );
+	const filterWords = currentFilter.toLowerCase().trim().split(/\s+/);
+
+	let filtered = currentGenePairs.filter(p => 
+	  filterWords.some(word => p.desc.toLowerCase().includes(word))
+	);
 
     const thead = document.getElementById('dynamicThead');
     thead.innerHTML =

@@ -449,14 +449,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTable() {
     const tbody = document.getElementById('geneTableBody');
     let html = '';
-    const filterLower = currentFilter.toLowerCase();
+    const filterWords = currentFilter.toLowerCase().trim().split(/\s+/);
     allEntries.forEach(gene => {		
       const stateObj = geneStates.get(gene.key);
       const state = stateObj.state;
       const selected = stateObj.selectedBases;
       const toggleIcon = state === 'source' ? '🧪' : '🧬';
       const toggleClass = state === 'source' ? 'source' : 'random';
-      const nameMatch = gene.desc.toLowerCase().includes(filterLower);
+/*
+	let filtered = currentGenePairs.filter(p => 
+	  filterWords.some(word => p.desc.toLowerCase().includes(word))
+	);
+
+*/	
+	  
+      //const nameMatch = gene.desc.toLowerCase().includes(filterLower);
+	  const nameMatch =  filterWords.some(word => gene.desc.toLowerCase().includes(word));
       const rowStyle = nameMatch ? '' : 'style="display:none;"';
       const sourceClass = state === 'source' ? ' source-mode' : '';
       const baseButtons = gene.priorityOrder.map((base, idx) => {
