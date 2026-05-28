@@ -339,7 +339,7 @@ async function loadGeneDataFromXml(xmlString="") {
 		  }
 
 		  matrix[idx1][idx2] = value;
-		  if(idx2<idx1){
+		  if(idx2>idx1){
 			  matrix[idx2][idx1] = value;
 		  }
 		  

@@ -542,9 +542,11 @@ function computeWeightedValue(entry, allele1, allele2) {
 */
 
 function computeWeightedValue(entry, allele1, allele2) {
+	
   // edge case: if bases not found, fallback to old method (or return 0)
 	const i1 = entry.n.indexOf(allele1);
 	const i2 = entry.n.indexOf(allele2);
+
 	return entry.valueMatrix[i1][i2];
 }
 
@@ -805,6 +807,38 @@ function removeDiversity(){
 	}
 }
 
+function fixDna(){
+	let modified=0;
+	currentGenePairs.forEach(gp=>{
+		const idx1=gp.n.indexOf(gp.allele1);
+		const idx2=gp.n.indexOf(gp.allele2);
+		const domIdx = idx1<idx2 ? idx1 : idx2;
+		const recIdx = idx1>idx2 ? idx1 : idx2;
+		
+		const domBase = gp.n[domIdx];
+		let recBase;
+		//consider checking dom value instead of just dom base to minimize changes.
+		if (domBase=="A") recBase = "T";
+		if (domBase=="T") recBase = "A";
+		if (domBase=="G") recBase = "C";
+		if (domBase=="C") recBase = "G";
+		
+		if(idx1==domIdx){
+			gp.allele1=domBase;
+			gp.allele2=recBase;
+		}else{
+			gp.allele2=domBase;
+			gp.allele1=recBase;		
+		}
+		modified++;				
+		
+	});
+	if(modified){
+		syncTextareaFromTable();
+		renderTable();
+		renderBookmarksList();
+	}
+}
 
 function randomDiversity() {
     let modified = 0;
