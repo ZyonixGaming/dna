@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix My DNA! - Sequence Analyzer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Orbitron:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap');
+
+        :root {
+            /* Bio-Tech Color Palette */
+            --bg-dark: #030712;
+            --bg-grid: rgba(0, 255, 255, 0.03);
+            --surface: rgba(15, 23, 42, 0.75);
+            --surface-inner: rgba(2, 6, 23, 0.85);
+            --border: #1e3a8a;
+            --border-glow: rgba(56, 189, 248, 0.4);
+            
+            /* Text & UI */
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-highlight: #38bdf8;
+            --radius: 12px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* DNA Specific Colors (Neon) */
+            --dna-a: #fbbf24; /* Adenine - Gold */
+            --dna-t: #f43f5e; /* Thymine - Crimson */
+            --dna-c: #38bdf8; /* Cytosine - Cyan */
+            --dna-g: #4ade80; /* Guanine - Emerald */
+            --dna-invalid: #ef4444; 
+            
+            --index-color: #818cf8;
+            --colon-color: #475569;
+            --mismatch-bg: rgba(239, 68, 68, 0.25);
+            --mismatch-border: rgba(239, 68, 68, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.2) 0%, transparent 70%),
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Custom Sci-Fi Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.5); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+        
+        /* Scanning Line Effect on Header */
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+            animation: scanline 3s linear infinite;
+        }
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            animation: pulse-icon 4s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-icon {
+            0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+            100% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.5); }
+        }
+
+        .header h1 {
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            margin-bottom: 2px;
+        }
+        .header .subtitle {
+            color: var(--text-highlight);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px;
+            background: rgba(2, 6, 23, 0.4);
+            border-bottom: 1px solid rgba(30, 58, 138, 0.5);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: rgba(0, 0, 0, 0.3);
+            transition: all var(--transition);
+        }
+        .btn:active { transform: scale(0.96); }
+        
+        .btn-paste {
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.1);
+        }
+        .btn-paste:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-copy {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.4);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.1);
+        }
+        .btn-copy:hover {
+            background: rgba(74, 222, 128, 0.1);
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-clear {
+            color: #f43f5e;
+            border-color: rgba(244, 63, 94, 0.4);
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.1);
+        }
+        .btn-clear:hover {
+            background: rgba(244, 63, 94, 0.1);
+            border-color: #f43f5e;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+        }
+        .btn .btn-icon { font-size: 1.1rem; filter: saturate(1.5) brightness(1.2); }
+
+        .status-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--text-highlight);
+            text-transform: uppercase;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+            animation: pulse-dot 2s infinite;
+        }
+        .status-dot.processing {
+            background: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+            animation: pulse-dot-fast 0.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        @keyframes pulse-dot-fast {
+            0%, 100% { box-shadow: 0 0 5px #fbbf24; }
+            50% { box-shadow: 0 0 15px #fbbf24; }
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+        }
+
+        .panel-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-highlight);
+        }
+        .panel-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.3), transparent);
+        }
+
+        .editor-wrapper, .output-wrapper {
+            position: relative;
+            margin: 0 24px 10px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 8px;
+            background: var(--surface-inner);
+            transition: all var(--transition);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* CRT Scanline Overlay for Editors */
+        .editor-wrapper::before, .output-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+            border-radius: inherit;
+        }
+
+        .editor-wrapper:focus-within {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px #38bdf8, 0 0 15px rgba(56, 189, 248, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .editor-wrapper .highlight-layer,
+        .output-display {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            padding: 16px;
+            letter-spacing: 1px;
+        }
+
+        .editor-wrapper .highlight-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: auto;
+            pointer-events: none;
+            z-index: 1;
+            color: transparent;
+        }
+        
+        .editor-wrapper textarea {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            letter-spacing: 1px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: none;
+            outline: none;
+            resize: vertical;
+            background: transparent;
+            color: transparent;
+            caret-color: #38bdf8;
+        }
+        .editor-wrapper textarea::placeholder {
+            color: rgba(148, 163, 184, 0.4);
+            font-style: italic;
+        }
+        .editor-wrapper textarea.visible-text {
+            color: var(--text-main) !important;
+        }
+
+        /* Scientific Data Highlighting */
+        span.char-A { color: var(--dna-a) !important; text-shadow: 0 0 8px rgba(251, 191, 36, 0.5); font-weight: 600; }
+        span.char-T { color: var(--dna-t) !important; text-shadow: 0 0 8px rgba(244, 63, 94, 0.5); font-weight: 600; }
+        span.char-C { color: var(--dna-c) !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); font-weight: 600; }
+        span.char-G { color: var(--dna-g) !important; text-shadow: 0 0 8px rgba(74, 222, 128, 0.5); font-weight: 600; }
+        
+        span.char-invalid {
+            color: var(--dna-invalid) !important;
+            text-decoration: line-through;
+            text-decoration-color: #ef4444;
+            text-decoration-thickness: 2px;
+            text-shadow: 0 0 5px rgba(239, 68, 68, 0.8);
+            font-weight: bold;
+        }
+        span.char-mismatch {
+            background: var(--mismatch-bg) !important;
+            border: 1px solid var(--mismatch-border);
+            border-radius: 3px;
+            padding: 0 1px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+            animation: error-flicker 2s infinite;
+        }
+        @keyframes error-flicker {
+            0%, 100% { background: var(--mismatch-bg); }
+            50% { background: rgba(239, 68, 68, 0.4); }
+        }
+
+        .index-part {
+            color: var(--index-color) !important;
+            opacity: 0.8;
+            user-select: none;
+        }
+        .colon-part {
+            color: var(--colon-color) !important;
+            user-select: none;
+            margin-right: 4px;
+        }
+
+        .overlay-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 24px 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .overlay-toggle:hover { color: var(--text-highlight); }
+        .overlay-toggle input {
+            cursor: pointer;
+            accent-color: #38bdf8;
+            width: 14px;
+            height: 14px;
+        }
+
+        .output-wrapper {
+            margin-bottom: 24px;
+            min-height: 150px;
+        }
+        .output-display {
+			min-height: 150px;
+			max-height: 400px;
+			overflow: auto;
+			color: var(--text-main);
+			white-space: pre-wrap; /* ADD THIS LINE: Preserves the \n line breaks */
+			word-wrap: break-word; /* ADD THIS LINE: Prevents long text from overflowing */
+        }
+        .output-placeholder {
+            color: rgba(148, 163, 184, 0.4);
+            font-style: italic;
+            text-align: center;
+            padding: 50px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success { border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
+        .toast.warning { border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); }
+
+        @media (max-width: 600px) {
+            .toolbar { padding: 12px 16px; gap: 8px; justify-content: center; }
+            .btn { padding: 8px 12px; font-size: 0.8rem; }
+            .header { padding: 16px 20px; }
+            .header h1 { font-size: 1.3rem; }
+            .editor-wrapper, .output-wrapper, .panel-label, .overlay-toggle { margin-left: 16px; margin-right: 16px; }
+            .status-area { width: 100%; justify-content: center; margin-top: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🧬</div>
+            <div>
+                <h1>Fix My DNA!</h1>
+                <div class="subtitle">GENOMIC SEQUENCE ANALYZER v3.50</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-paste" id="pasteBtn" title="Paste from clipboard">
+                <span class="btn-icon">📋</span> Paste Flawed DNA
+            </button>
+            <button class="btn btn-copy" id="copyBtn" title="Copy formatted output to clipboard">
+                <span class="btn-icon">📝</span> Copy Fixed DNA
+            </button>
+            <button class="btn btn-clear" id="clearBtn" title="Clear all content">
+                <span class="btn-icon">🗑️</span> Purge DNA
+            </button>
+            <div class="status-area">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">System Ready</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel-label">📥 Raw DNA Input</div>
+            <div class="editor-wrapper" id="editorWrapper">
+                <div class="highlight-layer" id="highlightLayer"></div>
+                <textarea id="inputArea" placeholder="Initialize data stream. Paste sequences here...&#10;&#10;Format:&#10;00:GCCAAGGATA&#10;00:TACAACTCAT&#10;01:GGGTCCCCTACCA..." spellcheck="false"></textarea>
+            </div>
+            <label class="overlay-toggle" title="Toggle color overlay in the editor">
+                <input type="checkbox" id="overlayToggle" checked> Enable Bio-Metric Color Overlay
+            </label>
+
+            <div class="panel-label">📤 Synthesized DNA Output</div>
+            <div class="output-wrapper">
+                <div class="output-display" id="outputArea">
+                    <div class="output-placeholder">Awaiting sequence data for processing...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            const inputArea = document.getElementById('inputArea');
+            const highlightLayer = document.getElementById('highlightLayer');
+            const outputArea = document.getElementById('outputArea');
+            const overlayToggle = document.getElementById('overlayToggle');
+            const pasteBtn = document.getElementById('pasteBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const toast = document.getElementById('toast');
+
+            const expectedLengths = {
+                0: 10,
+                1: 13,
+                2: 13,
+                3: 15,
+                4: 11,
+                5: 8,
+                6: 11,
+                7: 8,
+                8: 11,
+                9: 11,
+                10: 13,
+                11: 15,
+                12: 13,
+                13: 11,
+                14: 11,
+                15: 13,
+                16: 15,
+                17: 11,
+                18: 11,
+                19: 16
+            };
+
+            const complementMap = {
+                'A': 'T',
+                'T': 'A',
+                'G': 'C',
+                'C': 'G'
+            };
+            const validNucleotides = ['A', 'C', 'G', 'T'];
+
+            function randomNucleotide() {
+                return validNucleotides[Math.floor(Math.random() * 4)];
+            }
+
+            let toastTimer;
+            function showToast(message, type = '') {
+                clearTimeout(toastTimer);
+                toast.textContent = message;
+                toast.className = 'toast ' + type + ' show';
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+
+            function setStatus(state, text) {
+                statusDot.className = 'status-dot';
+                if (state === 'processing') {
+                    statusDot.classList.add('processing');
+                }
+                statusText.textContent = text;
+            }
+
+            function cleanSequence(rawSeq, expectedLen) {
+                let seq = rawSeq.toUpperCase();
+                let cleaned = '';
+                for (let i = 0; i < seq.length; i++) {
+                    const ch = seq[i];
+                    if (ch === 'A' || ch === 'C' || ch === 'G' || ch === 'T') {
+                        cleaned += ch;
+                    } else {
+                        cleaned += randomNucleotide();
+                    }
+                }
+                if (expectedLen !== undefined && expectedLen !== null) {
+                    if (cleaned.length > expectedLen) {
+                        cleaned = cleaned.substring(0, expectedLen);
+                    } else if (cleaned.length < expectedLen) {
+                        while (cleaned.length < expectedLen) {
+                            cleaned += randomNucleotide();
+                        }
+                    }
+                }
+                return cleaned;
+            }
+
+            function generateComplement(sequence) {
+                let comp = '';
+                for (const ch of sequence) {
+                    comp += complementMap[ch] || randomNucleotide();
+                }
+                return comp;
+            }
+
+            function parseInput(text) {
+                const lines = text.split(/\r?\n/);
+                const indexMap = new Map();
+                const indexOrder = [];
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+
+                    const match = trimmed.match(/^(\d{1,2})\s*:\s*([A-Za-z\s]*)$/);
+                    if (!match) {
+                        const looseMatch = trimmed.match(/^(\d{1,2})\s*:\s*(.*)$/);
+                        if (looseMatch) {
+                            const idx = parseInt(looseMatch[1], 10);
+                            const seq = looseMatch[2].replace(/\s+/g, '');
+                            if (idx >= 0 && idx <= 19 && seq.length > 0) {
+                                if (!indexMap.has(idx)) {
+                                    indexMap.set(idx, { index: idx, sequences: [] });
+                                    indexOrder.push(idx);
+                                }
+                                indexMap.get(idx).sequences.push(seq);
+                            }
+                        }
+                        continue;
+                    }
+
+                    const idx = parseInt(match[1], 10);
+                    const seq = match[2].replace(/\s+/g, '');
+
+                    if (idx < 0 || idx > 19) continue;
+                    if (seq.length === 0) continue;
+
+                    if (!indexMap.has(idx)) {
+                        indexMap.set(idx, { index: idx, sequences: [] });
+                        indexOrder.push(idx);
+                    }
+                    indexMap.get(idx).sequences.push(seq);
+                }
+
+                const result = indexOrder.map(idx => indexMap.get(idx));
+                result.sort((a, b) => a.index - b.index);
+                return result;
+            }
+
+            function processInput(text) {
+                const parsed = parseInput(text);
+                const outputLines = [];
+
+                for (const entry of parsed) {
+                    const idx = entry.index;
+                    const expectedLen = expectedLengths[idx] || null;
+                    const rawFirst = entry.sequences[0] || '';
+                    const cleanedFirst = cleanSequence(rawFirst, expectedLen);
+                    const complement = generateComplement(cleanedFirst);
+
+                    const idxStr = String(idx).padStart(2, '0');
+                    outputLines.push(`${idxStr}:${cleanedFirst}`);
+                    outputLines.push(`${idxStr}:${complement}`);
+                }
+
+                return outputLines.join('\n');
+            }
+
+            function findMismatches(pairs) {
+                const mismatchPositions = new Set();
+                for (let i = 0; i < pairs.length - 1; i += 2) {
+                    const line1 = pairs[i];
+                    const line2 = pairs[i + 1];
+                    if (!line1 || !line2) continue;
+                    const match1 = line1.match(/^(\d{2}):(.+)$/);
+                    const match2 = line2.match(/^(\d{2}):(.+)$/);
+                    if (!match1 || !match2) continue;
+                    if (match1[1] !== match2[1]) continue;
+                    const seq1 = match1[2];
+                    const seq2 = match2[2];
+                    const maxLen = Math.max(seq1.length, seq2.length);
+                    for (let j = 0; j < maxLen; j++) {
+                        const c1 = seq1[j] || '';
+                        const c2 = seq2[j] || '';
+                        if (c1 && c2 && complementMap[c1] !== c2) {
+                            mismatchPositions.add(`${i}:${j}`);
+                            mismatchPositions.add(`${i+1}:${j}`);
+                        }
+                    }
+                }
+                return mismatchPositions;
+            }
+
+            function renderHighlightHTML(rawText) {
+                const lines = rawText.split(/\r?\n/);
+                const htmlLines = [];
+                const pairs = [];
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) {
+                        pairs.push(null);
+                        continue;
+                    }
+                    const match = trimmed.match(/^(\d{1,2})\s*:\s*(.*)$/);
+                    if (match) {
+                        const idx = String(parseInt(match[1], 10)).padStart(2, '0');
+                        const seq = match[2].replace(/\s+/g, '').toUpperCase();
+                        pairs.push(`${idx}:${seq}`);
+                    } else {
+                        pairs.push(null);
+                    }
+                }
+
+                const mismatchPositions = findMismatches(pairs);
+
+                for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+                    const line = lines[lineIdx];
+                    const trimmed = line.trim();
+                    if (!trimmed) {
+                        htmlLines.push('');
+                        continue;
+                    }
+
+                    const match = trimmed.match(/^(\d{1,2}\s*:\s*)(.*)$/);
+                    if (match) {
+                        const indexPart = match[1];
+                        const seqPart = match[2].replace(/\s+/g, '');
+                        let seqHTML = '';
+                        for (let charIdx = 0; charIdx < seqPart.length; charIdx++) {
+                            const ch = seqPart[charIdx];
+                            const upper = ch.toUpperCase();
+                            const isMismatch = mismatchPositions.has(`${lineIdx}:${charIdx}`);
+                            let classes = '';
+                            if (upper === 'A' || upper === 'C' || upper === 'G' || upper === 'T') {
+                                classes = `char-${upper}`;
+                            } else if (ch.trim() === '') {
+                                seqHTML += ' ';
+                                continue;
+                            } else {
+                                classes = 'char-invalid';
+                            }
+                            if (isMismatch) {
+                                classes += ' char-mismatch';
+                            }
+                            seqHTML += `<span class="${classes}">${escapeHTML(ch)}</span>`;
+                        }
+                        htmlLines.push(
+                            `<span class="index-part">${escapeHTML(indexPart)}</span>${seqHTML}`
+                        );
+                    } else {
+                        htmlLines.push(escapeHTML(line));
+                    }
+                }
+
+                return htmlLines.join('\n');
+            }
+
+            function renderOutputHTML(processedText) {
+                const lines = processedText.split(/\r?\n/);
+                const mismatchPositions = findMismatches(lines);
+                const htmlLines = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (!line.trim()) {
+                        htmlLines.push('');
+                        continue;
+                    }
+
+                    const match = line.match(/^(\d{2}):(.+)$/);
+                    if (match) {
+                        const idxPart = match[1];
+                        const seqPart = match[2];
+                        let seqHTML = '';
+                        for (let j = 0; j < seqPart.length; j++) {
+                            const ch = seqPart[j];
+                            const upper = ch.toUpperCase();
+                            const isMismatch = mismatchPositions.has(`${i}:${j}`);
+                            let classes = '';
+                            if (upper === 'A' || upper === 'C' || upper === 'G' || upper === 'T') {
+                                classes = `char-${upper}`;
+                            } else {
+                                classes = 'char-invalid';
+                            }
+                            if (isMismatch) {
+                                classes += ' char-mismatch';
+                            }
+                            seqHTML += `<span class="${classes}">${upper}</span>`;
+                        }
+                        htmlLines.push(
+                            `<span class="index-part">${idxPart}</span><span class="colon-part">:</span>${seqHTML}`
+                        );
+                    } else {
+                        htmlLines.push(escapeHTML(line));
+                    }
+                }
+
+                return htmlLines.join('\n') || '<div class="output-placeholder">Awaiting sequence data for processing...</div>';
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.appendChild(document.createTextNode(str));
+                return div.innerHTML;
+            }
+
+            function updateAll(rawText) {
+                if (overlayToggle.checked) {
+                    highlightLayer.innerHTML = renderHighlightHTML(rawText);
+                    highlightLayer.style.display = '';
+                    inputArea.style.color = 'transparent';
+                    inputArea.classList.remove('visible-text');
+                } else {
+                    highlightLayer.innerHTML = '';
+                    highlightLayer.style.display = 'none';
+                    inputArea.style.color = '#e2e8f0'; // Updated to match the dark theme text color
+                    inputArea.classList.add('visible-text');
+                }
+
+                const processed = processInput(rawText);
+                outputArea.innerHTML = renderOutputHTML(processed);
+                outputArea.dataset.processedText = processed;
+                syncScroll();
+            }
+
+            function syncScroll() {
+                highlightLayer.scrollTop = inputArea.scrollTop;
+                highlightLayer.scrollLeft = inputArea.scrollLeft;
+            }
+
+            // Fast update - use requestAnimationFrame for smooth rendering
+            let rafId = null;
+            function fastUpdate() {
+                if (rafId) return;
+                setStatus('processing', 'Analyzing...');
+                rafId = requestAnimationFrame(() => {
+                    const rawText = inputArea.value;
+                    updateAll(rawText);
+                    setStatus('ready', 'System Ready');
+                    rafId = null;
+                });
+            }
+
+            function immediateUpdate() {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+                const rawText = inputArea.value;
+                updateAll(rawText);
+                setStatus('ready', 'System Ready');
+            }
+
+            inputArea.addEventListener('input', fastUpdate);
+            inputArea.addEventListener('scroll', syncScroll);
+            inputArea.addEventListener('paste', () => {
+                setTimeout(immediateUpdate, 10);
+            });
+
+            overlayToggle.addEventListener('change', () => {
+                const rawText = inputArea.value;
+                if (overlayToggle.checked) {
+                    highlightLayer.innerHTML = renderHighlightHTML(rawText);
+                    highlightLayer.style.display = '';
+                    inputArea.style.color = 'transparent';
+                    inputArea.classList.remove('visible-text');
+                } else {
+                    highlightLayer.innerHTML = '';
+                    highlightLayer.style.display = 'none';
+                    inputArea.style.color = '#e2e8f0'; // Updated to match the dark theme text color
+                    inputArea.classList.add('visible-text');
+                }
+                syncScroll();
+            });
+
+            pasteBtn.addEventListener('click', async () => {
+                try {
+                    if (!navigator.clipboard || !navigator.clipboard.readText) {
+                        inputArea.focus();
+                        showToast('Clipboard API not available. Please use Ctrl+V to paste.', 'warning');
+                        return;
+                    }
+                    const clipboardText = await navigator.clipboard.readText();
+                    if (clipboardText && clipboardText.trim()) {
+                        inputArea.value = clipboardText;
+                        immediateUpdate();
+                        showToast('Data stream successfully injected!', 'success');
+                    } else {
+                        showToast('Clipboard data is null.', 'warning');
+                    }
+                } catch (err) {
+                    inputArea.focus();
+                    showToast('Could not access clipboard data. Use Ctrl+V.', 'warning');
+                }
+            });
+
+            copyBtn.addEventListener('click', async () => {
+                const processedText = outputArea.dataset.processedText || '';
+                if (!processedText.trim()) {
+                    showToast('No synthesized data available to export.', 'warning');
+                    return;
+                }
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(processedText);
+                        showToast('Synthesized data exported to clipboard!', 'success');
+                    } else {
+                        const tempTextarea = document.createElement('textarea');
+                        tempTextarea.value = processedText;
+                        tempTextarea.style.position = 'fixed';
+                        tempTextarea.style.left = '-9999px';
+                        document.body.appendChild(tempTextarea);
+                        tempTextarea.focus();
+                        tempTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            showToast('Synthesized data exported to clipboard!', 'success');
+                        } catch (execErr) {
+                            showToast('Export failed. Manual intervention required.', 'warning');
+                        }
+                        document.body.removeChild(tempTextarea);
+                    }
+                } catch (err) {
+                    showToast('Export matrix failure.', 'warning');
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                inputArea.value = '';
+                highlightLayer.innerHTML = '';
+                outputArea.innerHTML = '<div class="output-placeholder">Awaiting sequence data for processing...</div>';
+                outputArea.dataset.processedText = '';
+                setStatus('ready', 'Data Purged');
+                inputArea.focus();
+                showToast('All sequences purged from memory.', 'success');
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    copyBtn.click();
+                }
+            });
+
+            inputArea.value = "";
+            immediateUpdate();
+
+            window.addEventListener('resize', syncScroll);
+        })();
+    </script>
+</body>
+</html>
