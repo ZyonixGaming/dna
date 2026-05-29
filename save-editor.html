@@ -1858,16 +1858,19 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 					applyGenomeToSaveX(nextGenome,genomeStart);
 				}
                 const applyGenomeToSaveX = (nextGenome,genomeStart) => {
+					console.log(nextGenome);
 					const dnaStatus = document.getElementById("dna-status");
 					let failures = [];
 					let rows = HELIX_LENGTHS.length;	
 				
 					for (let i = 0; i < rows; i++) {
 
-						for (let j = 0; j < HELIX_LENGTHS[i].length; j++) {
+						for (let j = 0; j < HELIX_LENGTHS[i]; j++) {
 							
 							const rawIndex=GENE_MAP[i][j];
+							console.log(rawIndex);
                             if (rawIndex === null) {
+								
                                 failures.push(`${i}:${j} no raw index`);
                                 continue;
                             }							
@@ -1876,8 +1879,10 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
 							const p1 = nextGenome[i][0][j];
 							const p2 = nextGenome[i][1][j];
 							const pair = p1+""+p2;
+							console.log(pair);
 							if(p1&&p2){
 							}else{
+								
 								failures.push(`${i}:${j} no data`);
 								for (let i = 0; i < genomeLen; i++) patches.delete(genomeStart + i);
 								renderPatchState();
