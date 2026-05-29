@@ -1228,8 +1228,8 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                     rows = rows.filter(
                         (r) =>
                             String(r.idx).includes(q) ||
-                            r.name.toLowerCase().includes(q) ||
-							r.location.toLowerCase().includes(q)||
+                            (r.name && r.name.toLowerCase().includes(q)) ||
+							(r.location&&r.location.toLowerCase().includes(q))||
                             recordName(view.getInt32(r.fixedOffset + 6, true))
                                 .toLowerCase()
                                 .includes(q) ||
