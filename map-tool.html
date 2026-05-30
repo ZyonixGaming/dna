@@ -4,259 +4,281 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Unofficial Horsey Game Savegame Map Manipulation and Modification Utility Tool</title>
-	
-
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1e1e2f;
-            color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Use 100svh for better mobile toolbar support */
-  box-sizing: border-box;
-  padding: 16px;
-  
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Keeps container locked to viewport height */
-  box-sizing: border-box;
-  padding: 16px;
+* {
+    box-sizing: border-box;
+}
 
-  /* --- NEW CENTERING RULES --- */
-  max-width: 780px; /* Restricts the maximum width */
-  width: 100%;       /* Ensures responsiveness on smaller screens */
-  margin: 0 auto;    /* Centers the container horizontally */
-  
-        }
-        h1 {
-            font-size: 1.6rem;
-            margin-top: 0;
-            color: #ffd966;
-        }
-        /* Hide the entire HEX/CSV panels */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 780px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px;
+    overflow-y: auto;        /* whole container scrolls if needed */
+}
+
+h1 {
+    font-size: 1.6rem;
+    margin-top: 0;
+    color: #ffd966;
+}
+
+.info {
+    background: #252532;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 20px;
+    font-family: monospace;
+    font-size: 14px;
+    border-left: 4px solid #ffd966;
+}
+
+.status {
+    font-weight: bold;
+    color: #ffaa66;
+}
+
+.info-text {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* Header */
+.header-bar {
+    background: #0b1218;
+    border-bottom: 2px solid #2d3a46;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 50;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.header-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #48b5b5;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Tools dropdown */
+.tools-dropdown {
+    position: relative;
+}
+
+.tools-btn {
+    background: #1e293b;
+    border: 2px solid #3b4e6b;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #b9c7d9;
+    font-family: monospace;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tools-btn:hover {
+    background: #2d3e44;
+    border-color: #48b5b5;
+    color: #fff;
+}
+
+.tools-btn .arrow {
+    font-size: 0.65rem;
+    transition: 0.2s;
+}
+
+.tools-btn.open .arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    min-width: 200px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+}
+
+.dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: #cbd5e6;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-family: monospace;
+    transition: 0.15s;
+    border-bottom: 1px solid #1e293b;
+}
+
+.dropdown-menu a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+    background: #1e293b;
+    color: #48b5b5;
+}
+
+.dropdown-menu a .tool-icon {
+    font-size: 1rem;
+    width: 22px;
+    text-align: center;
+}
+
+/* Tables */
+.locations-table,
+.buried-table {
+    background: #1e1e2a;
+    border-radius: 8px;
+    padding: 12px;
+    overflow-y: auto;          /* scroll inside if content exceeds height */
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+/* Locations table takes all remaining space */
+.locations-table {
+    flex: 1;                   /* grow to fill leftover height */
+    min-height: 300px;         /* never collapse too small */
+}
+
+/* Buried table uses only the height its content needs */
+.buried-table {
+    flex: 0 0 auto;            /* do NOT grow or shrink — use natural height */
+    max-height: 300px;          /* optional: prevent it from taking over the whole screen */
+}
+
+/* Inner table styling */
+.locations-table table,
+.buried-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.locations-table th,
+.locations-table td,
+.buried-table th,
+.buried-table td {
+    border: 1px solid #4a4a5a;
+    padding: 6px;
+    text-align: left;
+}
+
+.locations-table th,
+.buried-table th {
+    background: #2d2d3a;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Inputs inside tables */
+.coord-input {
+    width: 90px;
+    background: #2d2d3a;
+    border: 1px solid #4a4a5a;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.item-select {
+    width: 180px;
+    background: #2d2d3a;
+    border: 1px solid #4a4a5a;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Buttons */
+button {
+    background: #3a6ea5;
+    border: none;
+    color: white;
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    margin-top: 12px;
+    margin-right: 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #2c5282;
+    transform: scale(1.02);
+}
+
         .flex-row {
             display: none;
         }
-        .info {
-            background: #252532;
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 14px;
-            border-left: 4px solid #ffd966;
-        }
-        .status {
-            font-weight: bold;
-            color: #ffaa66;
-        }
-        /* Hide the dimension controls inputs and extra buttons, but keep the export button inside */
-        .dim-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-top: 10px;
-            background: #1e1e2a;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-        /* Hide width/height labels and the two buttons (apply/update) */
         .dim-controls label,
         #applyDimensionsBtn,
         #updateCoordsBtn {
             display: none;
-        }
-        button {
-            background: #3a6ea5;
-            border: none;
-            color: white;
-            font-size: 0.85rem;
-            padding: 8px 18px;
-            margin-top: 12px;
-            margin-right: 12px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: bold;
-        }
-        button:hover {
-            background: #2c5282;
-            transform: scale(1.02);
-        }
-        .locations-table {
-            margin-top: 20px;
-            background: #1e1e2a;
-            border-radius: 8px;
-            padding: 12px;
-            height: auto;
-            overflow-y: auto;
-  flex: 1; 
-  overflow-y: auto; /* This makes the table body scrollable */
-  border: 1px solid #ddd;
-  
-        }
-        .locations-table table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-        .locations-table th, .locations-table td {
-            border: 1px solid #4a4a5a;
-            padding: 6px;
-            text-align: left;
-        }
-        .locations-table th {
-            background: #2d2d3a;
-			  position: sticky;
-			  top: 0;
-			  
-			  z-index: 1;			
-        }
-        .coord-input {
-            width: 90px;
-            background: #2d2d3a;
-            border: 1px solid #4a4a5a;
-            color: white;
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-        .info-text {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #aaa;
-        }
-		
-/* ---- Header Bar ---- */
-        .header-bar {
-			width: 100%;              /* not strictly necessary if using block/flex */
-            background: #0b1218;
-            border-bottom: 2px solid #2d3a46;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 50;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        .header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #48b5b5;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header-title span {
-            font-size: 1.5rem;
-        }
-        .tools-dropdown {
-            position: relative;
-        }
-        .tools-btn {
-            background: #1e293b;
-            border: 2px solid #3b4e6b;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-            color: #b9c7d9;
-            font-family: monospace;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .tools-btn:hover {
-            background: #2d3e44;
-            border-color: #48b5b5;
-            color: #fff;
-        }
-        .tools-btn .arrow {
-            font-size: 0.65rem;
-            transition: 0.2s;
-        }
-        .tools-btn.open .arrow {
-            transform: rotate(180deg);
-        }
-        .dropdown-menu {
-            position: absolute;
-            top: 110%;
-            left: 0;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 12px;
-            min-width: 200px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            display: none;
-            overflow: hidden;
-        }
-        .dropdown-menu.show {
-            display: block;
-            animation: fadeIn 0.15s ease;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            color: #cbd5e6;
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-family: monospace;
-            transition: 0.15s;
-            border-bottom: 1px solid #1e293b;
-        }
-        .dropdown-menu a:last-child {
-            border-bottom: none;
-        }
-        .dropdown-menu a:hover {
-            background: #1e293b;
-            color: #48b5b5;
-        }
-        .dropdown-menu a .tool-icon {
-            font-size: 1rem;
-            width: 22px;
-            text-align: center;
-        }
+        }		
 		
     </style>
 </head>
 <body>
 <div class="container">
     <h1>The Unofficial Horsey Game Savegame Map Manipulation and Modification Utility Tool</h1>
-	<div class="tools-dropdown" id="toolsDropdown">
-            <button class="tools-btn" id="toolsBtn">
-                🔧 Other Tools <span class="arrow">▼</span>
-            </button>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <!-- Populated by header-links.js -->
-            </div>
-        </div>
+    <div class="tools-dropdown" id="toolsDropdown">
+        <button class="tools-btn" id="toolsBtn">🔧 Other Tools <span class="arrow">▼</span></button>
+        <div class="dropdown-menu" id="dropdownMenu"></div>
+    </div>
 
-    <!-- Hidden panels (HEX and CSV) – kept in DOM for functionality but hidden -->
+    <!-- hidden panels -->
     <div class="flex-row">
         <div class="panel">
             <h2>📤 RLE Hex (input)</h2>
@@ -274,43 +296,49 @@
 
     <div class="info">
         <span class="status">ℹ️ Info</span><br>
-		• Change the position of your buildings in your save.<br>
-		• Load a tmx file from a map editor to replace your map.<br><br>
+        Apply an edited horsey.tmx map file to your save without resetting!<br>
+        ✓ Update the map tiles.<br>
+        ✓ Update the position of your buildings.<br>
+        ✓ Update buried items.<br>
+        ✗ Spawn points in the map file are not applied.<br><br>
         <div id="dimInfo">No files loaded.</div><br>
-        Saves are typically in this folder:<br>
-		C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\save1.dat<br><br>
-		Use at your own risk! Remember to make backups.
-        <br><br>
+        Use at your own risk! Remember to make backups.<br><br>
         <span id="byteDeltaDisplay">Byte change: —</span>
         <div class="dim-controls">
-            <!-- hidden width/height inputs -->
             <label>Map Width: <input type="number" id="mapWidth" value="400" step="1" min="1"></label>
             <label>Map Height: <input type="number" id="mapHeight" value="225" step="1" min="1"></label>
             <button id="applyDimensionsBtn" style="display:none;">Apply Dimensions</button>
-			<button id="fileInput">1. Load Save (save1.dat) 📂</button>
-			<button id="tmxInput">2. Load Map (horsey.tmx) 🗺️</button>
+            <button id="fileInput">1. Load Save (save1.dat) 📂</button>
+            <button id="tmxInput">2. Load Map (horsey.tmx) 🗺️</button>
             <button id="replaceMapBtn">3. Export Save File 💾</button>
             <button id="updateCoordsBtn" style="display:none;">Update Coordinates</button>
         </div>
     </div>
 
-    <div style="margin-top: 12px;">
-        
-        
+    <!-- Buried items table -->
+    <div id="buriedPanel" class="buried-table" style="display: none;">
+        <h3>📦 Buried Items</h3>
+        <table id="buriedTable">
+            <thead><tr><th>Item</th><th>X</th><th>Y</th></thead>
+            <tbody id="buriedTbody"></tbody>
+        </table>
+        <button id="addBuriedBtn" style="margin-top:8px;">➕ Add Buried Item</button>
     </div>
 
-    <div id="locationsPanel" class="locations-table" style="display: none;">        
+    <!-- Locations table -->
+    <div id="locationsPanel" class="locations-table" style="display: none;">
+        <h3>📍 Locations (editable coordinates)</h3>
         <table id="locationsTable">
-            <thead><tr><th>Name</th><th>X</th><th>Y</th></tr></thead>
+            <thead><tr><th>Name</th><th>X</th><th>Y</th></thead>
             <tbody id="locationsTbody"></tbody>
         </table>
-        
+        <p class="info-text">⚠️ Changes are stored in memory. Press "Export Save File" to save all changes to disk.</p>
     </div>
 </div>
 
 <script>
 // ------------------------------------------------------------------
-//  LOOKUP TABLE (final tile number → raw encoding data) – unchanged
+//  LOOKUP TABLE (final tile number → raw encoding data)
 // ------------------------------------------------------------------
 const lookup = {
   "1": { n:"Plain1", pre:0, tmx:1, tile:1, hasHealth:false },
@@ -420,6 +448,29 @@ const lookup = {
   "105": { n:"NGrass", pre:2, tmx:70, tile:101, hasHealth:20 }
 };
 
+const itemList = [
+  "ItemHay", "ItemBale", "ItemApple", "ItemBeer", "ItemHotsauce", 
+  "ItemPlutonium", "ItemBones", "ItemCarcass", "ItemDung", "ItemTrophy", 
+  "ItemChampTrophy", "ItemVipCard", "ItemVial", "ItemDiskette", "ItemBriefcase", 
+  "ItemChest", "ItemCactus", "ItemVase", "ItemTM", "ItemG", 
+  "ItemA", "ItemT", "ItemC", "ItemStripe", "ItemLift", 
+  "ItemRambar", "ItemSneakers", "ItemBowTie", "ItemCravat", "ItemTopHat", 
+  "ItemToque", "ItemGlasses", "ItemSunglasses", "ItemBallAndChain", "ItemJetEngine", 
+  "ItemBalloon", "ItemRollerblades", "ItemStilts", "ItemClownNose", "ItemCowboyBoots1", 
+  "ItemCowboyBoots2", "ItemCowboyBoots3", "ItemCowboyBoots4", "ItemRibbon1", "ItemRibbon2", 
+  "ItemRibbon3", "ItemRibbon4", "ItemFenceBox", "ItemMemory", /*"ItemCrown", 
+  "ItemMeat", "ItemPlutonium2", "LetterG", "LetterA", "LetterT", 
+  "LetterC", "DecoToque", "DecoSpikedBall", "DecoSunglasses", "DecoSneakers", 
+  "DecoSneakers", "DecoJetEngine", "DecoJetEngineV", "DecoRollerblades", "DecoGlasses", 
+  "BriefcaseOpen", "ChestOpen", "VialBubble", "VialBubble2", "VialBubble3", 
+  "VialEmpty", "InvTab", "InvTab2", "InvTab3", "InvTab4", 
+  "InvTrumpet", "InvLasso", "InvShovel", "InvGun", "InvFence", 
+  "InvBalloon", "InvSTrumpet", "InvSLasso", "InvSShovel", "InvSGun", 
+  "InvSFence", "InvSBalloon", "TinyGoldenShovel", "PowStripe", "PowLift", 
+  "PowRambar", "PowStopwatch", "DisStripe", "DisLift", "DisRambar", 
+  "DisStopwatch"*/
+];
+
 let WIDTH = 400;
 let HEIGHT = 225;
 let view = null;
@@ -432,8 +483,14 @@ let currentSaveHandle = null;
 let records = [];
 let wildHorses = [], farmHorses = [], jockeys = [], otherHorses = [], otherDna = [];
 let locations = [];
+let buriedItems = [];               // { itemIndex, x, y }
+let buriedItemsStartOffset = 0;
+let buriedItemsEntriesStart = 0;
+let buriedItemsEndOffset = 0;
+let trailingDataStart = 0;
+let trailingData = null;
 
-// DOM elements (hidden panels still exist for internal use)
+// DOM elements
 const hexInput = document.getElementById('hexInput');
 const csvOutput = document.getElementById('csvOutput');
 const decodeBtn = document.getElementById('decodeBtn');
@@ -446,14 +503,17 @@ const mapHeightInput = document.getElementById('mapHeight');
 const dimInfoDiv = document.getElementById('dimInfo');
 const locationsPanel = document.getElementById('locationsPanel');
 const locationsTbody = document.getElementById('locationsTbody');
+const buriedPanel = document.getElementById('buriedPanel');
+const buriedTbody = document.getElementById('buriedTbody');
 
 function updateDimInfo() {
-    dimInfoDiv.innerHTML = `<strong>Width = ${WIDTH}</strong>, <strong>Height = ${HEIGHT}</strong> → exactly <strong>${WIDTH * HEIGHT}</strong> tiles.`;
+    if (WIDTH && HEIGHT) dimInfoDiv.innerHTML = `<strong>Width = ${WIDTH}</strong>, <strong>Height = ${HEIGHT}</strong> → exactly <strong>${WIDTH * HEIGHT}</strong> tiles.`;
+    else dimInfoDiv.innerHTML = "No files loaded.";
 }
 updateDimInfo();
 
 // ------------------------------------------------------------------
-//  UTILITIES (unchanged)
+//  UTILITIES
 // ------------------------------------------------------------------
 function hex(n, width = 0) {
     const s = Number(n).toString(16);
@@ -489,7 +549,7 @@ function getI32Patched(off) {
 }
 
 // ------------------------------------------------------------------
-//  COORDINATE SEARCH IN BYTE RANGE
+//  COORDINATE SEARCH
 // ------------------------------------------------------------------
 function findCoordinatesInRange(x, y, startOffset, endOffset) {
     const targetBytes = new Uint8Array(8);
@@ -510,7 +570,73 @@ function findCoordinatesInRange(x, y, startOffset, endOffset) {
 }
 
 // ------------------------------------------------------------------
-//  LOCATION EDITOR UI (hide offset columns)
+//  BURIED ITEMS UI
+// ------------------------------------------------------------------
+function renderBuriedItemsTable() {
+    if (!buriedItems.length) {
+        buriedPanel.style.display = 'none';
+        return;
+    }
+    buriedPanel.style.display = 'block';
+    buriedTbody.innerHTML = '';
+    for (let i = 0; i < buriedItems.length; i++) {
+        const item = buriedItems[i];
+        const row = buriedTbody.insertRow();
+        // Item dropdown
+        const selectCell = row.insertCell(0);
+        const select = document.createElement('select');
+        select.classList.add('item-select');
+        for (let idx = 0; idx < itemList.length; idx++) {
+            const option = document.createElement('option');
+            option.value = idx;
+            option.textContent = itemList[idx];
+            if (idx === item.itemIndex) option.selected = true;
+            select.appendChild(option);
+        }
+        select.dataset.idx = i;
+        select.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.dataset.idx, 10);
+            buriedItems[idx].itemIndex = parseInt(e.target.value, 10);
+        });
+        selectCell.appendChild(select);
+        // X input
+        const xCell = row.insertCell(1);
+        const xInput = document.createElement('input');
+        xInput.type = 'number';
+        xInput.step = 'any';
+        xInput.value = item.x;
+        xInput.classList.add('coord-input');
+        xInput.dataset.idx = i;
+        xInput.dataset.coord = 'x';
+        xInput.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.dataset.idx, 10);
+            buriedItems[idx].x = parseFloat(e.target.value);
+        });
+        xCell.appendChild(xInput);
+        // Y input
+        const yCell = row.insertCell(2);
+        const yInput = document.createElement('input');
+        yInput.type = 'number';
+        yInput.step = 'any';
+        yInput.value = item.y;
+        yInput.classList.add('coord-input');
+        yInput.dataset.idx = i;
+        yInput.dataset.coord = 'y';
+        yInput.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.dataset.idx, 10);
+            buriedItems[idx].y = parseFloat(e.target.value);
+        });
+        yCell.appendChild(yInput);
+    }
+}
+
+document.getElementById('addBuriedBtn')?.addEventListener('click', () => {
+    buriedItems.push({ itemIndex: 0, x: 0, y: 0 });
+    renderBuriedItemsTable();
+});
+
+// ------------------------------------------------------------------
+//  LOCATION EDITOR UI
 // ------------------------------------------------------------------
 function renderLocationsTable() {
     if (!locations.length) {
@@ -541,7 +667,6 @@ function renderLocationsTable() {
         yInput.dataset.coord = 'y';
         xCell.appendChild(xInput);
         yCell.appendChild(yInput);
-        // No offset columns
     }
     document.querySelectorAll('.coord-input').forEach(inp => {
         inp.removeEventListener('change', handleCoordChange);
@@ -558,7 +683,7 @@ function handleCoordChange(e) {
 }
 
 // ------------------------------------------------------------------
-//  DECODER (unchanged)
+//  DECODER
 // ------------------------------------------------------------------
 function decodeRLE(startOffset, opt_bytes) {
     const data = opt_bytes || original;
@@ -660,7 +785,7 @@ function parseCSV(csvStr, width, height) {
 }
 
 // ------------------------------------------------------------------
-//  ENCODER (unchanged)
+//  ENCODER
 // ------------------------------------------------------------------
 function encodeRLE(width, height, tiles) {
     const bytes = [];
@@ -719,7 +844,7 @@ function encodeRLE(width, height, tiles) {
 }
 
 // ------------------------------------------------------------------
-//  INDEXEDDB HANDLERS (unchanged)
+//  INDEXEDDB HANDLERS
 // ------------------------------------------------------------------
 function openDB() {
     return new Promise((resolve, reject) => {
@@ -746,7 +871,7 @@ async function loadHandleByKey(key) {
 let lastUsedTMXHandle = null;
 
 // ------------------------------------------------------------------
-//  FIND VARIABLE STRINGS – UPDATED FOR MULTI-LANGUAGE
+//  FIND VARIABLE STRINGS & DNA
 // ------------------------------------------------------------------
 function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
     const lookupMap = new Map();
@@ -766,7 +891,6 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
     lookupMap.clear();
     const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
     let stillFarm = true;
-    // Unicode regex: letters, numbers, punctuation, spaces, symbols (printable across many languages)
     const printableRegex = /^[\p{L}\p{N}\p{P}\p{Z}\p{S}]+$/u;
     for (let i = startPos; i <= buffer.length - 4; i++) {
         const length = dv.getUint32(i, littleEndian);
@@ -776,7 +900,6 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
             try {
                 const stringBuffer = buffer.slice(i + 4, i + 4 + length);
                 let decodedString = new TextDecoder('utf-8').decode(stringBuffer);
-                // Accept any string that consists solely of printable Unicode characters (no control codes)
                 if (printableRegex.test(decodedString)) {
                     if (decodedString == "unknown") {
                         if (locations.length > 10) continue;
@@ -832,11 +955,9 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                     yoff = xoff + 4;
                     x = f32(xoff);
                     y = f32(yoff);
-					if(x<32||y<32) continue;
+                    if(x<32||y<32) continue;
                     let offset2 = getOffset(x, y);
-                    if (offset2[0] < 0) {
-                        console.log(decodedString+" cannot find off2");
-                    }
+                    if (offset2[0] < 0) console.log(decodedString+" cannot find off2");
                     locations.push({
                         offset: i, length, value: decodedString, isFarm, crowd: length2,
                         xoff, yoff, xoff2: offset2[0], yoff2: offset2[1], x, y
@@ -913,11 +1034,10 @@ function findDnaRuns() {
         }
         i = j;
     }
-    //console.log("wild:", wildHorses.length, "farm:", farmHorses.length, "jockeys:", jockeys.length, "other:", otherHorses.length, "other dna:", otherDna.length);
 }
 
 // ------------------------------------------------------------------
-//  PARSE SAVE FILE (unchanged)
+//  PARSE SAVE FILE (with buried items)
 // ------------------------------------------------------------------
 function parseSave() {
     if (!original || original.length < 0x14) throw new Error("File too small");
@@ -962,13 +1082,31 @@ function parseSave() {
     cachedMapStartOffset = offset2 + 8;
     const tiles = decodeRLE(cachedMapStartOffset, original);
     cachedMapEndOffset = cachedMapStartOffset + lastDecodedBytes;
+
+    // ---- Read buried items ----
+    buriedItemsStartOffset = cachedMapEndOffset;
+    const buriedCount = u32(buriedItemsStartOffset);
+    buriedItems = [];
+    for (let i = 0; i < buriedCount; i++) {
+        const entryOffset = buriedItemsStartOffset + 4 + i * 8;
+        const buriedLoc = u32(entryOffset);
+        const buriedItemIdx = u32(entryOffset + 4);
+        const buriedX = (buriedLoc % WIDTH) * 32;
+        const buriedY = Math.floor(buriedLoc / WIDTH) * 32+32;
+        buriedItems.push({ itemIndex: buriedItemIdx, x: buriedX, y: buriedY });
+    }
+    buriedItemsEntriesStart = buriedItemsStartOffset + 4;
+    buriedItemsEndOffset = buriedItemsEntriesStart + buriedCount * 8;
+    trailingDataStart = buriedItemsEndOffset;
+    trailingData = original.slice(trailingDataStart);
+    renderBuriedItemsTable();
+
     const mapHex = bytesToHex(Array.from(original.slice(cachedMapStartOffset, cachedMapEndOffset)));
     hexInput.value = mapHex;
     const csvString = toCSV(tiles, WIDTH, HEIGHT);
     csvOutput.value = csvString;
     findDnaRuns();
     renderLocationsTable();
-    //console.log(`Map data at offset ${hex(cachedMapStartOffset)} length ${lastDecodedBytes} bytes`);
 }
 
 // ------------------------------------------------------------------
@@ -990,7 +1128,7 @@ document.getElementById('fileInput').addEventListener('click', async () => {
 });
 
 // ------------------------------------------------------------------
-//  TMX LOADER (object-to-location mapping)
+//  TMX LOADER (with object-to-location mapping and buried items)
 // ------------------------------------------------------------------
 function mapObjectTypeToLocationName(type, objectName) {
     const directMap = {
@@ -1054,6 +1192,35 @@ function parseObjectsFromTMX(xmlDoc) {
     return objects;
 }
 
+function parseBuriedFromTMX(xmlDoc) {
+    const newBuried = [];
+    const objectGroups = xmlDoc.querySelectorAll("objectgroup");
+    for (const group of objectGroups) {
+        const objList = group.querySelectorAll("object");
+        for (const obj of objList) {
+            const gidAttr = obj.getAttribute("gid");
+            if (gidAttr && parseInt(gidAttr, 10) === 154) {
+                const props = obj.querySelectorAll("property");
+                let buriedValue = null;
+                for (const prop of props) {
+                    if (prop.getAttribute("name") === "buried") {
+                        buriedValue = prop.getAttribute("value");
+                        break;
+                    }
+                }
+                if (buriedValue !== null) {
+                    const x = parseFloat(obj.getAttribute("x"));
+                    const y = parseFloat(obj.getAttribute("y"));
+                    if (!isNaN(x) && !isNaN(y)) {
+                        newBuried.push({ itemIndex: parseInt(buriedValue, 10), x, y });
+                    }
+                }
+            }
+        }
+    }
+    return newBuried;
+}
+
 document.getElementById('tmxInput').addEventListener('click', async () => {
     try {
         const options = { suggestedName: "map.tmx", types: [{ description: "TMX Files", accept: { "application/x-tmx": [".tmx"] } }] };
@@ -1090,16 +1257,14 @@ document.getElementById('tmxInput').addEventListener('click', async () => {
         byteDeltaSpan.innerHTML = `Byte change: — (TMX loaded, encoded to ${encoded.length} bytes)`;
 
         if (original && view) {
+            // Update locations
             const tmxObjects = parseObjectsFromTMX(xmlDoc);
             let updatedCount = 0;
             for (const obj of tmxObjects) {
                 let locationName = mapObjectTypeToLocationName(obj.type, obj.name);
                 if (!locationName) continue;
                 const locEntry = locations.find(loc => loc.value.includes(locationName) || locationName.includes(loc.value));
-                if (!locEntry) {
-                    console.warn(`Location "${locationName}" not found in save file, skipping`);
-                    continue;
-                }
+                if (!locEntry) continue;
                 const isVial = (locationName === "vial world");
                 const converted = convertCoordinates(obj.x, obj.y, isVial);
                 locEntry.x = converted.x;
@@ -1114,6 +1279,17 @@ document.getElementById('tmxInput').addEventListener('click', async () => {
                 }
                 updatedCount++;
             }
+            // Update buried items
+            const newBuried = parseBuriedFromTMX(xmlDoc);
+            if (newBuried.length > 0) {
+                buriedItems = newBuried;
+                renderBuriedItemsTable();
+                alert(`Replaced buried items with ${buriedItems.length} entries from TMX.`);
+            } else {
+                buriedItems = [];
+                renderBuriedItemsTable();
+                alert("No buried items found in TMX – buried list cleared.");
+            }
             renderLocationsTable();
             alert(`Updated ${updatedCount} location coordinates from TMX objects.`);
         } else {
@@ -1123,7 +1299,7 @@ document.getElementById('tmxInput').addEventListener('click', async () => {
 });
 
 // ------------------------------------------------------------------
-//  EXPORT BUTTON: updates coordinates, replaces map, saves file
+//  EXPORT BUTTON: updates coordinates, replaces map, writes buried items
 // ------------------------------------------------------------------
 document.getElementById('replaceMapBtn').addEventListener('click', async () => {
     if (!original || !view) { alert("No save file loaded."); return; }
@@ -1160,17 +1336,30 @@ document.getElementById('replaceMapBtn').addEventListener('click', async () => {
     const some_count = u32(offset1);
     const offset2 = offset1 + 4 + (8*some_count);
 
-    // Build new file buffer
+    // Build new buried items buffer
+    const newBuriedCount = buriedItems.length;
+    const newBuriedSize = 4 + newBuriedCount * 8;
+    const newBuriedBuffer = new Uint8Array(newBuriedSize);
+    const newDataView = new DataView(newBuriedBuffer.buffer);
+    newDataView.setUint32(0, newBuriedCount, true);
+    for (let i = 0; i < newBuriedCount; i++) {
+        const item = buriedItems[i];
+        const buriedLoc = ((Math.floor(item.y / 32)-1) * WIDTH) + Math.floor(item.x / 32);
+        newDataView.setUint32(4 + i*8, buriedLoc, true);
+        newDataView.setUint32(4 + i*8 + 4, item.itemIndex, true);
+    }
+
+    // Build final file buffer
     const headerSize = cachedMapStartOffset;
-    const footerSize = original.length - cachedMapEndOffset;
-    const newTotalSize = headerSize + newMapBytes.length + footerSize;
+    const newTotalSize = headerSize + newMapBytes.length + newBuriedSize + trailingData.length;
     const newBuffer = new Uint8Array(newTotalSize);
     newBuffer.set(original.slice(0, headerSize), 0);
     newBuffer.set(newMapBytes, headerSize);
-    newBuffer.set(original.slice(cachedMapEndOffset), headerSize + newMapBytes.length);
-    const newView = new DataView(newBuffer.buffer);
-    newView.setUint32(offset2, newWidth, true);
-    newView.setUint32(offset2+4, newHeight, true);
+    newBuffer.set(newBuriedBuffer, headerSize + newMapBytes.length);
+    newBuffer.set(trailingData, headerSize + newMapBytes.length + newBuriedSize);
+    const finalView = new DataView(newBuffer.buffer);
+    finalView.setUint32(offset2, newWidth, true);
+    finalView.setUint32(offset2+4, newHeight, true);
 
     // Save to disk
     try {
@@ -1183,12 +1372,12 @@ document.getElementById('replaceMapBtn').addEventListener('click', async () => {
         const writable = await saveHandle.createWritable();
         await writable.write(newBuffer);
         await writable.close();
-        alert("Save file exported successfully with updated map and coordinates.");
+        alert("Save file exported successfully with updated map, coordinates, and buried items.");
     } catch(err) { if (err.name !== "AbortError") alert("Save cancelled or failed: " + err.message); }
 });
 
 // ------------------------------------------------------------------
-//  DECODE / ENCODE / CLEAR (still exist but hidden – not needed for UI)
+//  HIDDEN DECODE/ENCODE BUTTONS (keep functionality but not shown)
 // ------------------------------------------------------------------
 let originalHexBytes = null;
 function updateByteDelta(newHexStr) {
@@ -1198,9 +1387,33 @@ function updateByteDelta(newHexStr) {
     byteDeltaSpan.innerHTML = `Byte change: ${diff>=0?'+':''}${diff}  (original: ${originalHexBytes} bytes, new: ${newLen} bytes)`;
 }
 
-decodeBtn.addEventListener('click', () => { /* kept for internal use, not shown */ });
-encodeBtn.addEventListener('click', () => { /* kept for internal use */ });
-clearHexBtn.addEventListener('click', () => { hexInput.value = ''; originalHexBytes = null; });
+decodeBtn.addEventListener('click', () => {
+    const hexStr = hexInput.value.trim();
+    if (!hexStr) { alert('Please paste hex data first.'); return; }
+    try {
+        const bytes = hexToBytes(hexStr);
+        const tiles = decodeRLE(0, bytes);
+        const csvString = toCSV(tiles, WIDTH, HEIGHT);
+        csvOutput.value = csvString;
+        originalHexBytes = getByteLength(hexStr);
+        byteDeltaSpan.innerHTML = `Byte change: — (original loaded, ${originalHexBytes} bytes)`;
+    } catch(err) { alert('Decoding error: ' + err.message); console.error(err); }
+});
+
+encodeBtn.addEventListener('click', () => {
+    const csvStr = csvOutput.value.trim();
+    if (!csvStr) { alert('No CSV data.'); return; }
+    try {
+        const tiles = parseCSV(csvStr, WIDTH, HEIGHT);
+        const encodedBytes = encodeRLE(WIDTH, HEIGHT, tiles);
+        const newHex = bytesToHex(encodedBytes);
+        hexInput.value = newHex;
+        if (originalHexBytes !== null) updateByteDelta(newHex);
+        else byteDeltaSpan.innerHTML = `Byte change: — (original unknown, new length: ${encodedBytes.length} bytes)`;
+    } catch(err) { alert('Encoding error: ' + err.message); console.error(err); }
+});
+
+clearHexBtn.addEventListener('click', () => { hexInput.value = ''; originalHexBytes = null; byteDeltaSpan.innerHTML = `Byte change: —`; });
 clearCsvBtn.addEventListener('click', () => { csvOutput.value = ''; });
 
 // Restore persistent save handle on page load
