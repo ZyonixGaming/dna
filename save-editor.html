@@ -478,6 +478,7 @@
             let view = null;
             let fileName = "save1.dat";
             let records = [];
+			let nameChanged = false;
 			let wildHorses = [];
 			let farmHorses = [];
 			let jockeys = [];
@@ -710,6 +711,7 @@ function crc32Slice(offset = 0, length = 240) {
                         throw new Error(
                             `Record ${idx}: missing name length at ${hex(off)}`,
                         );
+					const nameOffset = off;
                     const nameLen = u32(off);
                     const nameStart = off + 4;
                     const nameEnd = nameStart + nameLen;
@@ -743,6 +745,8 @@ function crc32Slice(offset = 0, length = 240) {
                         offset: off,
                         nameLen,
                         name,
+						oldname:name,
+						nameOffset,
                         fixedOffset,
                         linkCountOffset,
                         linksOffset,
@@ -1263,6 +1267,8 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
             }
 
             function renderSelected() {
+			
+			
 				
                 const props = $("horseProps");
                 props.innerHTML = "";
@@ -1278,6 +1284,72 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                     return;
                 }
                 const r = records[selectedIndex];
+
+
+				
+// ----- Name editor (preserve original length) -----
+const nameStart = r.offset + 4;
+const originalNameBytes = original.slice(nameStart, nameStart + r.nameLen);
+const originalName = r.name;
+
+const nameInput = document.createElement("input");
+nameInput.type = "text";
+nameInput.value = originalName;
+nameInput.maxLength =255;        // visual hint only
+nameInput.style.width = "200px";
+
+nameInput.addEventListener("change", () => {
+    let newName = nameInput.value;
+    // Encode to UTF-8 bytes
+    const encoder = new TextEncoder();
+    let newBytes = encoder.encode(newName);
+    
+    // Truncate or pad to exact original length
+	/*
+    if (newBytes.length !== r.nameLen) {
+        const truncated = newBytes.length > r.nameLen;
+        const msg = `Name must be exactly ${r.nameLen} bytes (currently ${newBytes.length}).\n` +
+                    (truncated ? "Truncate extra characters?" : "Pad with spaces?");
+        if (!confirm(msg)) {
+            nameInput.value = originalName;  // revert
+            return;
+        }
+        if (truncated) {
+            newBytes = newBytes.slice(0, r.nameLen);
+        } else {
+            const padded = new Uint8Array(r.nameLen);
+            padded.set(newBytes);
+            for (let i = newBytes.length; i < r.nameLen; i++) padded[i] = 32; // space
+            newBytes = padded;
+        }
+    }
+    */
+	
+    // Write each byte as a patch
+	/*
+    for (let i = 0; i < r.nameLen; i++) {
+        setByte(nameStart + i, newBytes[i]);
+    }
+    */
+    // Update stored name (decode again for display, trimming trailing spaces)
+    const decodedName = new TextDecoder().decode(newBytes);
+	if(!r.oldname){
+		r.oldname=r.name;
+	}
+    r.name = decodedName;
+	nameChanged=true;
+	renderPatchState();
+    // Refresh UI
+    renderSelected();      // re‑enters, but avoids double event
+    renderRecords();
+});
+
+//const namePropRow = propRow("Name", nameInput, `(must be ${r.nameLen} bytes)`);
+const namePropRow = propRow("Name", nameInput);
+props.appendChild(namePropRow);
+
+
+				
                 $("selectedTitle").textContent =
                     `${r.name || "(blank)"} #${r.idx}`;
                // $("selectedMeta").textContent = `fixed ${hex(r.fixedOffset)}`;
@@ -1379,6 +1451,9 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                         null,
                     ),
                 );
+
+
+
 
 				/*
                 const parentAOff = r.fixedOffset + 6;
@@ -2172,7 +2247,7 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
             function renderPatchState() {
 				
                 $("downloadBtn").disabled = !original;
-                $("clearPatchesBtn").disabled = !original || patches.size === 0;
+                $("clearPatchesBtn").disabled = (!original || patches.size === 0 && !nameChanged);
                 //$("patchCount").textContent = `${patches.size} bytes`;
                 $("patchSummary").textContent = patches.size
                     ? `${patches.size} byte change(s).`
@@ -2372,10 +2447,62 @@ $("fileInput").addEventListener("click", async () => {
 // --- UPDATED DOWNLOAD LOGIC ---
 $("downloadBtn").addEventListener("click", async () => {
   if (!original) return;
+  
+function convertName(str, littleEndian = true) {
+// 1. Encode the string into a UTF-8 byte array
+const stringBytes = new TextEncoder().encode(str);
+
+// 2. Allocate space for the 4-byte u32 length prefix + the string bytes
+const buffer = new ArrayBuffer(4 + stringBytes.length);
+const view = new DataView(buffer);
+
+// 3. Write the byte length of the string as a u32 at byte offset 0
+view.setUint32(0, stringBytes.length, littleEndian);
+
+// 4. Wrap the remaining buffer space in a Uint8Array and copy the string bytes
+const resultBytes = new Uint8Array(buffer);
+resultBytes.set(stringBytes, 4);
+
+return resultBytes;
+}
+
+function applySplice(original, offset, oldLength, newData) {
+  // Calculate new total length
+  const newTotal = original.length - oldLength + newData.length;
+
+  // Create a new buffer of the required size
+  const result = new Uint8Array(newTotal);
+
+  // 1. Copy bytes before the splice point
+  result.set(original.subarray(0, offset), 0);
+
+  // 2. Copy the new data at the splice point
+  result.set(newData, offset);
+
+  // 3. Copy bytes after the removed range
+  result.set(original.subarray(offset + oldLength), offset + newData.length);
+
+  return result;
+}
+
 
   //const out = new Uint8Array(original);
-  const out = original.slice();
+  let out = original.slice();
   for (const [off, val] of patches) out[off] = val;
+  
+  for(let i=0;i<records.length;i++){
+	const r = records[records.length-1-i];
+	if(r.oldname!==r.name){
+		
+		//console.log(convertName(r.name));
+		const oldLength=r.nameLen+4;
+		const offset = r.nameOffset;
+		out=applySplice(out,offset,oldLength,convertName(r.name));
+		
+		
+	}
+	
+  }
 
   const options = {
     suggestedName: fileName,
@@ -2410,6 +2537,12 @@ $("downloadBtn").addEventListener("click", async () => {
 
             $("clearPatchesBtn").addEventListener("click", () => {
                 patches.clear();
+				for(let i=0;i<records.length;i++){
+					if(records[i].oldname){
+						records[i].name=records[i].oldname;
+					}
+				}
+				nameChanged=false;
                 renderAll();
             });
 
@@ -2714,7 +2847,7 @@ function updateCheckboxesVisibility() {
                     updateCheckboxesVisibility();
                 };
 
-                tryAutoLoadPopXml();
+                //tryAutoLoadPopXml();
                 updateCheckboxesVisibility();
             }
             initMutator();
