@@ -487,6 +487,9 @@ let buriedItems = [];               // { itemIndex, x, y }
 let buriedItemsStartOffset = 0;
 let buriedItemsEntriesStart = 0;
 let buriedItemsEndOffset = 0;
+let worldItems = [];
+let locationList;
+
 let trailingDataStart = 0;
 let trailingData = null;
 
@@ -519,6 +522,7 @@ function hex(n, width = 0) {
     const s = Number(n).toString(16);
     return "0x" + (width ? s.padStart(width, "0") : s);
 }
+
 function u32(off) { return view.getUint32(off, true); }
 function f32(off) { return view.getFloat32(off, true); }
 function writeF32(off, val) { view.setFloat32(off, val, true); }
@@ -874,21 +878,10 @@ let lastUsedTMXHandle = null;
 //  FIND VARIABLE STRINGS & DNA
 // ------------------------------------------------------------------
 function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
-    const lookupMap = new Map();
-    function addOffset(x, y, xoff, yoff) { lookupMap.set(`${x},${y}`, [xoff, yoff]); }
-    function getOffset(x, y) {
-        const key = `${x},${y}`;
-        if (lookupMap.has(key)) return lookupMap.get(key);
-        if (cachedMapEndOffset && cachedWorldEndOffset) {
-            const found = findCoordinatesInRange(x, y, cachedMapEndOffset, cachedWorldEndOffset);
-            if (found[0] !== -1) {
-                addOffset(x, y, found[0], found[1]);
-                return found;
-            }
-        }
-        return [-1, -1];
-    }
-    lookupMap.clear();
+
+
+	
+	let locationIndex=0;
     const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
     let stillFarm = true;
     const printableRegex = /^[\p{L}\p{N}\p{P}\p{Z}\p{S}]+$/u;
@@ -901,33 +894,13 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                 const stringBuffer = buffer.slice(i + 4, i + 4 + length);
                 let decodedString = new TextDecoder('utf-8').decode(stringBuffer);
                 if (printableRegex.test(decodedString)) {
+					
                     if (decodedString == "unknown") {
-                        if (locations.length > 10) continue;
-                        let xoff = i+4+length+37;
-                        let yoff = xoff+4;
-                        let x = f32(xoff);
-                        let y = f32(yoff);
-                        locations.push({
-                            offset: -1, length: -1, value: "Truck", isFarm: false, crowd: -1,
-                            xoff, yoff, xoff2: -1, yoff2: -1, x, y
-                        });
-                        let flag = 1;
-                        let temp_position = xoff + 0x3d;
-                        while (flag > 0 && flag < 3) {
-                            const xoff2 = temp_position;
-                            const yoff2 = temp_position + 4;
-                            const x2 = f32(xoff2);
-                            const y2 = f32(yoff2);
-                            addOffset(x2, y2, xoff2, yoff2);
-                            flag = dv.getUint32(temp_position + 16, littleEndian);
-                            temp_position += 0x29;
-                        }
-                        i = temp_position;
-                        continue;
+						continue;
                     } else if (decodedString == "Race Track") {
                         stillFarm = false;
                     } else if (decodedString == "My House") {
-                        cachedWorldEndOffset = i;
+                        //cachedWorldEndOffset = i;
                     }
                     let isFarm = (locations.length >= 2 && stillFarm);
                     let xoff = 0, yoff = 0, x = 0, y = 0;
@@ -956,85 +929,27 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                     x = f32(xoff);
                     y = f32(yoff);
                     if(x<32||y<32) continue;
-                    let offset2 = getOffset(x, y);
-                    if (offset2[0] < 0) console.log(decodedString+" cannot find off2");
+                    
+					const locItem=locationList[locationIndex];
+					if(x!==locItem.x||y!==locItem.y){
+						console.log(decodedString +" entry and exit coords mismatched!");
+						console.log("x: "+x+"->"+locItem.x+", y: "+y+"->"+locItem.y);
+					}					
+					locationIndex++;
+                    //if (offset2[0] < 0) console.log(decodedString+" cannot find off2");
                     locations.push({
                         offset: i, length, value: decodedString, isFarm, crowd: length2,
-                        xoff, yoff, xoff2: offset2[0], yoff2: offset2[1], x, y
+                        xoff, yoff, xoff2: locItem.offx, yoff2: locItem.offy, x, y
                     });
+					
                 }
             } catch(e) { console.log(e); }
         }
     }
-    console.log(locations);
+    //console.log(locations);
     return locations;
 }
 
-function findDnaRuns() {
-    findVariableStrings(original, cachedMapEndOffset);
-    const codeSet = new Set([9,10,11,12,17,18,19,20,25,26,27,28,33,34,35,36]);
-    let i = cachedMapEndOffset;
-    let loc_index = 1;
-    let loc_pos_index = 0;
-    cachedWorldEndOffset = original.length;
-    while (i < original.length) {
-        if (!codeSet.has(original[i])) { i++; continue; }
-        let j = i;
-        while (j < original.length && codeSet.has(original[j]) && (j-i+1 <= 240)) j++;
-        const len = j - i;
-        if (len >= 240) {
-            for (let k = 0; k < 1; k++) {
-                const b0 = original[j+8+k];
-                const b1 = original[j+9+k];
-                const b2 = original[j+10+k];
-                const b3 = original[j+11+k];
-                const tempindex = (((b3*256+b2)*256+b1)*256+b0) | 0;
-                if (tempindex >= -1 && tempindex < records.length) {
-                    const off = j+8;
-                    const status = off+6 < original.length ? getByte(off+6) : null;
-                    const age = off+7 < original.length ? getByte(off+7) : null;
-                    const personality = off+9 < original.length ? getByte(off+9) : null;
-                    const flags = off+14 < original.length ? getByte(off+14) : null;
-                    const checking = getI32Patched(off-4);
-                    if (age>=0 && age<=11 && personality>=0 && personality<15 && status>=0 && status<7) {
-                        while (loc_index < locations.length && locations[loc_index].offset < i) { loc_index++; loc_pos_index = 0; }
-                        const location = locations[loc_index-1];
-                        if (tempindex >= 0) {
-                            if (!records[tempindex].detail_off) {
-                                records[tempindex].detail_off = [];
-                                records[tempindex].location = location.value;
-                                records[tempindex].detail_off.push(j+8);
-                                records[tempindex].pos_x = 0;
-                                records[tempindex].pos_y = 0;
-                            }
-                            if (location.value == "Map") {
-                                const pos_x = i-13 < original.length ? f32(i-16) : null;
-                                const pos_y = i-9 < original.length ? f32(i-12) : null;
-                                records[tempindex].pos_x = pos_x;
-                                records[tempindex].pos_y = pos_y;
-                                wildHorses.push(i);
-                            } else if (location.value == "The Jockey Club") {
-                                records[tempindex].isJockey = true;
-                                jockeys.push(i);
-                            }
-                            if (location.isFarm) {
-                                records[tempindex].inFarm = true;
-                                if (loc_pos_index > 0) farmHorses.push(i);
-                            }
-                        } else {
-                            if (location.value == "Map") wildHorses.push(i);
-                            else otherHorses.push(i);
-                        }
-                        loc_pos_index++;
-                    } else {
-                        otherDna.push(i);
-                    }
-                }
-            }
-        }
-        i = j;
-    }
-}
 
 // ------------------------------------------------------------------
 //  PARSE SAVE FILE (with buried items)
@@ -1065,6 +980,7 @@ function parseSave() {
         off = next;
     }
     const tableEnd = off;
+	//console.log("Table End: "+hex(tableEnd));
     const xoff = tableEnd + 0x34;
     const yoff = tableEnd + 0x38;
     const x = f32(xoff);
@@ -1082,7 +998,7 @@ function parseSave() {
     cachedMapStartOffset = offset2 + 8;
     const tiles = decodeRLE(cachedMapStartOffset, original);
     cachedMapEndOffset = cachedMapStartOffset + lastDecodedBytes;
-
+	//console.log("Map End: "+hex(cachedMapEndOffset));
     // ---- Read buried items ----
     buriedItemsStartOffset = cachedMapEndOffset;
     const buriedCount = u32(buriedItemsStartOffset);
@@ -1097,15 +1013,106 @@ function parseSave() {
     }
     buriedItemsEntriesStart = buriedItemsStartOffset + 4;
     buriedItemsEndOffset = buriedItemsEntriesStart + buriedCount * 8;
+	
+	const wordLength = u32(buriedItemsEndOffset);
+	
+	const worldItemCount = u32(buriedItemsEndOffset+4+wordLength+8);
+	
+	//console.log("worlditemcount: "+worldItemCount);
+	
+	const worldItemStart = buriedItemsEndOffset+4+wordLength+4+8;
+	
+	let worldItemOffset = worldItemStart;
+	let wildHorseCount=0;
+	const locationLookup = {};
+	for (let i=0;i<worldItemCount;i++){
+		//console.log(hex(worldItemOffset));
+		const itemOffset = worldItemOffset;
+		const itemType = u32(worldItemOffset);
+		const itemIndex = getByte(worldItemOffset+5);
+		const itemX = f32(worldItemOffset + 25);
+		const itemY = f32(worldItemOffset + 29)
+		worldItemOffset=worldItemOffset+41;
+		
+		
+		
+		if(itemType==0){
+			
+			
+			
+			worldItemOffset = worldItemOffset + 0xF0; //DNA
+			worldItemOffset = worldItemOffset + 0x08; //not sure, will get to horseindex
+			const horseId = u32(worldItemOffset);
+			worldItemOffset=worldItemOffset+4;
+			const voiceStrLen = u32(worldItemOffset+19);			
+			const itemCount =u32(worldItemOffset+27+voiceStrLen);
+			
+			/*
+			+2 = status
+			+3 = age
+			+5 = personality
+			+10 = flags
+			+19 = voicelength
+			+27+voicelength = itemcount
+			+39+(voicelength+itemcount*8)
+			*/
+			worldItemOffset=worldItemOffset+20+39+voiceStrLen+(8*itemCount);
+			
+			wildHorseCount++;
+			//horse
+		}else if(itemType==1){
+			worldItemOffset = worldItemOffset+20;
+			locations.push({
+				offset: -1, length: -1, value: "Truck", isFarm: false, crowd: -1,
+				xoff:itemOffset+25, yoff:itemOffset+29, xoff2: -1, yoff2: -1, x:itemX, y:itemY
+			});			
+			//truck/player
+			//5x4
+			//stripes
+			//suspension
+			//ram
+			//?
+			//?
+			
+		}else if(itemType==2){
+			locationLookup[itemIndex]={x:itemX,y:itemY,offx:itemOffset+25,offy:itemOffset+29};
+			//console.log("index: "+itemIndex + " ("+itemX+","+itemY+")");
+			//location
+			
+		}else if(itemType==3){
+			worldItemOffset = worldItemOffset+8;
+			console.log("item "+itemList[itemIndex]+"  ("+itemX+","+itemY+")");
+			//item
+		}else if(itemType==4){			
+		
+			//hole		
+		}else{
+			console.log("error itemtype = "+ itemtype);
+		}
+		
+	}
+	cachedWorldEndOffset=worldItemOffset;
+	locationList = Object.entries(locationLookup)
+  .sort((a, b) => Number(a[0]) - Number(b[0])) // Sort keys numerically (a[0] is the key)
+  .map(entry => entry[1]);           
+	//console.log(locationList);
+	//console.log("wild hroses: "+wildHorseCount);
+	//console.log("Buried Items End: "+hex(buriedItemsEndOffset));
+	
+	//start 07 followed by "unknown"
+	
     trailingDataStart = buriedItemsEndOffset;
     trailingData = original.slice(trailingDataStart);
     renderBuriedItemsTable();
+	
+	
 
     const mapHex = bytesToHex(Array.from(original.slice(cachedMapStartOffset, cachedMapEndOffset)));
     hexInput.value = mapHex;
     const csvString = toCSV(tiles, WIDTH, HEIGHT);
     csvOutput.value = csvString;
-    findDnaRuns();
+
+	findVariableStrings(original,cachedWorldEndOffset);
     renderLocationsTable();
 }
 
@@ -1306,6 +1313,7 @@ document.getElementById('replaceMapBtn').addEventListener('click', async () => {
 
     // 1. Apply all current location coordinates to memory
     for (let loc of locations) {
+			
         if (loc.xoff !== undefined && loc.xoff >= 0 && loc.xoff+4 <= original.length) {
             writeF32(loc.xoff, loc.x);
             writeF32(loc.yoff, loc.y);
@@ -1332,6 +1340,7 @@ document.getElementById('replaceMapBtn').addEventListener('click', async () => {
         off += 4 + nameLen + 18 + 4 + u32(off+4+nameLen+18)*4;
     }
     const tableEnd = off;
+
     const offset1 = tableEnd + 0xF0;
     const some_count = u32(offset1);
     const offset2 = offset1 + 4 + (8*some_count);
@@ -1356,7 +1365,12 @@ document.getElementById('replaceMapBtn').addEventListener('click', async () => {
     newBuffer.set(original.slice(0, headerSize), 0);
     newBuffer.set(newMapBytes, headerSize);
     newBuffer.set(newBuriedBuffer, headerSize + newMapBytes.length);
-    newBuffer.set(trailingData, headerSize + newMapBytes.length + newBuriedSize);
+	
+    //newBuffer.set(trailingData, headerSize + newMapBytes.length + newBuriedSize);
+	
+	const liveTrailing = original.slice(trailingDataStart);
+	newBuffer.set(liveTrailing, headerSize + newMapBytes.length + newBuriedSize);
+	
     const finalView = new DataView(newBuffer.buffer);
     finalView.setUint32(offset2, newWidth, true);
     finalView.setUint32(offset2+4, newHeight, true);
@@ -1419,7 +1433,10 @@ clearCsvBtn.addEventListener('click', () => { csvOutput.value = ''; });
 // Restore persistent save handle on page load
 (async () => {
     const savedSaveHandle = await loadHandleByKey("lastUsedSave");
-    if (savedSaveHandle) { currentSaveHandle = savedSaveHandle; console.log("Restored save handle from IndexedDB"); }
+    if (savedSaveHandle) {
+		currentSaveHandle = savedSaveHandle;
+		//console.log("Restored save handle from IndexedDB"); 
+	}
     lastUsedTMXHandle = await loadHandleByKey("lastUsedTMX");
 })();
 </script>
