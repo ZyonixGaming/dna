@@ -478,7 +478,9 @@
             let view = null;
             let fileName = "save1.dat";
             let records = [];
+			let selectedItem = 0;
 			let nameChanged = false;
+			let itemChanged = false;
 			let wildHorses = [];
 			let farmHorses = [];
 			let jockeys = [];
@@ -766,14 +768,9 @@ function crc32Slice(offset = 0, length = 240) {
 
 			function hasItem(r){
 				if(r.detail_off){
-					const detailBlocks = findHorseDetailBlocks(r.idx);
-					const primaryDetail = detailBlocks.length
-						? detailBlocks[detailBlocks.length - 1]
-						: null;
-					const itemcount = (primaryDetail && primaryDetail.off + 31 +3 < original.length) ? i32(primaryDetail.off + 31) : 0;					
-					
-					if(itemcount>0){
+					if(r.items&&r.items.length>0){
 						return true;
+
 					}
 
 				}
@@ -976,7 +973,9 @@ function crc32Slice(offset = 0, length = 240) {
 									//console.log("checking: "+checking+", index: "+tempindex+ " age: "+age+ " personality: "+personality +" status: "+status +" flags: "+flags +" loc: "+loc_index+"position: ("+pos_x+", "+pos_y+")");
 								}
 								
-								if((age>0||tempindex<0||tempindex>10)&&age>=0&&age<=11&&personality>=0&&personality<PERSONALITIES.length&&status>=0&&status<7){
+								
+								
+								if((age>0||tempindex<0||tempindex>10)&&age>=0&&age<=11&&personality>=0&&personality<PERSONALITIES.length&&status>=0&&status<7&&tempindex<records.length){
 									if(checking<-1||checking>0) console.log("c, "+checking+", "+tempindex);
 									while(loc_index<locations.length&&locations[loc_index].offset<i){
 									
@@ -985,14 +984,35 @@ function crc32Slice(offset = 0, length = 240) {
 									
 									}
 									const location = locations[loc_index-1];
+									
+									
+									let voiceStrLen=0;
+									voiceStrLen=(off + 31 +3-8 < original.length) ? getI32Patched(off + 31-8) : 0;		
+									
+									let itemcountoffset = off+voiceStrLen + 31;
+									let itemcount = (itemcountoffset +3 < original.length) ? getI32Patched(itemcountoffset) : 0;	
+									let itemoffset = itemcountoffset + 4;
+									const items=[];
+									const olditems=[];
+									for(let m=0;m<itemcount;m++){
+										items.push([getI32Patched(itemoffset),getI32Patched(itemoffset+4)]);										
+										itemoffset+=8;
+									}
+
+									
 									//if(tempindex==136) console.log("yes");
 									if (tempindex>=0){
+										if(itemcount>0)	console.log(records[tempindex].name+" "+itemcount+ " "+JSON.stringify(items));
 										if(!records[tempindex].detail_off){
 											records[tempindex].detail_off = [];
 											records[tempindex].location = location.value;
 											records[tempindex].detail_off.push(j+8);
 											records[tempindex].pos_x = 0;
 											records[tempindex].pos_y = 0;
+											records[tempindex].itemcount=0;											
+											records[tempindex].olditems=[...items];
+											records[tempindex].items=items;
+											records[tempindex].itemcountoffset=itemcountoffset;
 										}else{
 											console.log("potential issue: "+tempindex);
 											
@@ -1623,115 +1643,143 @@ props.appendChild(namePropRow);
 				voiceStrLen=(primaryDetail && primaryDetail.off + 31 +3-8 < original.length) ? getI32Patched(primaryDetail.off + 31-8) : 0;		
 				
 
-				let itemcount = (primaryDetail && primaryDetail.off+voiceStrLen + 31 +3 < original.length) ? getI32Patched(primaryDetail.off+voiceStrLen + 31) : 0;		
-				let itemoffset = 0;
-				
 
-				
-				if (itemcount<0||itemcount>=10){
-
-						itemcount=0;
-						//prevent error
-
+				let itemcount=0;
+				if(r.items){
+					itemcount=r.items.length;
 				}
+				
+				
+		
 					//off + 31 < original.length ? getByte(off + 31) : 0;						
 				
-				
-				if(itemcount>0){
-					const items=new Array(itemcount)
-					const itemSlots = new Set();
-					for(let itemidx=0;itemidx<itemcount;itemidx++){
-						const itemoff=35+(8*itemidx);
-						const item_pos=getI32Patched(primaryDetail.off+voiceStrLen + itemoffset+itemoff);
-						const item_id=getI32Patched(primaryDetail.off+voiceStrLen + itemoffset+itemoff+4);							
-						items[itemidx]={pos:item_pos,id:item_id};
-						const itemIds=Object.keys(ITEMS);
-						
-						if(!itemSlots.has(item_pos)) itemSlots.add(item_pos);
-						
-						if (Object.hasOwn(ITEMS, item_id)) {
-							const itemSelect = document.createElement('select');
-							itemSelect.style.width = '160px';
-							
-							// Populate options 0..13 (personalities that won't crash)
-							for (let i = 0; i < itemIds.length; i++) {
-								//if(STATUSES[i].length>0){
-									const opt = document.createElement('option');
-									opt.value = itemIds[i];
-									opt.textContent = ITEMS[itemIds[i]].name;
-									itemSelect.appendChild(opt);									
-								//}
-								
-							}
-							
-							// Set current value, but clamp to 0..13; if the saved byte is out of range, you might want to handle that
-							//const clampedVal = Math.min(Math.max(item_id, 0), 6);
-							//itemSelect.value = clampedVal;
-							itemSelect.value = item_id;
-							
-							itemSelect.addEventListener('change', () => {													
-								const newVal = parseInt(itemSelect.value);
-								const newPos = ITEMS[newVal].pos;
-								
-								if(newPos==item_pos||(!itemSlots.has(newPos))){
-								
-									setI32(primaryDetail.off+voiceStrLen + itemoffset + itemoff, newPos);
-									setI32(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4, newVal);
-								}else{
-									alert("There is another equipment in the same position as " + ITEMS[newVal].name +".");
-									
-								}
-								renderSelected();
-								renderRecords();
-							});
-							
-							props.appendChild(propRow("Item "+(itemidx+1), itemSelect, null));						
-						}else{
-							props.appendChild(
-								propRow(
-									"Item "+(itemidx+1)+" position",
-									makeNumberInput(
-										getByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff),
-										0,
-										255,
-										(v) => {
-											setByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff, v);
-											renderSelected();
-											renderRecords();
-										},
-									),
-									null,
-								),
-							);
-							props.appendChild(
-								propRow(
-									"Item "+(itemidx+1)+" ID",
-									makeNumberInput(
-										getByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4),
-										0,
-										255,
-										(v) => {
-											setByte(primaryDetail.off+voiceStrLen + itemoffset + itemoff + 4, v);
-											renderSelected();
-											renderRecords();
-										},
-									),
-									null,
-								),
-							);
-						}
-					
-					}
-					
-					
-					
-					
-					
-				}else{
-					const items=[];
-				}
+// --------------------------------------------------------------
+// ITEMS DISPLAY + EDITOR (ADD / REMOVE)
+// --------------------------------------------------------------
+const items = r.items;
+const itemSlots = new Set(items.map(it => it[0]));
 
 
+// Helper to refresh the whole selected view after item changes
+function refreshItemsUI() {
+    renderSelected();  // re-render the whole horse panel
+    renderRecords();   // update record list in case item filter changed
+}
+
+
+const itemIds = Object.keys(ITEMS);
+// Display existing items with Remove button
+if (items.length === 0) {
+    const emptyRow = document.createElement("div");
+    emptyRow.className = "prop";
+    emptyRow.innerHTML = `<label>Items</label><div class="small" style="color:#aaa;">No items</div>`;
+    props.appendChild(emptyRow);
+} else {
+    for (let itemidx = 0; itemidx < items.length; itemidx++) {
+        const item = items[itemidx];
+        const itemRow = document.createElement("div");
+        itemRow.className = "prop";
+
+        const itemLabel = document.createElement("label");
+        itemLabel.textContent = `Item ${itemidx+1}`;
+        
+        const itemControls = document.createElement("div");
+        
+        const select = document.createElement("select");
+        select.style.width = "160px";
+        for (let id of itemIds) {
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = ITEMS[id].name;
+            if (parseInt(id) === item[1]) opt.selected = true;
+            select.appendChild(opt);
+        }
+        
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "✖";
+        removeBtn.className = "mini-btn";
+        removeBtn.style.marginLeft = "8px";
+        
+        itemControls.appendChild(select);
+        itemControls.appendChild(removeBtn);
+        itemRow.appendChild(itemLabel);
+        itemRow.appendChild(itemControls);
+        props.appendChild(itemRow);
+        
+        // Change handler
+        select.addEventListener("change", () => {
+            const newId = parseInt(select.value);
+            const newPos = ITEMS[newId].pos;
+            if (newPos !== item[0] && itemSlots.has(newPos)) {
+                alert(`Cannot change to "${ITEMS[newId].name}" – slot ${newPos} already used.`);
+                select.value = item[1]; // revert
+                return;
+            }
+            // Remove old slot from set, add new one
+            itemSlots.delete(item[0]);
+            item[0] = newPos;
+            item[1] = newId;
+			nameChanged=true;
+            itemSlots.add(newPos);
+            refreshItemsUI();
+        });
+        
+        // Remove handler
+        removeBtn.addEventListener("click", () => {
+			nameChanged=true;
+            r.items.splice(itemidx, 1);
+            refreshItemsUI();
+        });
+    }
+}
+
+// Add Item button (appears above the item list)
+const addItemRow = document.createElement("div");
+addItemRow.className = "prop";
+addItemRow.style.marginBottom = "8px";
+
+const addLabel = document.createElement("label");
+addLabel.textContent = "Add item";
+const addContainer = document.createElement("div");
+
+const itemSelect = document.createElement("select");
+itemSelect.style.width = "160px";
+
+for (let id of itemIds) {
+    const opt = document.createElement("option");
+    opt.value = id;
+	opt.selected = (selectedItem==id);
+    opt.textContent = ITEMS[id].name;
+    itemSelect.appendChild(opt);
+}
+const addBtn = document.createElement("button");
+addBtn.textContent = "+ Add";
+addBtn.className = "mini-btn";
+addBtn.style.marginLeft = "8px";
+ itemSelect.addEventListener("change", () => {
+            selectedItem = parseInt(itemSelect.value);
+        });
+
+
+addContainer.appendChild(itemSelect);
+addContainer.appendChild(addBtn);
+addItemRow.appendChild(addLabel);
+addItemRow.appendChild(addContainer);
+props.appendChild(addItemRow);
+
+
+
+addBtn.addEventListener("click", () => {
+    const newItemId = parseInt(itemSelect.value);
+    const newPos = ITEMS[newItemId].pos;
+    if (itemSlots.has(newPos)) {
+        alert(`Slot ${newPos} already occupied by another item. Remove it first.`);
+        return;
+    }
+    r.items.push([newPos, newItemId]);
+	nameChanged=true;
+    refreshItemsUI();
+});
 
 				/*
                 if (primaryDetail && primaryDetail.off + 14 < original.length) {
@@ -2247,7 +2295,7 @@ props.appendChild(namePropRow);
             function renderPatchState() {
 				
                 $("downloadBtn").disabled = !original;
-                $("clearPatchesBtn").disabled = (!original || patches.size === 0 && !nameChanged);
+                $("clearPatchesBtn").disabled = (!original || patches.size === 0 && !nameChanged && !itemChanged);
                 //$("patchCount").textContent = `${patches.size} bytes`;
                 $("patchSummary").textContent = patches.size
                     ? `${patches.size} byte change(s).`
@@ -2448,40 +2496,65 @@ $("fileInput").addEventListener("click", async () => {
 $("downloadBtn").addEventListener("click", async () => {
   if (!original) return;
   
-function convertName(str, littleEndian = true) {
-// 1. Encode the string into a UTF-8 byte array
-const stringBytes = new TextEncoder().encode(str);
-
-// 2. Allocate space for the 4-byte u32 length prefix + the string bytes
-const buffer = new ArrayBuffer(4 + stringBytes.length);
-const view = new DataView(buffer);
-
-// 3. Write the byte length of the string as a u32 at byte offset 0
-view.setUint32(0, stringBytes.length, littleEndian);
-
-// 4. Wrap the remaining buffer space in a Uint8Array and copy the string bytes
-const resultBytes = new Uint8Array(buffer);
-resultBytes.set(stringBytes, 4);
-
-return resultBytes;
+function writeU32(byteArray, offset, value) {
+    const view = new DataView(byteArray.buffer || new Uint8Array(byteArray).buffer);
+    view.setUint32(offset, value, true); // true flag specifies little-endian
 }
+  
+function convertName(str, littleEndian = true) {
+	// 1. Encode the string into a UTF-8 byte array
+	const stringBytes = new TextEncoder().encode(str);
+
+	// 2. Allocate space for the 4-byte u32 length prefix + the string bytes
+	const buffer = new ArrayBuffer(4 + stringBytes.length);
+	const view = new DataView(buffer);
+
+	// 3. Write the byte length of the string as a u32 at byte offset 0
+	view.setUint32(0, stringBytes.length, littleEndian);
+
+	// 4. Wrap the remaining buffer space in a Uint8Array and copy the string bytes
+	const resultBytes = new Uint8Array(buffer);
+	resultBytes.set(stringBytes, 4);
+
+	return resultBytes;
+}
+
+function convertItems(arr, littleEndian = true) {
+	// 1. Calculate buffer size: 4 bytes for length + (4 bytes * 2 numbers) per outer element
+	const totalBytes = 4 + (arr.length * 2 * 4);
+	const buffer = new ArrayBuffer(totalBytes);
+	const view = new DataView(buffer);
+
+	// 2. Write the total outer array length as a u32 at byte offset 0
+	view.setUint32(0, arr.length, littleEndian);
+
+	// 3. Loop through the 2D array and write each integer sequentially
+	let byteOffset = 4;
+	for (let i = 0; i < arr.length; i++) {
+		view.setUint32(byteOffset, arr[i][0], littleEndian);
+		byteOffset += 4;
+		
+		view.setUint32(byteOffset, arr[i][1], littleEndian);
+		byteOffset += 4;
+	}
+
+	// 4. Return the complete buffer as a byte array
+	console.log(buffer);
+	return new Uint8Array(buffer);
+}
+
 
 function applySplice(original, offset, oldLength, newData) {
   // Calculate new total length
   const newTotal = original.length - oldLength + newData.length;
-
   // Create a new buffer of the required size
   const result = new Uint8Array(newTotal);
-
   // 1. Copy bytes before the splice point
   result.set(original.subarray(0, offset), 0);
-
   // 2. Copy the new data at the splice point
   result.set(newData, offset);
-
   // 3. Copy bytes after the removed range
   result.set(original.subarray(offset + oldLength), offset + newData.length);
-
   return result;
 }
 
@@ -2489,6 +2562,49 @@ function applySplice(original, offset, oldLength, newData) {
   //const out = new Uint8Array(original);
   let out = original.slice();
   for (const [off, val] of patches) out[off] = val;
+  
+  
+  let changedItems={};
+  for(let i=0;i<records.length;i++){
+	const r=records[i];
+	
+	if((r.items&&r.items.length)||(r.olditems&&r.olditems.length)){
+		if(r.items.length!==r.olditems.length){
+			changedItems[r.itemcountoffset]={offset:r.itemcountoffset,items:r.items,oldLength:(r.olditems.length*8)+4};
+			//length change
+		}else{
+			//no length Change
+			const offset = r.itemcountoffset+4;
+			for(let j=0;j<r.items.length;j++){
+				const itemoffset = offset+(8*j);
+				writeU32(out,itemoffset,r.items[j][0]);
+				writeU32(out,itemoffset+4,r.items[j][1]);
+				
+			}
+		}
+	}
+	
+  }
+  if (Object.keys(changedItems).length >= 0) {
+	  const sortedItemsArray = Object.keys(changedItems)
+	  .sort((a, b) => Number(a) - Number(b)) // Sort keys numerically
+	  .map(key => changedItems[key]);        // Get the r.items array for each key
+	  
+	  //console.log(sortedItemsArray);
+	  //console.log("sorted");
+	  for(let i=0;i<sortedItemsArray.length;i++){
+		//console.log("loop");
+		const r = sortedItemsArray[sortedItemsArray.length-1-i];
+		const oldLength=r.oldLength;
+		const offset = r.offset;
+		//const newData = convertItems(r.items);
+		//console.log(newData);
+		out=applySplice(out,offset,oldLength,convertItems(r.items));
+	  }
+  
+  }
+  
+  
   
   for(let i=0;i<records.length;i++){
 	const r = records[records.length-1-i];
@@ -2541,7 +2657,11 @@ function applySplice(original, offset, oldLength, newData) {
 					if(records[i].oldname){
 						records[i].name=records[i].oldname;
 					}
+					if(records[i].olditems){
+						reccords[i].items=[...records[i].olditems];
+					}
 				}
+				itemChanged=false;
 				nameChanged=false;
                 renderAll();
             });
