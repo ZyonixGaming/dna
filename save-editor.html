@@ -976,7 +976,10 @@ function crc32Slice(offset = 0, length = 240) {
 								
 								
 								if((age>0||tempindex<0||tempindex>10)&&age>=0&&age<=11&&personality>=0&&personality<PERSONALITIES.length&&status>=0&&status<7&&tempindex<records.length){
-									if(checking<-1||checking>0) console.log("c, "+checking+", "+tempindex);
+									if(checking<-1||checking>0){
+										console.log("c, "+checking+", "+tempindex+ " "+off);
+										continue;
+									}
 									while(loc_index<locations.length&&locations[loc_index].offset<i){
 									
 										loc_index++;
@@ -1002,7 +1005,7 @@ function crc32Slice(offset = 0, length = 240) {
 									
 									//if(tempindex==136) console.log("yes");
 									if (tempindex>=0){
-										if(itemcount>0)	console.log(records[tempindex].name+" "+itemcount+ " "+JSON.stringify(items));
+										//if(itemcount>0)	console.log(records[tempindex].name+" "+itemcount+ " "+JSON.stringify(items));
 										if(!records[tempindex].detail_off){
 											records[tempindex].detail_off = [];
 											records[tempindex].location = location.value;
