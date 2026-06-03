@@ -517,10 +517,10 @@
 				40:{name:"Tan Boots",pos:5},
 				41:{name:"Purple Boots",pos:5},
 				42:{name:"Black Boots",pos:5},
-				43:{name:"Pink Ribbon",pos:18},
+				43:{name:"Pink Ribbon",pos:17},
 				44:{name:"Yellow Ribbon",pos:18},
-				45:{name:"Orange Ribbon",pos:18},
-				46:{name:"Green Ribbon",pos:18}			
+				45:{name:"Orange Ribbon",pos:19},
+				46:{name:"Green Ribbon",pos:20}			
 			};
 /*
 5,26 Sneakers
@@ -757,7 +757,8 @@ function crc32Slice(offset = 0, length = 240) {
                     });
                     off = next;
                 }
-                tableEnd = off;                
+                tableEnd = off;
+				console.log(tableEnd);
 				findDnaRuns();
             }
 
