@@ -39,7 +39,7 @@ Please refer to the wiki at https://horseygame.miraheze.org/wiki/Genome for the 
 * You can paste in DNA to check if the DNA fits into a pre-defined.
   
 ---
-## Horsey Game Save Editor https://zyonixgaming.github.io/dna/save-editor.html
+## Horsey Game Savegame Map Tool https://zyonixgaming.github.io/dna/map-tool.html
 * Load your save file, load a horsey.tmx map file, and export the edited save.
 * Replace the map in your save with a new map.
 * Buried items are replaced with the ones in the new map.
