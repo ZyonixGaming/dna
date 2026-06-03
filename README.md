@@ -1,5 +1,5 @@
 I've developed some tools for Horsey Game which I've been using extensively.
-Probably not without bugs, but they work for what they are supposed to do.
+Probably not without bugs, but they do what they are supposed to do.
 
 That said, gene editing is still largely a trial and error process. I don't know exactly what each gene does.
 Please refer to the wiki at https://horseygame.miraheze.org/wiki/Genome for the most up to date information on what's been discovered so far.
@@ -37,11 +37,21 @@ Please refer to the wiki at https://horseygame.miraheze.org/wiki/Genome for the 
 ## pop.xml DNA Validator https://zyonixgaming.github.io/dna/pop.html
 * Generate DNA based on the definitions in the game's pop.xml file.
 * You can paste in DNA to check if the DNA fits into a pre-defined.
+  
+---
+## Horsey Game Save Editor https://zyonixgaming.github.io/dna/save-editor.html
+* Load your save file, load a horsey.tmx map file, and export the edited save.
+* Replace the map in your save with a new map.
+* Buried items are replaced with the ones in the new map.
+* Items and holes on the map are removed.
+* Remember to backup your save before using this.
 
 ---
 ## Horsey Game Save Editor https://zyonixgaming.github.io/dna/save-editor.html
-* Load your save file, make changes, and export the edited file.
+* This was forked from https://github.com/alexjthomson/horsey-save-editor
+* Load your save file, make changes, and export the edited save.
 * Edit horse stuff not affected by genes: Age, Personality, Hunger, Tiredness, Race stats, etc.
+* Add/Change/Remove Items.
 * Mass apply DNA to all wild horses and horses in farms/ranches/stables/etc.
 * Remember to backup your save before using this.
-* This was forked from https://github.com/alexjthomson/horsey-save-editor
+  
