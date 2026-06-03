@@ -193,7 +193,7 @@
 							It is usually found at:<br>
 							<span class="mono small"><small>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\save\</small></span>
                         </div>
-                        <div class="small" id="patchSummary"></div>
+                        
                     </div>
                 </section>
                 <section class="card">
@@ -758,7 +758,7 @@ function crc32Slice(offset = 0, length = 240) {
                     off = next;
                 }
                 tableEnd = off;
-				console.log(tableEnd);
+				//console.log(tableEnd);
 				findDnaRuns();
             }
 
@@ -1199,7 +1199,7 @@ function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
                 if (!original) return;
                 $("summary").innerHTML =
                     `<div>File: <span class="mono">${fileName}</span></div>` +
-                    `<div>Size: <span class="mono">${original.length}</span> bytes</div>` +
+                    //`<div>Size: <span class="mono">${original.length}</span> bytes</div>` +
 					`<div><strong>Remember to backup your save!</strong></div>`;
 					
 					/*
@@ -2301,9 +2301,7 @@ addBtn.addEventListener("click", () => {
                 $("downloadBtn").disabled = !original;
                 $("clearPatchesBtn").disabled = (!original || patches.size === 0 && !nameChanged && !itemChanged);
                 //$("patchCount").textContent = `${patches.size} bytes`;
-                $("patchSummary").textContent = patches.size
-                    ? `${patches.size} byte change(s).`
-                    : "No changes.";
+
 					
 				return null;
                 if (!patches.size) {
@@ -2543,7 +2541,7 @@ function convertItems(arr, littleEndian = true) {
 	}
 
 	// 4. Return the complete buffer as a byte array
-	console.log(buffer);
+	//console.log(buffer);
 	return new Uint8Array(buffer);
 }
 
