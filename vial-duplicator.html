@@ -137,7 +137,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>🧪 Add DNA Vials </h2>
+            <h2>🧪 Add DNA Vials </h2>   <button id="generateRandomGenomeBtn" style="background: #2d3e4a;">🎲 Generate Random Genome</button>
         </div>
         <div class="flex-row" style="flex-direction: column; align-items: stretch;">
             <label style="margin-bottom: 0.25rem;">📜 Genome:</label>
@@ -147,16 +147,18 @@
 01:GCTAGCTA
 01:CGATCGAT
 ...'></textarea>
+  
             <div class="flex-row" style="margin-top: 0.5rem;">
                 <label>🔢 Number of vials (1–1000):</label>
                 <input type="number" id="vialCount" class="number-input" min="1" max="1000" value="1" step="1">
                 <button id="addVialsBtn" class="primary" disabled>➕ Add DNA Vials</button>
+				<button id="addRandomBtn" class="primary" disabled>➕ Add Random DNA Vials</button>
             </div>
-            <div id="vialStatus" class="status" style="margin-top: 0.5rem;display:none;">⏳ Waiting for gene library & save file...</div>
+            <div id="vialStatus" class="status" style="margin-top: 0.5rem;">⏳ Waiting for gene library & save file...</div>
         </div>
     </div>
 
-    <div class="card"style="display:none;" >
+    <div class="card" >
         <div class="card-header" >
             <h2>📋 Parsing logs & details</h2>
             <button id="clearConsoleBtn">🗑 Clear logs</button>
@@ -233,6 +235,49 @@
         }
         return secondOffset;
     }
+	
+async function generateRandomGenome() {
+    await waitForGeneData();
+    if (!HELIX_LENGTHS || !GENE_MAP) {
+        throw new Error("Gene data not loaded – cannot generate random genome.");
+    }
+    const rows = HELIX_LENGTHS.length;
+    const lines = [];
+    const nucleotides = ['A', 'T', 'C', 'G'];
+    
+    for (let row = 0; row < rows; row++) {
+        const length = HELIX_LENGTHS[row];
+        if (length === undefined) continue;
+        
+        // Generate two random strands
+        let strand1 = '';
+        let strand2 = '';
+        for (let i = 0; i < length; i++) {
+            strand1 += nucleotides[Math.floor(Math.random() * 4)];
+            strand2 += nucleotides[Math.floor(Math.random() * 4)];
+        }
+        lines.push(`${row}:${strand1}`);
+        lines.push(`${row}:${strand2}`);
+    }
+    return lines.join('\n');
+}	
+
+const generateBtn = document.getElementById('generateRandomGenomeBtn');
+generateBtn.addEventListener('click', async () => {
+    try {
+        if (!geneDataReady) {
+            vialStatusSpan.innerHTML = "⏳ Gene library still loading, please wait...";
+            return;
+        }
+        vialStatusSpan.innerHTML = "🎲 Generating random genome...";
+        const randomGenome = await generateRandomGenome();
+        genomeInput.value = randomGenome;
+        vialStatusSpan.innerHTML = "✅ Random genome generated. You can now add vials.";
+    } catch (err) {
+        console.error(err);
+        vialStatusSpan.innerHTML = `❌ Generation failed: ${err.message}`;
+    }
+});
 
     // --------------------------------------------------------------
     // 4. Main parse function (returns extended info)
@@ -247,10 +292,10 @@
 
         const markerOffset = findSecondUnknownMarker(byteArray);
         if (markerOffset === -1) {
-            addLog("❌ Could not find second '07 00 00 00 unknown' marker.", true);
+            addLog("❌ Could not find truck offset.", true);
             return { success: false, logs, horses: [], worldItems: [] };
         }
-        addLog(`✅ Second marker at 0x${markerOffset.toString(16)}`);
+        addLog(`✅ Truck offset at 0x${markerOffset.toString(16)}`);
 
         const horseCountOffset = markerOffset + 4 + 7;
         if (horseCountOffset + 4 > byteArray.length) {
@@ -297,14 +342,14 @@
             if (terminator === 0xFFFFFFFF) {
                 terminatorFound = true;
                 terminatorOffset = currentPos;
-                addLog(`🔖 Found terminator 0xFFFFFFFF at 0x${currentPos.toString(16)}`);
+                //addLog(`🔖 Found terminator 0xFFFFFFFF at 0x${currentPos.toString(16)}`);
                 if (currentPos + 8 <= byteArray.length) {
                     worldItemCountOffset = currentPos + 4;
                     worldItemCount = dataView.getUint32(worldItemCountOffset, true);
                     worldItemsStart = currentPos + 8;
-                    addLog(`📦 World item count: ${worldItemCount}`);
+                    addLog(`📦 Truck item count: ${worldItemCount}`);
                 } else {
-                    addLog(`⚠️ terminator found but missing world item count`, true);
+                    addLog(`⚠️ terminator found but missing truck item count`, true);
                 }
             } else {
                 addLog(`⚠️ Expected 0xFFFFFFFF after horses, got 0x${terminator.toString(16)}. Trying fallback...`, false);
@@ -312,7 +357,7 @@
                     worldItemCountOffset = currentPos;
                     worldItemCount = dataView.getUint32(currentPos, true);
                     worldItemsStart = currentPos + 4;
-                    addLog(`📦 (fallback) world item count: ${worldItemCount}`);
+                    addLog(`📦 (fallback) truck item count: ${worldItemCount}`);
                 }
             }
         } else {
@@ -340,7 +385,7 @@
         for (let i = 0; i < worldItemCount; i++) {
             const itemOffset = parsePos;
             if (itemOffset + 4 > byteArray.length) {
-                addLog(`⚠️ World item #${i}: out of bounds`, true);
+                addLog(`⚠️ Truck item #${i}: out of bounds`, true);
                 break;
             }
             const itemType = dataView.getUint32(itemOffset, true);
@@ -375,7 +420,7 @@
                 if (byteAt13 !== null && byteAt13 >= 0 && byteAt13 < ITEM_LIST.length) itemName = ITEM_LIST[byteAt13];
                 const posX = safeF32(itemOffset + 33 - 8 + extraSize);
                 const posY = safeF32(itemOffset + 37 - 8 + extraSize);
-                addLog(`🧩 [Item Type 3] idx=${itemIndex} offset=0x${itemOffset.toString(16)} loc=(${posX?.toFixed(1)},${posY?.toFixed(1)}) dna_extra=${valAt8>0?'YES':'NO'} byte13=${byteAt13} → ${itemName}`);
+                //addLog(`🧩 [Item Type 3] idx=${itemIndex} offset=0x${itemOffset.toString(16)} loc=(${posX?.toFixed(1)},${posY?.toFixed(1)}) dna_extra=${valAt8>0?'YES':'NO'} byte13=${byteAt13} → ${itemName}`);
                 //console.log(`🔍 Type3 at 0x${itemOffset.toString(16)}`);
             }
             else if (itemType === 4) extraSize = 0;
@@ -387,7 +432,7 @@
             itemIndex++;
             if (parsePos > byteArray.length) break;
         }
-        addLog(`📦 Processed ${itemsParsed.length} world items`);
+        addLog(`📦 Processed ${itemsParsed.length} truck items`);
 
         const summary = {
             fileName,
@@ -536,6 +581,56 @@
         
         return finalBuffer.buffer;
     }
+	
+    async function appendRandomVialsToSave(vialCount) {
+        if (!currentRawBuffer || !currentParseInfo) throw new Error("No save file loaded or parsed");
+        const info = currentParseInfo;
+        const { worldItemsStart, worldItemCountOffset, terminatorOffset, originalWorldItemCount, rawBuffer } = info;
+        if (worldItemCountOffset === -1 || worldItemsStart === -1) throw new Error("World item region not found in save");
+
+        const origBuf = new Uint8Array(rawBuffer);
+        // Extract all existing world items
+        let existingItemsEnd = worldItemsStart;
+        for (let item of info.itemsParsed) {
+            existingItemsEnd = Math.max(existingItemsEnd, item.startOffset + item.size);
+        }
+        const existingItemsData = origBuf.slice(worldItemsStart, existingItemsEnd);
+        
+        // Build all new vials
+        let newItemsTotalSize = 0;
+        const newItemsChunks = [];
+        for (let i = 0; i < vialCount; i++) {
+			const randomGenome = await generateRandomGenome();
+			const dna240Bytes = await genomeToDNABytes(randomGenome);
+            const vialItem = buildDNAVialItem(dna240Bytes);
+            newItemsChunks.push(vialItem);
+            newItemsTotalSize += vialItem.length;
+        }
+        // Concatenate existing + new items
+        const allItemsData = new Uint8Array(existingItemsData.length + newItemsTotalSize);
+        allItemsData.set(existingItemsData, 0);
+        let offset = existingItemsData.length;
+        for (let chunk of newItemsChunks) {
+            allItemsData.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        const newWorldItemCount = originalWorldItemCount + vialCount;
+        // Build final buffer: everything before terminator -> terminator -> new count -> all items
+        const prefixEnd = terminatorOffset !== -1 ? terminatorOffset : worldItemCountOffset - 4;
+        const prefix = origBuf.slice(0, prefixEnd);
+        const terminatorBytes = new Uint8Array([0xFF,0xFF,0xFF,0xFF]);
+        const countBytes = new Uint8Array(4);
+        new DataView(countBytes.buffer).setUint32(0, newWorldItemCount, true);
+        
+        const finalBuffer = new Uint8Array(prefix.length + terminatorBytes.length + countBytes.length + allItemsData.length);
+        finalBuffer.set(prefix, 0);
+        finalBuffer.set(terminatorBytes, prefix.length);
+        finalBuffer.set(countBytes, prefix.length + terminatorBytes.length);
+        finalBuffer.set(allItemsData, prefix.length + terminatorBytes.length + countBytes.length);
+        
+        return finalBuffer.buffer;
+    }	
 
     // --------------------------------------------------------------
     // 7. UI state & global variables
@@ -554,6 +649,7 @@
     const genomeInput = document.getElementById('genomeInput');
     const vialCountInput = document.getElementById('vialCount');
     const addVialsBtn = document.getElementById('addVialsBtn');
+	const addRandomBtn = document.getElementById('addRandomBtn');
     const vialStatusSpan = document.getElementById('vialStatus');
 
     function renderLogs(logs) {
@@ -579,11 +675,9 @@
         if (!summary) { summaryPanel.innerHTML = ''; return; }
         summaryPanel.innerHTML = `
             <div class="pill">📄 ${summary.fileName}</div>
-            <div class="pill">📍 Marker2 @ ${summary.markerOffsetHex}</div>
+            <div class="pill">📍 Truck @ ${summary.markerOffsetHex}</div>
             <div class="pill">🐎 Horses: ${summary.horseCount} (parsed ${summary.horsesProcessed})</div>
-            <div class="pill">📦 World items: ${summary.worldItemCount} / proc ${summary.itemsParsedCount}</div>
-            <div class="pill">🔍 Type-3 items: ${summary.type3Count}</div>
-            <div class="pill">🔖 0xFFFFFFFF terminator: ${summary.terminatorFound ? 'YES' : 'NO'}</div>
+            <div class="pill">📦 Truck items: ${summary.worldItemCount} / proc ${summary.itemsParsedCount}</div>                        
         `;
     }
 
@@ -618,7 +712,10 @@
             exportBtn.disabled = false;
             if (!result.success) fileNameSpan.style.background = '#7f1a1a';
             // Enable add button if gene data ready
-            if (geneDataReady) addVialsBtn.disabled = false;
+            if (geneDataReady){
+				addVialsBtn.disabled = false;
+				addRandomBtn.disabled = false;
+			}
             vialStatusSpan.innerHTML = geneDataReady ? "✅ Gene library ready. Enter genome to add vials." : "⏳ Loading gene library...";
         } catch (err) {
             console.error(err);
@@ -656,6 +753,31 @@
             vialStatusSpan.innerHTML = `❌ Failed: ${err.message}`;
         }
     });
+	
+    // Add vials handler
+    addRandomBtn.addEventListener('click', async () => {
+        if (!currentRawBuffer || !currentParseInfo) {
+            vialStatusSpan.innerHTML = "❌ No save file loaded.";
+            return;
+        }
+        const vialCount = parseInt(vialCountInput.value, 10);
+        if (isNaN(vialCount) || vialCount < 1 || vialCount > 1000) {
+            vialStatusSpan.innerHTML = "❌ Vial count must be between 1 and 1000.";
+            return;
+        }
+
+        try {
+            vialStatusSpan.innerHTML = "⏳ Converting genome to DNA block...";
+            vialStatusSpan.innerHTML = `⏳ Adding ${vialCount} DNA vial(s)...`;
+            const newBuffer = await appendRandomVialsToSave(vialCount);
+            currentRawBuffer = newBuffer;
+            await reparseAndUpdate(newBuffer, currentFileName);
+            vialStatusSpan.innerHTML = `✅ Added ${vialCount} Random DNA vial(s). Use "Export Save" to save modified file.`;
+        } catch (err) {
+            console.error(err);
+            vialStatusSpan.innerHTML = `❌ Failed: ${err.message}`;
+        }
+    });	
 
     // Load button
     loadBtn.addEventListener('click', async () => {
@@ -678,11 +800,11 @@
             const options = { suggestedName: currentFileName || "save1.dat", types: [{ description: "DAT Files", accept: { "application/x-dat": [".dat"] } }] };
             const lastHandle = await loadHandle("lastSaveHandle");
             if (lastHandle) options.startIn = lastHandle;
-            const saveHandle = await window.showSaveFilePicker(options);
-            const writable = await saveHandle.createWritable();
+            const fileHandle = await window.showSaveFilePicker(options);
+            const writable = await fileHandle.createWritable();
             await writable.write(currentRawBuffer);
             await writable.close();
-            await saveHandle("lastSaveHandle", saveHandle);
+            await saveHandle("lastSaveHandle", fileHandle);
             alert("File exported successfully (modified).");
         } catch (err) { if (err.name !== "AbortError") alert("Export failed: " + err.message); }
     });
@@ -700,7 +822,10 @@
     if (loadGeneDataFromXml) {
         loadGeneDataFromXml().then(() => {
             geneDataReady = true;
-            if (currentRawBuffer) addVialsBtn.disabled = false;
+            if (currentRawBuffer){
+				addVialsBtn.disabled = false;
+				addRandomBtn.disabled = false;
+			}
             vialStatusSpan.innerHTML = currentRawBuffer ? "✅ Gene library ready. Enter genome to add vials." : "✅ Gene library ready. Load a save file first.";
         }).catch(e => {
             console.error(e);
@@ -723,7 +848,10 @@
             await reparseAndUpdate(buffer, file.name);
             fileNameSpan.textContent = file.name;
             exportBtn.disabled = false;
-            if (geneDataReady) addVialsBtn.disabled = false;
+            if (geneDataReady){
+				addVialsBtn.disabled = false;
+				addRandomBtn.disabled = false;
+			}
         } else {
             logContainer.innerHTML = `<span style="color:#f87171;">⚠️ Drop a .dat save file.</span>`;
         }
