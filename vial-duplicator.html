@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Vial Duplicator</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c1220 100%);
+            font-family: 'Segoe UI', 'Fira Code', monospace;
+            margin: 0;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: #e2e8f0;
+        }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 1.8rem;
+            border: 1px solid #2d4a6e;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #2c5f7a;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            background: linear-gradient(135deg, #c084fc, #48b5b5);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        h2 { font-size: 1.4rem; margin: 0; }
+        button {
+            background: #1e293b;
+            border: 1px solid #48b5b5;
+            padding: 8px 24px;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #cbd5e6;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        button.primary {
+            background: linear-gradient(105deg, #2c6e9e, #3b82f6);
+            border-color: #9ac8e0;
+            color: white;
+        }
+        button.primary:hover { transform: translateY(-1px); filter: brightness(1.05); }
+        button:hover { background: #2d3e4a; border-color: #6dc3c3; color: white; }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+        .log-area {
+            background: #030712cc;
+            border-radius: 1.2rem;
+            border: 1px solid #2d4a6e;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .status {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            background: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            display: inline-block;
+        }
+        .summary-grid {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .pill {
+            background: #1e293b;
+            border-radius: 2rem;
+            padding: 0.25rem 1rem;
+            font-size: 0.8rem;
+            border: 1px solid #48b5b5;
+        }
+        hr { border-color: #2c5f7a; margin: 0.8rem 0; }
+        textarea {
+            width: 100%;
+            background: #030712;
+            border: 1px solid #2d3a46;
+            border-radius: 1.2rem;
+            padding: 0.9rem 1rem;
+            color: #e2e8f0;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #7aa9c4;
+        }
+        .number-input {
+            background: #030712;
+            border: 1px solid #2d3a46;
+            border-radius: 1.2rem;
+            padding: 0.5rem 1rem;
+            color: #e2e8f0;
+            font-family: inherit;
+            font-size: 0.9rem;
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>🧬 DNA Vial Duplicator</h1>
+        </div>
+        <div class="flex-row">
+            <button id="loadSaveBtn" class="primary">📂 Load save1.dat</button>
+            <button id="exportSaveBtn" class="primary" disabled>💾 Export Save (modified)</button>
+            <span id="fileNameDisplay" class="pill">No file loaded</span>
+        </div>
+        <div id="parseStatus" class="status">⚡ Ready — load a save file to parse</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>🧪 Add DNA Vials </h2>
+        </div>
+        <div class="flex-row" style="flex-direction: column; align-items: stretch;">
+            <label style="margin-bottom: 0.25rem;">📜 Genome:</label>
+            <textarea id="genomeInput" rows="5" placeholder='Paste genome lines e.g.
+00:ATCGGCTA
+00:TGCCGAT
+01:GCTAGCTA
+01:CGATCGAT
+...'></textarea>
+            <div class="flex-row" style="margin-top: 0.5rem;">
+                <label>🔢 Number of vials (1–1000):</label>
+                <input type="number" id="vialCount" class="number-input" min="1" max="1000" value="1" step="1">
+                <button id="addVialsBtn" class="primary" disabled>➕ Add DNA Vials</button>
+            </div>
+            <div id="vialStatus" class="status" style="margin-top: 0.5rem;display:none;">⏳ Waiting for gene library & save file...</div>
+        </div>
+    </div>
+
+    <div class="card"style="display:none;" >
+        <div class="card-header" >
+            <h2>📋 Parsing logs & details</h2>
+            <button id="clearConsoleBtn">🗑 Clear logs</button>
+        </div>
+        <div id="logContainer" class="log-area">
+            <span style="color:#9ab3d0;">📌 Output will appear here.</span>
+        </div>
+        <div class="summary-grid" id="summaryPanel"></div>
+    </div>
+</div>
+
+<script src="./js/genes.js"></script>
+<script>
+    // --------------------------------------------------------------
+    // 1. ITEM_LIST (from map-tool)
+    // --------------------------------------------------------------
+    const ITEM_LIST = [
+        "ItemHay", "ItemBale", "ItemApple", "ItemBeer", "ItemHotsauce",
+        "ItemPlutonium", "ItemBones", "ItemCarcass", "ItemDung", "ItemTrophy",
+        "ItemChampTrophy", "ItemVipCard", "ItemVial", "ItemDiskette", "ItemBriefcase",
+        "ItemChest", "ItemCactus", "ItemVase", "ItemTM", "ItemG",
+        "ItemA", "ItemT", "ItemC", "ItemStripe", "ItemLift",
+        "ItemRambar", "ItemSneakers", "ItemBowTie", "ItemCravat", "ItemTopHat",
+        "ItemToque", "ItemGlasses", "ItemSunglasses", "ItemBallAndChain", "ItemJetEngine",
+        "ItemBalloon", "ItemRollerblades", "ItemStilts", "ItemClownNose", "ItemCowboyBoots1",
+        "ItemCowboyBoots2", "ItemCowboyBoots3", "ItemCowboyBoots4", "ItemRibbon1", "ItemRibbon2",
+        "ItemRibbon3", "ItemRibbon4", "ItemFenceBox", "ItemMemory"
+    ];
+
+    // --------------------------------------------------------------
+    // 2. IndexedDB helpers (persist file handles)
+    // --------------------------------------------------------------
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open("SaveParserHandlesDB", 1);
+            req.onupgradeneeded = (e) => e.target.result.createObjectStore("handles");
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = (e) => reject(e.target.error);
+        });
+    }
+    async function saveHandle(key, handle) {
+        const db = await openDB();
+        const tx = db.transaction("handles", "readwrite");
+        tx.objectStore("handles").put(handle, key);
+        return tx.complete;
+    }
+    async function loadHandle(key) {
+        const db = await openDB();
+        return new Promise((resolve) => {
+            const req = db.transaction("handles").objectStore("handles").get(key);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    }
+
+    // --------------------------------------------------------------
+    // 3. Find second marker (07 00 00 00 + "unknown")
+    // --------------------------------------------------------------
+    function findSecondUnknownMarker(byteArray) {
+        const magic = [0x07, 0x00, 0x00, 0x00];
+        const suffix = "unknown";
+        const suffixCodes = [0x75, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E];
+        let occurrences = 0;
+        let secondOffset = -1;
+        for (let i = 0; i <= byteArray.length - (4 + suffix.length); i++) {
+            let match = true;
+            for (let m = 0; m < 4; m++) if (byteArray[i + m] !== magic[m]) { match = false; break; }
+            if (!match) continue;
+            for (let s = 0; s < suffixCodes.length; s++) if (byteArray[i + 4 + s] !== suffixCodes[s]) { match = false; break; }
+            if (match) {
+                occurrences++;
+                if (occurrences === 2) { secondOffset = i; break; }
+            }
+        }
+        return secondOffset;
+    }
+
+    // --------------------------------------------------------------
+    // 4. Main parse function (returns extended info)
+    // --------------------------------------------------------------
+    async function parseSaveFile(buffer, fileName) {
+        const byteArray = new Uint8Array(buffer);
+        const dataView = new DataView(buffer);
+        const logs = [];
+        const addLog = (msg, isError = false) => logs.push({ msg, isError });
+
+        addLog(`🔍 Parsing: ${fileName} (${byteArray.length} bytes)`);
+
+        const markerOffset = findSecondUnknownMarker(byteArray);
+        if (markerOffset === -1) {
+            addLog("❌ Could not find second '07 00 00 00 unknown' marker.", true);
+            return { success: false, logs, horses: [], worldItems: [] };
+        }
+        addLog(`✅ Second marker at 0x${markerOffset.toString(16)}`);
+
+        const horseCountOffset = markerOffset + 4 + 7;
+        if (horseCountOffset + 4 > byteArray.length) {
+            addLog("❌ Cannot read horse count", true);
+            return { success: false, logs };
+        }
+        const horseCount = dataView.getUint32(horseCountOffset, true);
+        addLog(`🐎 Horse count: ${horseCount}`);
+
+        let currentPos = horseCountOffset + 4;
+        const horses = [];
+
+        for (let h = 0; h < horseCount; h++) {
+            if (currentPos + 240 > byteArray.length) break;
+            const dnaStart = currentPos;
+            const dnaBytes = byteArray.slice(dnaStart, dnaStart + 240);
+            currentPos += 240;
+            if (currentPos + 8 > byteArray.length) break;
+            currentPos += 8;
+            if (currentPos + 4 > byteArray.length) break;
+            const horseId = dataView.getUint32(currentPos, true);
+            currentPos += 4;
+            const wioBase = currentPos;
+            if (wioBase + 19 + 4 > byteArray.length) break;
+            const voiceStrLen = dataView.getUint32(wioBase + 19, true);
+            const itemCountOffset = wioBase + 27 + voiceStrLen;
+            if (itemCountOffset + 4 > byteArray.length) break;
+            const itemCount = dataView.getUint32(itemCountOffset, true);
+            const variableSize = 43 + voiceStrLen + (8 * itemCount);
+            const nextRecordOffset = wioBase + variableSize;
+            horses.push({ index: h, horseId, dnaBytes, voiceStrLen, itemCount, recordStart: dnaStart, recordEnd: nextRecordOffset });
+            currentPos = nextRecordOffset;
+        }
+        addLog(`✅ Parsed ${horses.length} horse records`);
+
+        let worldItemCount = 0;
+        let worldItemsStart = currentPos;
+        let worldItemCountOffset = -1;
+        let terminatorOffset = -1;
+        let terminatorFound = false;
+
+        if (currentPos + 4 <= byteArray.length) {
+            const terminator = dataView.getUint32(currentPos, true);
+            if (terminator === 0xFFFFFFFF) {
+                terminatorFound = true;
+                terminatorOffset = currentPos;
+                addLog(`🔖 Found terminator 0xFFFFFFFF at 0x${currentPos.toString(16)}`);
+                if (currentPos + 8 <= byteArray.length) {
+                    worldItemCountOffset = currentPos + 4;
+                    worldItemCount = dataView.getUint32(worldItemCountOffset, true);
+                    worldItemsStart = currentPos + 8;
+                    addLog(`📦 World item count: ${worldItemCount}`);
+                } else {
+                    addLog(`⚠️ terminator found but missing world item count`, true);
+                }
+            } else {
+                addLog(`⚠️ Expected 0xFFFFFFFF after horses, got 0x${terminator.toString(16)}. Trying fallback...`, false);
+                if (currentPos + 4 <= byteArray.length) {
+                    worldItemCountOffset = currentPos;
+                    worldItemCount = dataView.getUint32(currentPos, true);
+                    worldItemsStart = currentPos + 4;
+                    addLog(`📦 (fallback) world item count: ${worldItemCount}`);
+                }
+            }
+        } else {
+            addLog(`⚠️ No room for terminator after horses`, false);
+        }
+
+        // Parse world items to get sizes
+        let parsePos = worldItemsStart;
+        let itemsParsed = [];
+        let itemIndex = 0;
+
+        function safeU32(off) {
+            if (off + 4 > byteArray.length) return null;
+            return dataView.getUint32(off, true);
+        }
+        function safeF32(off) {
+            if (off + 4 > byteArray.length) return null;
+            return dataView.getFloat32(off, true);
+        }
+        function safeByte(off) {
+            if (off >= byteArray.length) return null;
+            return byteArray[off];
+        }
+
+        for (let i = 0; i < worldItemCount; i++) {
+            const itemOffset = parsePos;
+            if (itemOffset + 4 > byteArray.length) {
+                addLog(`⚠️ World item #${i}: out of bounds`, true);
+                break;
+            }
+            const itemType = dataView.getUint32(itemOffset, true);
+            let baseSize = 41;
+            let extraSize = 0;
+
+            if (itemType === 0) {
+                extraSize = 0xF0 + 0x08;
+                let tempPos = itemOffset + baseSize + extraSize;
+                if (tempPos + 4 <= byteArray.length) {
+                    tempPos += 4;
+                    if (tempPos + 19 + 4 <= byteArray.length) {
+                        const voiceLen = dataView.getUint32(tempPos + 19, true);
+                        if (voiceLen < 4096) {
+                            const subItemCntOff = tempPos + 27 + voiceLen;
+                            if (subItemCntOff + 4 <= byteArray.length) {
+                                const subItemCount = dataView.getUint32(subItemCntOff, true);
+                                extraSize += 4 + (20 + 39 + voiceLen + (8 * subItemCount));
+                            } else extraSize += 20 + 39 + voiceLen;
+                        } else extraSize += 20 + 39;
+                    } else extraSize += 20 + 39;
+                } else extraSize += 4;
+            }
+            else if (itemType === 1) extraSize = 20;
+            else if (itemType === 2) extraSize = 0;
+            else if (itemType === 3) {
+                const valAt8 = safeU32(itemOffset + 8);
+                if (valAt8 !== null && valAt8 > 0) extraSize = 8 + 0xF0;
+                else extraSize = 8;
+                const byteAt13 = safeByte(itemOffset + 13 - 8 + extraSize);
+                let itemName = "unknown";
+                if (byteAt13 !== null && byteAt13 >= 0 && byteAt13 < ITEM_LIST.length) itemName = ITEM_LIST[byteAt13];
+                const posX = safeF32(itemOffset + 33 - 8 + extraSize);
+                const posY = safeF32(itemOffset + 37 - 8 + extraSize);
+                addLog(`🧩 [Item Type 3] idx=${itemIndex} offset=0x${itemOffset.toString(16)} loc=(${posX?.toFixed(1)},${posY?.toFixed(1)}) dna_extra=${valAt8>0?'YES':'NO'} byte13=${byteAt13} → ${itemName}`);
+                //console.log(`🔍 Type3 at 0x${itemOffset.toString(16)}`);
+            }
+            else if (itemType === 4) extraSize = 0;
+            else extraSize = 0;
+
+            const totalItemSize = baseSize + extraSize;
+            itemsParsed.push({ index: i, type: itemType, startOffset: itemOffset, size: totalItemSize });
+            parsePos = itemOffset + totalItemSize;
+            itemIndex++;
+            if (parsePos > byteArray.length) break;
+        }
+        addLog(`📦 Processed ${itemsParsed.length} world items`);
+
+        const summary = {
+            fileName,
+            markerOffsetHex: "0x" + markerOffset.toString(16),
+            horseCount,
+            horsesProcessed: horses.length,
+            worldItemCount: worldItemCount,
+            itemsParsedCount: itemsParsed.length,
+            terminatorFound,
+            type3Count: logs.filter(l => l.msg.includes("Item Type 3")).length
+        };
+
+        return { success: true, logs, horses, itemsParsed, summary, rawBuffer: buffer,
+                 worldItemsStart, worldItemCountOffset, terminatorOffset, originalWorldItemCount: worldItemCount };
+    }
+
+    // --------------------------------------------------------------
+    // 5. Genome → DNA bytes (using genes.js)
+    // --------------------------------------------------------------
+    let geneDataReady = false;
+    function waitForGeneData() { return new Promise(resolve => { if (geneDataReady) resolve(); else { const check = setInterval(() => { if (geneDataReady) { clearInterval(check); resolve(); } }, 50); } }); }
+
+    function parseGenomeLines(genomeText) {
+        const lines = genomeText.split(/\r?\n/);
+        const rowMap = new Map();
+        for (let line of lines) {
+            line = line.trim();
+            if (!line.length || line.startsWith("//")) continue;
+            const match = line.match(/^\s*(\d+)\s*:\s*([A-Za-z]+)\s*$/);
+            if (!match) throw new Error(`Invalid line format: "${line}"`);
+            const rowIdx = parseInt(match[1], 10);
+            const sequence = match[2].toUpperCase();
+            if (!/^[ATCG]+$/.test(sequence)) throw new Error(`Invalid nucleotides in row ${rowIdx}`);
+            if (!rowMap.has(rowIdx)) rowMap.set(rowIdx, []);
+            rowMap.get(rowIdx).push(sequence);
+        }
+        for (let [rowIdx, strands] of rowMap.entries()) {
+            if (strands.length !== 2) throw new Error(`Row ${rowIdx} has ${strands.length} strands (need 2)`);
+            if (strands[0].length !== strands[1].length) throw new Error(`Row ${rowIdx} strand length mismatch`);
+        }
+        return rowMap;
+    }
+
+    function encodeGenomeToBytes(rowMap) {
+        if (!GENE_MAP || !HELIX_LENGTHS || !geneById) throw new Error("Gene data missing");
+        const totalRows = HELIX_LENGTHS.length;
+        const bytes = new Array(240).fill(null);
+        for (let rowIdx = 0; rowIdx < totalRows; rowIdx++) {
+            const expectedLen = HELIX_LENGTHS[rowIdx];
+            const strands = rowMap.get(rowIdx);
+            if (!strands) throw new Error(`Missing row index ${rowIdx}`);
+            const [strand1, strand2] = strands;
+            if (strand1.length !== expectedLen || strand2.length !== expectedLen)
+                throw new Error(`Row ${rowIdx} length mismatch: expected ${expectedLen}`);
+            for (let pos = 0; pos < expectedLen; pos++) {
+                const rawIndex = GENE_MAP[rowIdx][pos];
+                if (rawIndex === undefined) throw new Error(`Invalid GENE_MAP[${rowIdx}][${pos}]`);
+                const p1 = strand1[pos];
+                const p2 = strand2[pos];
+                const pairStr = p1 + p2;
+                const entry = geneById.get(rawIndex);
+                if (!entry) throw new Error(`No gene entry for rawIndex ${rawIndex}`);
+                const byteVal = (entry.n.indexOf(p2) + 1) * 8 + (entry.n.indexOf(p1) + 1);
+                if (byteVal === undefined || byteVal < 0) throw new Error(`Invalid pair "${pairStr}" at row ${rowIdx}, pos ${pos}`);
+                if (bytes[rawIndex] !== null && bytes[rawIndex] !== byteVal)
+                    throw new Error(`Conflicting assignment at byte ${rawIndex}`);
+                bytes[rawIndex] = byteVal;
+            }
+        }
+        for (let i = 0; i < 240; i++) if (bytes[i] === null) throw new Error(`Missing byte at index ${i}`);
+        return new Uint8Array(bytes);
+    }
+
+    async function genomeToDNABytes(genomeText) {
+        await waitForGeneData();
+        const rowMap = parseGenomeLines(genomeText);
+        if (rowMap.size !== HELIX_LENGTHS.length) throw new Error(`Row count mismatch: ${rowMap.size} vs expected ${HELIX_LENGTHS.length}`);
+        return encodeGenomeToBytes(rowMap);
+    }
+
+    // Build a single DNA vial item (type 3) from 240-byte DNA block
+    function buildDNAVialItem(dna240) {
+        // Header: 12 bytes: type=3, zero, count=1
+        const header = new Uint8Array([0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00]);
+        // Trailer: fixed 38 bytes (as provided)
+        const trailer = new Uint8Array([
+            0x0A, 0x0C, 0x17, 0x01, 0x00, 0x74, 0xF6, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00,
+            0x00, 0x07, 0x00, 0x00, 0x00, 0xCF, 0xAF, 0x25, 0x41, 0xE2, 0xCC, 0xDC, 0x40, 0x00, 0x00, 0xA0,
+            0x3F, 0x00, 0x00, 0xB8, 0x3F
+        ]);
+        const totalLength = header.length + dna240.length + trailer.length;
+        const item = new Uint8Array(totalLength);
+        item.set(header, 0);
+        item.set(dna240, header.length);
+        item.set(trailer, header.length + dna240.length);
+        return item;
+    }
+
+    // --------------------------------------------------------------
+    // 6. Append vials to save buffer
+    // --------------------------------------------------------------
+    async function appendDNAVialsToSave(vialCount, dna240Bytes) {
+        if (!currentRawBuffer || !currentParseInfo) throw new Error("No save file loaded or parsed");
+        const info = currentParseInfo;
+        const { worldItemsStart, worldItemCountOffset, terminatorOffset, originalWorldItemCount, rawBuffer } = info;
+        if (worldItemCountOffset === -1 || worldItemsStart === -1) throw new Error("World item region not found in save");
+
+        const origBuf = new Uint8Array(rawBuffer);
+        // Extract all existing world items
+        let existingItemsEnd = worldItemsStart;
+        for (let item of info.itemsParsed) {
+            existingItemsEnd = Math.max(existingItemsEnd, item.startOffset + item.size);
+        }
+        const existingItemsData = origBuf.slice(worldItemsStart, existingItemsEnd);
+        
+        // Build all new vials
+        let newItemsTotalSize = 0;
+        const newItemsChunks = [];
+        for (let i = 0; i < vialCount; i++) {
+            const vialItem = buildDNAVialItem(dna240Bytes);
+            newItemsChunks.push(vialItem);
+            newItemsTotalSize += vialItem.length;
+        }
+        // Concatenate existing + new items
+        const allItemsData = new Uint8Array(existingItemsData.length + newItemsTotalSize);
+        allItemsData.set(existingItemsData, 0);
+        let offset = existingItemsData.length;
+        for (let chunk of newItemsChunks) {
+            allItemsData.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        const newWorldItemCount = originalWorldItemCount + vialCount;
+        // Build final buffer: everything before terminator -> terminator -> new count -> all items
+        const prefixEnd = terminatorOffset !== -1 ? terminatorOffset : worldItemCountOffset - 4;
+        const prefix = origBuf.slice(0, prefixEnd);
+        const terminatorBytes = new Uint8Array([0xFF,0xFF,0xFF,0xFF]);
+        const countBytes = new Uint8Array(4);
+        new DataView(countBytes.buffer).setUint32(0, newWorldItemCount, true);
+        
+        const finalBuffer = new Uint8Array(prefix.length + terminatorBytes.length + countBytes.length + allItemsData.length);
+        finalBuffer.set(prefix, 0);
+        finalBuffer.set(terminatorBytes, prefix.length);
+        finalBuffer.set(countBytes, prefix.length + terminatorBytes.length);
+        finalBuffer.set(allItemsData, prefix.length + terminatorBytes.length + countBytes.length);
+        
+        return finalBuffer.buffer;
+    }
+
+    // --------------------------------------------------------------
+    // 7. UI state & global variables
+    // --------------------------------------------------------------
+    let currentSaveHandle = null;
+    let currentRawBuffer = null;
+    let currentFileName = null;
+    let currentParseInfo = null;  // stores parse result details
+
+    const loadBtn = document.getElementById('loadSaveBtn');
+    const exportBtn = document.getElementById('exportSaveBtn');
+    const fileNameSpan = document.getElementById('fileNameDisplay');
+    const logContainer = document.getElementById('logContainer');
+    const summaryPanel = document.getElementById('summaryPanel');
+    const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+    const genomeInput = document.getElementById('genomeInput');
+    const vialCountInput = document.getElementById('vialCount');
+    const addVialsBtn = document.getElementById('addVialsBtn');
+    const vialStatusSpan = document.getElementById('vialStatus');
+
+    function renderLogs(logs) {
+        logContainer.innerHTML = '';
+        if (!logs.length) { logContainer.innerHTML = '<span style="color:#9ab3d0;">✨ No logs yet.</span>'; return; }
+        for (const entry of logs) {
+            const line = document.createElement('div');
+            line.style.fontFamily = 'monospace';
+            line.style.fontSize = '12px';
+            line.style.padding = '2px 0';
+            line.style.borderBottom = '1px solid #1e2a3a';
+            line.style.whiteSpace = 'pre-wrap';
+            if (entry.isError) line.style.color = '#f87171';
+            else if (entry.msg.includes('Item Type 3')) { line.style.color = '#facc15'; line.style.fontWeight = 'bold'; }
+            else line.style.color = '#b9c7d9';
+            line.textContent = entry.msg;
+            logContainer.appendChild(line);
+        }
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function renderSummary(summary) {
+        if (!summary) { summaryPanel.innerHTML = ''; return; }
+        summaryPanel.innerHTML = `
+            <div class="pill">📄 ${summary.fileName}</div>
+            <div class="pill">📍 Marker2 @ ${summary.markerOffsetHex}</div>
+            <div class="pill">🐎 Horses: ${summary.horseCount} (parsed ${summary.horsesProcessed})</div>
+            <div class="pill">📦 World items: ${summary.worldItemCount} / proc ${summary.itemsParsedCount}</div>
+            <div class="pill">🔍 Type-3 items: ${summary.type3Count}</div>
+            <div class="pill">🔖 0xFFFFFFFF terminator: ${summary.terminatorFound ? 'YES' : 'NO'}</div>
+        `;
+    }
+
+    async function reparseAndUpdate(buffer, fileName) {
+        const result = await parseSaveFile(buffer, fileName);
+        renderLogs(result.logs);
+        renderSummary(result.summary);
+        if (result.success) {
+            currentParseInfo = {
+                worldItemsStart: result.worldItemsStart,
+                worldItemCountOffset: result.worldItemCountOffset,
+                terminatorOffset: result.terminatorOffset,
+                originalWorldItemCount: result.originalWorldItemCount,
+                itemsParsed: result.itemsParsed,
+                rawBuffer: buffer,
+                fileName
+            };
+        }
+        return result;
+    }
+
+    async function loadAndParse(handle, file) {
+        try {
+            const buffer = await file.arrayBuffer();
+            currentRawBuffer = buffer;
+            currentFileName = file.name;
+            currentSaveHandle = handle;
+            await saveHandle("lastSaveHandle", handle);
+            const result = await reparseAndUpdate(buffer, file.name);
+            fileNameSpan.textContent = file.name;
+            fileNameSpan.style.background = '#2c5f7a';
+            exportBtn.disabled = false;
+            if (!result.success) fileNameSpan.style.background = '#7f1a1a';
+            // Enable add button if gene data ready
+            if (geneDataReady) addVialsBtn.disabled = false;
+            vialStatusSpan.innerHTML = geneDataReady ? "✅ Gene library ready. Enter genome to add vials." : "⏳ Loading gene library...";
+        } catch (err) {
+            console.error(err);
+            logContainer.innerHTML = `<span style="color:#f87171;">❌ Fatal parse error: ${err.message}</span>`;
+            exportBtn.disabled = true;
+        }
+    }
+
+    // Add vials handler
+    addVialsBtn.addEventListener('click', async () => {
+        if (!currentRawBuffer || !currentParseInfo) {
+            vialStatusSpan.innerHTML = "❌ No save file loaded.";
+            return;
+        }
+        const vialCount = parseInt(vialCountInput.value, 10);
+        if (isNaN(vialCount) || vialCount < 1 || vialCount > 1000) {
+            vialStatusSpan.innerHTML = "❌ Vial count must be between 1 and 1000.";
+            return;
+        }
+        const genomeText = genomeInput.value.trim();
+        if (!genomeText) {
+            vialStatusSpan.innerHTML = "❌ Please paste a genome in the textarea.";
+            return;
+        }
+        try {
+            vialStatusSpan.innerHTML = "⏳ Converting genome to DNA block...";
+            const dna240 = await genomeToDNABytes(genomeText);
+            vialStatusSpan.innerHTML = `⏳ Adding ${vialCount} DNA vial(s)...`;
+            const newBuffer = await appendDNAVialsToSave(vialCount, dna240);
+            currentRawBuffer = newBuffer;
+            await reparseAndUpdate(newBuffer, currentFileName);
+            vialStatusSpan.innerHTML = `✅ Added ${vialCount} DNA vial(s). Use "Export Save" to save modified file.`;
+        } catch (err) {
+            console.error(err);
+            vialStatusSpan.innerHTML = `❌ Failed: ${err.message}`;
+        }
+    });
+
+    // Load button
+    loadBtn.addEventListener('click', async () => {
+        try {
+            const options = { types: [{ description: "Save file", accept: { "application/octet-stream": [".dat"] } }] };
+            const lastHandle = await loadHandle("lastSaveHandle");
+            if (lastHandle) options.startIn = lastHandle;
+            const [handle] = await window.showOpenFilePicker(options);
+            const file = await handle.getFile();
+            await loadAndParse(handle, file);
+        } catch (err) {
+            if (err.name !== "AbortError") logContainer.innerHTML = `<span style="color:#f87171;">❌ Open failed: ${err.message}</span>`;
+        }
+    });
+
+    // Export button (saves currentRawBuffer using file handle)
+    exportBtn.addEventListener('click', async () => {
+        if (!currentSaveHandle || !currentRawBuffer) { alert("No save file loaded."); return; }
+        try {
+            const options = { suggestedName: currentFileName || "save1.dat", types: [{ description: "DAT Files", accept: { "application/x-dat": [".dat"] } }] };
+            const lastHandle = await loadHandle("lastSaveHandle");
+            if (lastHandle) options.startIn = lastHandle;
+            const saveHandle = await window.showSaveFilePicker(options);
+            const writable = await saveHandle.createWritable();
+            await writable.write(currentRawBuffer);
+            await writable.close();
+            await saveHandle("lastSaveHandle", saveHandle);
+            alert("File exported successfully (modified).");
+        } catch (err) { if (err.name !== "AbortError") alert("Export failed: " + err.message); }
+    });
+
+    clearConsoleBtn.addEventListener('click', () => {
+        logContainer.innerHTML = '<span style="color:#9ab3d0;">Console cleared.</span>';
+        summaryPanel.innerHTML = '';
+        fileNameSpan.textContent = 'No file loaded';
+        fileNameSpan.style.background = '#1e293b';
+        exportBtn.disabled = true;
+        console.clear();
+    });
+
+    // Gene data readiness
+    if (loadGeneDataFromXml) {
+        loadGeneDataFromXml().then(() => {
+            geneDataReady = true;
+            if (currentRawBuffer) addVialsBtn.disabled = false;
+            vialStatusSpan.innerHTML = currentRawBuffer ? "✅ Gene library ready. Enter genome to add vials." : "✅ Gene library ready. Load a save file first.";
+        }).catch(e => {
+            console.error(e);
+            vialStatusSpan.innerHTML = "❌ Failed to load genes.js. Vial injection unavailable.";
+        });
+    } else {
+        vialStatusSpan.innerHTML = "❌ genes.js not loaded correctly.";
+    }
+
+    // Drag & drop
+    document.body.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+    document.body.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && (file.name.endsWith('.dat') || file.name.includes('save'))) {
+            const buffer = await file.arrayBuffer();
+            currentRawBuffer = buffer;
+            currentFileName = file.name;
+            currentSaveHandle = null;
+            await reparseAndUpdate(buffer, file.name);
+            fileNameSpan.textContent = file.name;
+            exportBtn.disabled = false;
+            if (geneDataReady) addVialsBtn.disabled = false;
+        } else {
+            logContainer.innerHTML = `<span style="color:#f87171;">⚠️ Drop a .dat save file.</span>`;
+        }
+    });
+</script>
+</body>
+</html>
