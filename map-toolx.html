@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horsey Game Savegame Map Tool</title>
+    <title>Horsey Game Savegame Hole Removal Tool</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2f; color: #f0f0f0; margin: 0; padding: 0px; }
@@ -40,7 +40,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Horsey Game Savegame Map Tool</h1>
+        <h1>Horsey Game Savegame Hole Removal Tool</h1>
         <div class="tools-dropdown" id="toolsDropdown">
             <button class="tools-btn" id="toolsBtn">🔧 Other Tools <span class="arrow">▼</span></button>
             <div class="dropdown-menu" id="dropdownMenu"></div>
@@ -63,12 +63,9 @@
 
         <div class="info">
             <span class="status">ℹ️ Info</span><br>
-            Apply an edited horsey.tmx map file to your save without resetting!<br>
-            ✓ Update the map tiles.<br>
-            ✓ Update the position of your buildings.<br>
-            ✓ Update buried items.<br>
-			✓ Remove holes and items on map.<br>
-            ✗ Spawn points in the map file are not applied.<br><br>
+            * Load Save<br>
+            * Export Save<br>
+            * All holes (and items on the map) are all gone! <br><br>
             <div id="dimInfo">No files loaded.</div>
             Use at your own risk! Remember to make backups.<br>
             <span id="byteDeltaDisplay">Byte change: —</span>
@@ -77,7 +74,7 @@
                 <label>Map Height: <input type="number" id="mapHeight" value="225" step="1" min="1"></label>
                 <button id="applyDimensionsBtn">Apply Dimensions</button>
                 <button id="fileInput">1. Load Save (save1.dat) 📂</button>
-                <button id="tmxInput">2. Load Map (horsey.tmx) 🗺️</button>
+                <button id="tmxInput" style="display:none;">2. Load Map (horsey.tmx) 🗺️</button>
                 <button id="replaceMapBtn">3. Export Save File 💾</button>
                 <button id="updateCoordsBtn">Update Coordinates</button>
             </div>
@@ -725,6 +722,80 @@
         // ------------------------------------------------------------------
         //  CLEAR WORLD ITEMS TYPE 3 & 4 (fully offset‑aware)
         // ------------------------------------------------------------------
+		
+        function clearHoles() {
+            if (!original || !view) return;
+            const oldWorldItemData = original.slice(worldItemStartOffset, worldItemEndOffset);
+            const oldView = new DataView(oldWorldItemData.buffer, oldWorldItemData.byteOffset, oldWorldItemData.byteLength);
+            let offset = 0;
+            const keepItems = [];
+            while (offset < oldWorldItemData.length) {
+                if (offset + 4 > oldWorldItemData.length) break;
+                const itemType = oldView.getUint32(offset, true);
+                const itemStart = offset;
+                let itemSize = 41;
+                if (itemType == 0) {
+                    if (offset + itemSize + 0xF0 + 0x08 > oldWorldItemData.length) break;
+                    itemSize += 0xF0 + 0x08;
+                    const horseIdOff = itemStart + itemSize;
+                    if (horseIdOff + 4 > oldWorldItemData.length) break;
+                    itemSize += 4;
+                    const voiceOff = itemStart + itemSize;
+                    if (voiceOff + 19 > oldWorldItemData.length) break;
+                    const voiceStrLen = oldView.getUint32(voiceOff + 19, true);
+                    if (voiceOff + 27 + voiceStrLen + 4 > oldWorldItemData.length) break;
+                    const itemCount = oldView.getUint32(voiceOff + 27 + voiceStrLen, true);
+                    itemSize += 20 + 39 + voiceStrLen + (8 * itemCount);
+                } else if (itemType == 1) {
+                    if (offset + 41 + 20 > oldWorldItemData.length) break;
+                    itemSize += 20;
+                } else if (itemType == 3) {
+
+                    if (offset + 41 + 8 > oldWorldItemData.length) break;
+                    itemSize += 8;
+					if(u32(offset+8)>0){
+						if (offset + 41 + 0xF0 +8 > oldWorldItemData.length) break;
+						itemSize += 0xF0;
+					}					
+                }
+                if (itemType !== 4) {
+                    keepItems.push(oldWorldItemData.slice(itemStart, itemStart + itemSize));
+                }
+                offset += itemSize;
+            }
+            const newCount = keepItems.length;
+            const newWorldItems = new Uint8Array(keepItems.reduce((acc, arr) => acc + arr.length, 0));
+            let pos = 0;
+            for (const item of keepItems) { newWorldItems.set(item, pos); pos += item.length; }
+            const oldWorldSectionSize = worldItemEndOffset - worldItemStartOffset;
+            const newWorldSectionSize = newWorldItems.length;
+            const delta = newWorldSectionSize - oldWorldSectionSize;
+            const beforeWorldItems = original.slice(0, worldItemStartOffset);
+            const afterWorldItems = original.slice(worldItemEndOffset);
+            const newTotalSize = beforeWorldItems.length + newWorldSectionSize + afterWorldItems.length;
+            const newBuffer = new Uint8Array(newTotalSize);
+            newBuffer.set(beforeWorldItems, 0);
+            newBuffer.set(newWorldItems, beforeWorldItems.length);
+            newBuffer.set(afterWorldItems, beforeWorldItems.length + newWorldSectionSize);
+            original = newBuffer;
+            view = new DataView(newBuffer.buffer);
+            view.setUint32(worldItemCountOffset, newCount, true);
+            worldItemEndOffset = worldItemStartOffset + newWorldSectionSize;
+            cachedWorldEndOffset = worldItemEndOffset;
+            worldItemCount = newCount;
+
+            // Update pointers that lie AFTER the world‑item block
+            for (const loc of locations) {
+                if (loc.xoff >= worldItemEndOffset) loc.xoff += delta;
+                if (loc.yoff >= worldItemEndOffset) loc.yoff += delta;
+                if (loc.xoff2 >= worldItemEndOffset) loc.xoff2 += delta;
+                if (loc.yoff2 >= worldItemEndOffset) loc.yoff2 += delta;
+            }
+
+            // Re‑build offsets that point INTO the world‑item block (Truck, locations)
+            refreshWorldItemDerivedOffsets();
+        }
+		
         function clearWorldItemsType3And4() {
             if (!original || !view) return;
             const oldWorldItemData = original.slice(worldItemStartOffset, worldItemEndOffset);
@@ -812,7 +883,11 @@
                 const buf = await file.arrayBuffer();
                 original = new Uint8Array(buf);
                 view = new DataView(buf);
-                try { parseSave(); } catch(e) { original = null; alert("Could not parse save: " + e.message); }
+                try {
+					parseSave();
+					//clearHoles();					
+					clearWorldItemsType3And4();
+				} catch(e) { original = null; alert("Could not parse save: " + e.message); }
             } catch(err) { if (err.name !== "AbortError") console.error(err); }
         });
 
