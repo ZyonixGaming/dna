@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horsey Game Savegame Map Cleaner</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2f; color: #f0f0f0; margin: 0; padding: 0px; }
+        .container { display: flex; flex-direction: column; height: 100vh; max-width: 780px; width: 100%; margin: 0 auto; padding: 16px; overflow-y: auto; }
+        h1 { font-size: 1.6rem; margin-top: 0; margin-bottom:0; color: #ffd966; }
+		h3 {margin-top: 0; margin-bottom:8px;}
+        .info { background: #252532; border-radius: 10px; padding: 12px 16px; margin-top: 20px; font-family: monospace; font-size: 14px; border-left: 4px solid #ffd966; }
+        .status { font-weight: bold; color: #ffaa66; }
+        .info-text { margin-top: 8px; font-size: 12px; color: #aaa; }
+        .tools-dropdown { position: relative; }
+        .tools-btn { background: #1e293b; border: 2px solid #3b4e6b; padding: 8px 18px; border-radius: 30px; font-weight: bold; font-size: 0.85rem; cursor: pointer; color: #b9c7d9; font-family: monospace; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .tools-btn:hover { background: #2d3e44; border-color: #48b5b5; color: #fff; }
+        .tools-btn .arrow { font-size: 0.65rem; transition: 0.2s; }
+        .tools-btn.open .arrow { transform: rotate(180deg); }
+        .dropdown-menu { position: absolute; top: 110%; left: 0; background: #0f172a; border: 2px solid #334155; border-radius: 12px; min-width: 200px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index: 100; display: none; overflow: hidden; }
+        .dropdown-menu.show { display: block; animation: fadeIn 0.15s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-menu a { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #cbd5e6; text-decoration: none; font-size: 0.8rem; font-family: monospace; transition: 0.15s; border-bottom: 1px solid #1e293b; }
+        .dropdown-menu a:last-child { border-bottom: none; }
+        .dropdown-menu a:hover { background: #1e293b; color: #48b5b5; }
+        .locations-table, .buried-table { background: #1e1e2a; border-radius: 8px; padding: 12px; overflow-y: auto; border: 1px solid #ddd; margin-top: 20px; }
+        .locations-table { flex: 1; min-height: 300px; }
+        .buried-table { flex: 0 0 auto; max-height: 260px; }
+        .locations-table table, .buried-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .locations-table th, .locations-table td, .buried-table th, .buried-table td { border: 1px solid #4a4a5a; padding: 6px; text-align: left; }
+        .locations-table th, .buried-table th { background: #2d2d3a; position: sticky; top: 0; z-index: 1; }
+        .coord-input { width: 90px; background: #2d2d3a; border: 1px solid #4a4a5a; color: white; padding: 2px 4px; border-radius: 4px; }
+        .item-select { width: 180px; background: #2d2d3a; border: 1px solid #4a4a5a; color: white; padding: 2px 4px; border-radius: 4px; }
+        button { background: #3a6ea5; border: none; color: white; font-size: 0.85rem; padding: 4px 8px; margin-top: 4px; margin-right: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        button:hover { background: #2c5282; transform: scale(1.02); }
+        .flex-row { display: none; }
+        .dim-controls label, #applyDimensionsBtn, #updateCoordsBtn, #byteDeltaDisplay, #dimInfo { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Horsey Game Savegame Map Cleaner</h1>
+        <div class="tools-dropdown" id="toolsDropdown">
+            <button class="tools-btn" id="toolsBtn">🔧 Other Tools <span class="arrow">▼</span></button>
+            <div class="dropdown-menu" id="dropdownMenu"></div>
+        </div>
+
+        <div class="flex-row">
+            <div class="panel">
+                <h2>📤 RLE Hex (input)</h2>
+                <textarea id="hexInput" placeholder="Paste hex string here..."></textarea>
+                <button id="decodeBtn">⬇️ Decode Hex → CSV</button>
+                <button id="clearHexBtn">Clear hex</button>
+            </div>
+            <div class="panel">
+                <h2>📥 CSV Grid</h2>
+                <textarea id="csvOutput" placeholder="Decoded CSV will appear here..."></textarea>
+                <button id="encodeBtn">⬆️ Encode CSV → Hex</button>
+                <button id="clearCsvBtn">Clear CSV</button>
+            </div>
+        </div>
+
+        <div class="info">
+            <span class="status">ℹ️ Info</span><br>
+            * Load Save<br>
+            * Export Save<br>
+            * All horses, items, buried items, and holes on the map are all gone! <br><br>
+            <div id="dimInfo">No files loaded.</div>
+            Use at your own risk! Remember to make backups.<br>
+            <span id="byteDeltaDisplay">Byte change: —</span>
+            <div class="dim-controls">
+                <label>Map Width: <input type="number" id="mapWidth" value="400" step="1" min="1"></label>
+                <label>Map Height: <input type="number" id="mapHeight" value="225" step="1" min="1"></label>
+                <button id="applyDimensionsBtn">Apply Dimensions</button>
+                <button id="fileInput">1. Load Save (save1.dat) 📂</button>
+                <button id="tmxInput" style="display:none;">2. Load Map (horsey.tmx) 🗺️</button>
+                <button id="replaceMapBtn">3. Export Save File 💾</button>
+                <button id="updateCoordsBtn">Update Coordinates</button>
+            </div>
+        </div>
+
+        <div id="buriedPanel" class="buried-table" style="display: none;">
+            <h3>📦 Buried Items</h3>
+            <table id="buriedTable"><thead><tr><th>Item</th><th>X</th><th>Y</th></tr></thead><tbody id="buriedTbody"></tbody></table>
+            <button id="addBuriedBtn" style="margin-top:8px;">➕ Add Buried Item</button>
+        </div>
+
+        <div id="locationsPanel" class="locations-table" style="display: none;">
+            <h3>📍 Locations</h3>
+            <table id="locationsTable"><thead><tr><th>Name</th><th>X</th><th>Y</th></tr></thead><tbody id="locationsTbody"></tbody></table>
+            <p class="info-text">⚠️ Changes are stored in memory. Press "Export Save File" to save all changes to disk.</p>
+        </div>
+    </div>
+
+    <script>
+        // ------------------------------------------------------------------
+        //  LOOKUP TABLE (unchanged)
+        // ------------------------------------------------------------------
+        const lookup = {
+            "1": { n: "Plain1", pre: 0, tmx: 1, tile: 1, hasHealth: false },
+            "2": { n: "Plain2", pre: 0, tmx: 2, tile: 2, hasHealth: false },
+            "3": { n: "Plain3", pre: 0, tmx: 3, tile: 3, hasHealth: false },
+            "4": { n: "Plain4", pre: 0, tmx: 4, tile: 4, hasHealth: false },
+            "5": { n: "GrassLand", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "6": { n: "BogLand", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "7": { n: "PalmLand", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "8": { n: "CactusLand", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "9": { n: "Water", pre: 6, tmx: 9, tile: 9, hasHealth: false },
+            "10": { n: "Pond", pre: 20, tmx: 10, tile: 10, hasHealth: false },
+            "11": { n: "Bush", pre: 0, tmx: 11, tile: 11, hasHealth: false },
+            "12": { n: "Stump", pre: 0, tmx: 12, tile: 12, hasHealth: false },
+            "13": { n: "Birch", pre: 0, tmx: 13, tile: 13, hasHealth: false },
+            "14": { n: "BridgeH", pre: 7, tmx: 14, tile: 14, hasHealth: false },
+            "15": { n: "BridgeV", pre: 7, tmx: 15, tile: 15, hasHealth: false },
+            "16": { n: "BadLand", pre: 5, tmx: 16, tile: 16, hasHealth: false },
+            "17": { n: "Mountain1", pre: 15, tmx: 17, tile: 17, hasHealth: false },
+            "18": { n: "Mountain2", pre: 15, tmx: 18, tile: 18, hasHealth: false },
+            "19": { n: "Mountain3", pre: 15, tmx: 19, tile: 19, hasHealth: false },
+            "20": { n: "Mountain4", pre: 15, tmx: 20, tile: 20, hasHealth: false },
+            "21": { n: "Fir", pre: 0, tmx: 21, tile: 21, hasHealth: false },
+            "22": { n: "Un1", pre: 0, tmx: 22, tile: 22, hasHealth: false },
+            "23": { n: "Un2", pre: 0, tmx: 23, tile: 23, hasHealth: false },
+            "24": { n: "Boulder", pre: 0, tmx: 24, tile: 24, hasHealth: false },
+            "25": { n: "AcaciaLand", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "26": { n: "AppleTree", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "27": { n: "DeadTree", pre: 13, tmx: 27, tile: 27, hasHealth: false },
+            "28": { n: "Cave", pre: 14, tmx: 28, tile: 28, hasHealth: false },
+            "29": { n: "FenceIcon", pre: 0x40, tmx: 29, tile: 29, hasHealth: false },
+            "30": { n: "FenceIconNotNeeded", pre: 0x80, tmx: 30, tile: 30, hasHealth: false },
+            "31": { n: "Tumbleweed", pre: 0, tmx: 31, tile: 31, hasHealth: false },
+            "32": { n: "Pebbles", pre: 0, tmx: 32, tile: 32, hasHealth: false },
+            "33": { n: "PowerFence", pre: 17, tmx: 33, tile: 33, hasHealth: false },
+            "34": { n: "Road1", pre: 7, tmx: 34, tile: 34, hasHealth: false },
+            "35": { n: "Road2", pre: 7, tmx: 35, tile: 35, hasHealth: false },
+            "36": { n: "Road3", pre: 7, tmx: 36, tile: 36, hasHealth: false },
+            "37": { n: "Road4", pre: 7, tmx: 37, tile: 37, hasHealth: false },
+            "38": { n: "Road5", pre: 7, tmx: 38, tile: 38, hasHealth: false },
+            "39": { n: "Road6", pre: 7, tmx: 39, tile: 39, hasHealth: false },
+            "40": { n: "Road7", pre: 7, tmx: 40, tile: 40, hasHealth: false },
+            "41": { n: "Road8", pre: 7, tmx: 41, tile: 41, hasHealth: false },
+            "42": { n: "Road9", pre: 7, tmx: 42, tile: 42, hasHealth: false },
+            "43": { n: "RoadA", pre: 7, tmx: 43, tile: 43, hasHealth: false },
+            "44": { n: "RoadB", pre: 7, tmx: 44, tile: 44, hasHealth: false },
+            "45": { n: "RoadC", pre: 7, tmx: 45, tile: 45, hasHealth: false },
+            "46": { n: "RoadD", pre: 7, tmx: 46, tile: 46, hasHealth: false },
+            "47": { n: "RoadE", pre: 7, tmx: 47, tile: 47, hasHealth: false },
+            "48": { n: "RoadF", pre: 7, tmx: 48, tile: 48, hasHealth: false },
+            "49": { n: "PowerTower", pre: 16, tmx: 49, tile: 49, hasHealth: false },
+            "50": { n: "DirtRoad1", pre: 8, tmx: 50, tile: 50, hasHealth: false },
+            "51": { n: "DirtRoad2", pre: 8, tmx: 51, tile: 51, hasHealth: false },
+            "52": { n: "DirtRoad3", pre: 8, tmx: 52, tile: 52, hasHealth: false },
+            "53": { n: "DirtRoad4", pre: 8, tmx: 53, tile: 53, hasHealth: false },
+            "54": { n: "DirtRoad5", pre: 8, tmx: 54, tile: 54, hasHealth: false },
+            "55": { n: "DirtRoad6", pre: 8, tmx: 55, tile: 55, hasHealth: false },
+            "56": { n: "DirtRoad7", pre: 8, tmx: 56, tile: 56, hasHealth: false },
+            "57": { n: "DirtRoad8", pre: 8, tmx: 57, tile: 57, hasHealth: false },
+            "58": { n: "DirtRoad9", pre: 8, tmx: 58, tile: 58, hasHealth: false },
+            "59": { n: "DirtRoadA", pre: 8, tmx: 59, tile: 59, hasHealth: false },
+            "60": { n: "DirtRoadB", pre: 8, tmx: 60, tile: 60, hasHealth: false },
+            "61": { n: "DirtRoadC", pre: 8, tmx: 61, tile: 61, hasHealth: false },
+            "62": { n: "DirtRoadD", pre: 8, tmx: 62, tile: 62, hasHealth: false },
+            "63": { n: "DirtRoadE", pre: 8, tmx: 63, tile: 63, hasHealth: false },
+            "64": { n: "DirtRoadF", pre: 8, tmx: 64, tile: 64, hasHealth: false },
+            "65": { n: "Goop", pre: 4, tmx: 65, tile: 65, hasHealth: false },
+            "66": { n: "Goop", pre: 4, tmx: 66, tile: 66, hasHealth: false },
+            "67": { n: "Glass", pre: 18, tmx: 67, tile: 67, hasHealth: false },
+            "68": { n: "GlassBG", pre: 0, tmx: 68, tile: 68, hasHealth: false },
+            "69": { n: "Gray", pre: 0, tmx: 69, tile: 69, hasHealth: false },
+            "70": { n: "NGrassLand", pre: 2, tmx: 70, tile: 101, hasHealth: 20 },
+            "71": { n: "Grass", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "72": { n: "Grass", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "73": { n: "Grass", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "74": { n: "Grass", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "75": { n: "Grass", pre: 1, tmx: 5, tile: 71, hasHealth: 20 },
+            "76": { n: "Reeds", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "77": { n: "Reeds", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "78": { n: "Reeds", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "79": { n: "Reeds", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "80": { n: "Reeds", pre: 3, tmx: 6, tile: 76, hasHealth: 20 },
+            "81": { n: "Acacia", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "82": { n: "Acacia", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "83": { n: "Acacia", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "84": { n: "Acacia", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "85": { n: "Acacia", pre: 9, tmx: 25, tile: 81, hasHealth: 180 },
+            "86": { n: "Apple", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "87": { n: "Apple", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "88": { n: "Apple", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "89": { n: "Apple", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "90": { n: "Apple", pre: 10, tmx: 26, tile: 86, hasHealth: 80 },
+            "91": { n: "Palm", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "92": { n: "Palm", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "93": { n: "Palm", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "94": { n: "Palm", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "95": { n: "Palm", pre: 11, tmx: 7, tile: 91, hasHealth: 120 },
+            "96": { n: "Cactus", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "97": { n: "Cactus", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "98": { n: "Cactus", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "99": { n: "Cactus", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "100": { n: "Cactus", pre: 12, tmx: 8, tile: 96, hasHealth: 80 },
+            "101": { n: "NGrass", pre: 2, tmx: 70, tile: 101, hasHealth: 20 },
+            "102": { n: "NGrass", pre: 2, tmx: 70, tile: 101, hasHealth: 20 },
+            "103": { n: "NGrass", pre: 2, tmx: 70, tile: 101, hasHealth: 20 },
+            "104": { n: "NGrass", pre: 2, tmx: 70, tile: 101, hasHealth: 20 },
+            "105": { n: "NGrass", pre: 2, tmx: 70, tile: 101, hasHealth: 20 }
+        };
+
+        const itemList = [
+            "ItemHay", "ItemBale", "ItemApple", "ItemBeer", "ItemHotsauce",
+            "ItemPlutonium", "ItemBones", "ItemCarcass", "ItemDung", "ItemTrophy",
+            "ItemChampTrophy", "ItemVipCard", "ItemVial", "ItemDiskette", "ItemBriefcase",
+            "ItemChest", "ItemCactus", "ItemVase", "ItemTM", "ItemG",
+            "ItemA", "ItemT", "ItemC", "ItemStripe", "ItemLift",
+            "ItemRambar", "ItemSneakers", "ItemBowTie", "ItemCravat", "ItemTopHat",
+            "ItemToque", "ItemGlasses", "ItemSunglasses", "ItemBallAndChain", "ItemJetEngine",
+            "ItemBalloon", "ItemRollerblades", "ItemStilts", "ItemClownNose", "ItemCowboyBoots1",
+            "ItemCowboyBoots2", "ItemCowboyBoots3", "ItemCowboyBoots4", "ItemRibbon1", "ItemRibbon2",
+            "ItemRibbon3", "ItemRibbon4", "ItemFenceBox", "ItemMemory"
+        ];
+
+        let WIDTH = 400;
+        let HEIGHT = 225;
+        let view = null;
+        let original = null;
+        let lastDecodedBytes = 0;
+        let cachedMapStartOffset = 0;
+        let cachedMapEndOffset = 0;
+        let cachedWorldEndOffset = 0;
+        let currentSaveHandle = null;
+        let records = [];
+        let locations = [];
+        let buriedItems = [];
+        let buriedItemsStartOffset = 0;
+        let buriedItemsEndOffset = 0;
+        let locationList;
+
+        let worldItemCount = 0;
+        let worldItemCountOffset = 0;
+        let worldItemStartOffset = 0;
+        let worldItemEndOffset = 0;
+        let trailingDataStart = 0;
+
+        const hexInput = document.getElementById('hexInput');
+        const csvOutput = document.getElementById('csvOutput');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const encodeBtn = document.getElementById('encodeBtn');
+        const clearHexBtn = document.getElementById('clearHexBtn');
+        const clearCsvBtn = document.getElementById('clearCsvBtn');
+        const byteDeltaSpan = document.getElementById('byteDeltaDisplay');
+        const mapWidthInput = document.getElementById('mapWidth');
+        const mapHeightInput = document.getElementById('mapHeight');
+        const dimInfoDiv = document.getElementById('dimInfo');
+        const locationsPanel = document.getElementById('locationsPanel');
+        const locationsTbody = document.getElementById('locationsTbody');
+        const buriedPanel = document.getElementById('buriedPanel');
+        const buriedTbody = document.getElementById('buriedTbody');
+
+        function updateDimInfo() {
+            if (WIDTH && HEIGHT) dimInfoDiv.innerHTML = '<strong>Width = ' + WIDTH + '</strong>, <strong>Height = ' + HEIGHT + '</strong> → exactly <strong>' + (WIDTH * HEIGHT) + '</strong> tiles.';
+            else dimInfoDiv.innerHTML = "No files loaded.";
+        }
+        updateDimInfo();
+
+        // ------------------------------------------------------------------
+        //  SAFE UTILITIES
+        // ------------------------------------------------------------------
+        function u32(off) {
+            if (off < 0 || off + 4 > original.length) throw new Error('u32 out of bounds: offset ' + off);
+            return view.getUint32(off, true);
+        }
+        function f32(off) {
+            if (off < 0 || off + 4 > original.length) throw new Error('f32 out of bounds: offset ' + off);
+            return view.getFloat32(off, true);
+        }
+        function writeF32(off, val) {
+            if (off < 0 || off + 4 > original.length) throw new Error('writeF32 out of bounds: offset ' + off);
+            view.setFloat32(off, val, true);
+        }
+
+        function hexToBytes(hexStr) {
+            const clean = hexStr.replace(/\s/g, '');
+            if (clean.length % 2 !== 0) throw new Error('Hex string must have even length');
+            const bytes = [];
+            for (let i = 0; i < clean.length; i += 2) bytes.push(parseInt(clean.substr(i, 2), 16));
+            return bytes;
+        }
+        function bytesToHex(bytes) { return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(''); }
+        function getByteLength(hexStr) { return hexStr.replace(/\s/g, '').length / 2; }
+        function isBitSet(number, bitNumber) { return (number & (1 << (bitNumber - 1))) !== 0; }
+
+        // ------------------------------------------------------------------
+        //  BURIED ITEMS UI
+        // ------------------------------------------------------------------
+        function renderBuriedItemsTable() {
+            if (!buriedItems.length) { buriedPanel.style.display = 'none'; return; }
+            //buriedPanel.style.display = 'block';
+            buriedTbody.innerHTML = '';
+            for (let i = 0; i < buriedItems.length; i++) {
+                const item = buriedItems[i];
+                const row = buriedTbody.insertRow();
+                const selectCell = row.insertCell(0);
+                const select = document.createElement('select');
+                select.classList.add('item-select');
+                for (let idx = 0; idx < itemList.length; idx++) {
+                    const option = document.createElement('option');
+                    option.value = idx;
+                    option.textContent = itemList[idx];
+                    if (idx === item.itemIndex) option.selected = true;
+                    select.appendChild(option);
+                }
+                select.dataset.idx = i;
+                select.addEventListener('change', (e) => { const idx = parseInt(e.target.dataset.idx, 10); buriedItems[idx].itemIndex = parseInt(e.target.value, 10); });
+                selectCell.appendChild(select);
+                const xCell = row.insertCell(1);
+                const xInput = document.createElement('input');
+                xInput.type = 'number'; xInput.step = 'any'; xInput.value = item.x; xInput.classList.add('coord-input');
+                xInput.dataset.idx = i; xInput.dataset.coord = 'x';
+                xInput.addEventListener('change', (e) => { const idx = parseInt(e.target.dataset.idx, 10); buriedItems[idx].x = parseFloat(e.target.value); });
+                xCell.appendChild(xInput);
+                const yCell = row.insertCell(2);
+                const yInput = document.createElement('input');
+                yInput.type = 'number'; yInput.step = 'any'; yInput.value = item.y; yInput.classList.add('coord-input');
+                yInput.dataset.idx = i; yInput.dataset.coord = 'y';
+                yInput.addEventListener('change', (e) => { const idx = parseInt(e.target.dataset.idx, 10); buriedItems[idx].y = parseFloat(e.target.value); });
+                yCell.appendChild(yInput);
+            }
+        }
+        document.getElementById('addBuriedBtn')?.addEventListener('click', () => {
+            buriedItems.push({ itemIndex: 0, x: 0, y: 0 });
+            renderBuriedItemsTable();
+        });
+
+        // ------------------------------------------------------------------
+        //  LOCATION EDITOR UI
+        // ------------------------------------------------------------------
+        function renderLocationsTable() {
+            if (!locations.length) { locationsPanel.style.display = 'none'; return; }
+            //locationsPanel.style.display = 'block';
+            locationsTbody.innerHTML = '';
+            for (let i = 0; i < locations.length; i++) {
+                const loc = locations[i];
+                const row = locationsTbody.insertRow();
+                row.insertCell(0).textContent = loc.value;
+                const xCell = row.insertCell(1), yCell = row.insertCell(2);
+                const xInput = document.createElement('input');
+                xInput.type = 'number'; xInput.step = 'any'; xInput.value = loc.x; xInput.classList.add('coord-input');
+                xInput.dataset.idx = i; xInput.dataset.coord = 'x';
+                const yInput = document.createElement('input');
+                yInput.type = 'number'; yInput.step = 'any'; yInput.value = loc.y; yInput.classList.add('coord-input');
+                yInput.dataset.idx = i; yInput.dataset.coord = 'y';
+                xCell.appendChild(xInput); yCell.appendChild(yInput);
+            }
+            document.querySelectorAll('.coord-input').forEach(inp => inp.addEventListener('change', handleCoordChange));
+        }
+        function handleCoordChange(e) {
+            const idx = parseInt(e.target.dataset.idx, 10);
+            const coord = e.target.dataset.coord;
+            const val = parseFloat(e.target.value);
+            if (isNaN(val)) return;
+            if (coord === 'x') locations[idx].x = val;
+            else locations[idx].y = val;
+        }
+
+        // ------------------------------------------------------------------
+        //  DECODER / ENCODER (unchanged)
+        // ------------------------------------------------------------------
+        function decodeRLE(startOffset, opt_bytes) {
+            const data = opt_bytes || original;
+            if (!data) throw new Error("No data source");
+            const array2D = [...Array(WIDTH)].map(() => Array(HEIGHT).fill(null));
+            const result = [];
+            let i = 0, tilecount = 0;
+            const getByte = (idx) => data[startOffset + idx];
+            try {
+                while (tilecount < WIDTH * HEIGHT) {
+                    const first = getByte(i);
+                    const leftFence = isBitSet(first, 8), upFence = isBitSet(first, 7), realFirst = first & 0b00111111;
+                    if (first >= 0x3B && first <= 0x3E) {
+                        const row = Math.floor(tilecount / WIDTH), col = tilecount % WIDTH;
+                        array2D[col][row] = { flag:0, upFence:false, leftFence:false, tile:(first-0x3A), tmx:(first-0x3A), desc:"sand", x:col, y:row, extra_bytes:null };
+                        tilecount++; i++;
+                    } else if (first === 0x3F) {
+                        if (i+1 > data.length-startOffset-1) throw new Error("Truncated water run");
+                        const repeat = getByte(i+1);
+                        for (let k=0; k<repeat; k++) {
+                            const row = Math.floor(tilecount/WIDTH), col = tilecount%WIDTH;
+                            array2D[col][row] = { flag:6, upFence:false, leftFence:false, tile:0x09, tmx:9, desc:"water", x:col, y:row, extra_bytes:null };
+                            tilecount++;
+                        }
+                        i+=2;
+                    } else {
+                        if (i+1 > data.length-startOffset-1) throw new Error("Truncated tile data");
+                        const tile = getByte(i+1);
+                        const row = Math.floor(tilecount/WIDTH), col = tilecount%WIDTH;
+                        let tmx = tile, desc = "undefined", extra_bytes = null;
+                        if (lookup[tile]) { tmx = lookup[tile].tmx; desc = lookup[tile].n; }
+                        if (tile >= 0x47) {
+                            if (i+2 > data.length-startOffset-1) throw new Error("Missing health byte");
+                            extra_bytes = getByte(i+2); i++;
+                        }
+                        array2D[col][row] = { flag:realFirst, upFence, leftFence, tile, tmx, desc, x:col, y:row, extra_bytes };
+                        tilecount++; i+=2;
+                    }
+                }
+                for (let y=0; y<HEIGHT; y++) {
+                    for (let x=0; x<WIDTH; x++) {
+                        const sq = array2D[x][y];
+                        if (sq.upFence) { sq.tmx = 29; if (x+1<WIDTH) array2D[x+1][y].tmx = 29; }
+                        if (sq.leftFence) { sq.tmx = 30; if (y+1<HEIGHT) array2D[x][y+1].tmx = 30; }
+                        result.push(sq.tmx);
+                    }
+                }
+                lastDecodedBytes = i;
+                return result;
+            } catch (err) { console.error('Decoding failed at byte '+i, err); throw err; }
+        }
+        function toCSV(tiles, w, h) {
+            const rows = [];
+            for (let r=0; r<h; r++) rows.push(tiles.slice(r*w, (r+1)*w).join(','));
+            return rows.join(',\n');
+        }
+        function parseCSV(csvStr, w, h) {
+            const numbers = [];
+            const lines = csvStr.split(/\r?\n/);
+            for (const line of lines) {
+                if (line.trim() === '') continue;
+                const parts = line.split(',');
+                for (const p of parts) {
+                    const trimmed = p.trim();
+                    if (trimmed === '') continue;
+                    const num = parseInt(trimmed,10);
+                    if (isNaN(num)) throw new Error('Invalid number: '+trimmed);
+                    numbers.push(num);
+                }
+            }
+            if (numbers.length !== w*h) throw new Error('CSV has '+numbers.length+' numbers, expected '+w*h);
+            for (let i=0; i<numbers.length; i++) if (numbers[i]<0||numbers[i]>255) throw new Error('Tile out of range: '+numbers[i]);
+            return numbers;
+        }
+        function encodeRLE(width, height, tiles) {
+            const bytes = [];
+            let waterBuffer = 0;
+            const flushWater = () => {
+                if (waterBuffer>0) {
+                    while (waterBuffer>=255) { bytes.push(0x3F, 0xFF); waterBuffer -= 255; }
+                    if (waterBuffer>0) { bytes.push(0x3F, waterBuffer); waterBuffer = 0; }
+                }
+            };
+            const workTiles = tiles.slice();
+            for (let y=0; y<height; y++) {
+                for (let x=0; x<width; x++) {
+                    const idx = y*width + x;
+                    let finalTile = workTiles[idx];
+                    let rawTile = lookup[finalTile.toString()];
+                    let fenceFlag = 0;
+                    if ([29,30].includes(finalTile)) {
+                        let tempIdx = idx;
+                        if (x+1<width && [29,30].includes(workTiles[idx+1])) { fenceFlag |= 0x40; tempIdx = idx-width; }
+                        if (y+1<height && [29,30].includes(workTiles[idx+width])) { fenceFlag |= 0x80; tempIdx = idx-1; }
+                        if (tempIdx>=0 && tempIdx!==idx) {
+                            finalTile = workTiles[tempIdx]; rawTile = lookup[finalTile.toString()]; workTiles[idx] = finalTile;
+                        } else { finalTile = 2; rawTile = lookup["2"]; workTiles[idx] = 2; }
+                    }
+                    if (!rawTile) throw new Error('Unknown tile: '+finalTile+' at ('+x+','+y+')');
+                    let finalPre = rawTile.pre;
+                    if (x===0||y===0||x===width-1||y===height-1) finalPre = 15;
+                    finalPre |= fenceFlag;
+                    if (rawTile.tile===9 && finalPre===6) { waterBuffer++; if (waterBuffer===255) flushWater(); continue; }
+                    flushWater();
+                    if (finalPre===0 && rawTile.tile>=1 && rawTile.tile<=4) bytes.push(0x3A+rawTile.tile);
+                    else if (rawTile.tile>=17 && rawTile.tile<=20) bytes.push(finalPre, Math.floor(Math.random()*4)+17);
+                    else { bytes.push(finalPre, rawTile.tile); if (rawTile.hasHealth>0) bytes.push(rawTile.hasHealth); }
+                }
+            }
+            flushWater();
+            return bytes;
+        }
+
+        // ------------------------------------------------------------------
+        //  INDEXEDDB (unchanged)
+        // ------------------------------------------------------------------
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open("FileHandleDB", 1);
+                req.onupgradeneeded = (e) => e.target.result.createObjectStore("handles");
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+        async function saveHandleByKey(key, handle) { const db = await openDB(); const tx = db.transaction("handles","readwrite"); tx.objectStore("handles").put(handle, key); return tx.complete; }
+        async function loadHandleByKey(key) { const db = await openDB(); return new Promise(resolve => { const req = db.transaction("handles").objectStore("handles").get(key); req.onsuccess = () => resolve(req.result || null); req.onerror = () => resolve(null); }); }
+        let lastUsedTMXHandle = null;
+
+        // ------------------------------------------------------------------
+        //  FIND VARIABLE STRINGS (unchanged)
+        // ------------------------------------------------------------------
+        function findVariableStrings(buffer, startPos = 0, littleEndian = true) {
+            let locationIndex = 0;
+            const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+            let stillFarm = true;
+            const printableRegex = /^[\p{L}\p{N}\p{P}\p{Z}\p{S}]+$/u;
+            for (let i = startPos; i <= buffer.length - 4; i++) {
+                const length = dv.getUint32(i, littleEndian);
+                const length2 = (i + 8 + length) <= buffer.length ? dv.getUint32(i + 4 + length, littleEndian) : -1;
+                if (length2 > 255 || length2 < 0) continue;
+                if (length > 3 && (i + 4 + length) <= buffer.length && length2 >= 0 && length2 <= 255) {
+                    try {
+                        const stringBuffer = buffer.slice(i + 4, i + 4 + length);
+                        let decodedString = new TextDecoder('utf-8').decode(stringBuffer);
+                        if (printableRegex.test(decodedString)) {
+                            if (decodedString == "unknown") continue;
+                            if (decodedString == "Race Track") stillFarm = false;
+                            let isFarm = (locations.length >= 2 && stillFarm);
+                            let xoff = 0, yoff = 0, x = 0, y = 0, horseOffset = 0;
+                            for (let idx = 0; idx < length2; idx++) {
+                                horseOffset += 0xF0;
+                                if ((i+8+length+horseOffset+31+3) > original.length) break;
+                                let voiceStrLen = dv.getUint32(i+8+length+horseOffset+31, littleEndian);
+                                if (voiceStrLen>255||voiceStrLen<0) voiceStrLen = 0;
+                                horseOffset += 39 + voiceStrLen;
+                                let itemcount = dv.getUint32(i+8+length+horseOffset, littleEndian);
+                                if (itemcount>10||itemcount<0) itemcount = 0;
+                                horseOffset += 4 + (itemcount * 8) + 8 + 4;
+                            }
+                            if ((i+12+length+horseOffset+3) > original.length) continue;
+                            let length3 = dv.getUint32(i+12+length+horseOffset, littleEndian);
+                            if (length3 > 255) continue;
+                            let itemlength3 = 0;
+                            for (let idx3 = 0; idx3 < length3; idx3++) {
+                                let hasDna = dv.getUint32(i+12+length+horseOffset+itemlength3+12, littleEndian);
+                                if (hasDna) itemlength3 += 0xF0;
+                                itemlength3 += 49;
+                            }
+                            xoff = i + 16 + length + itemlength3 + horseOffset;
+                            yoff = xoff + 4;
+                            x = f32(xoff); y = f32(yoff);
+                            if (x<10||y<10) continue;
+                            const locItem = locationList[locationIndex];
+                            if (x !== locItem.x || y !== locItem.y) console.log(decodedString+" entry/exit coords mismatched! x:"+x+"->"+locItem.x+", y:"+y+"->"+locItem.y);
+                            locationIndex++;
+                            locations.push({ index:locItem.index, offset:i, length, value:decodedString, isFarm, crowd:length2, xoff, yoff, xoff2:locItem.offx, yoff2:locItem.offy, x, y });
+                        }
+                    } catch(e) { console.log(e); }
+                }
+            }
+            return locations;
+        }
+
+        // ------------------------------------------------------------------
+        //  PARSE SAVE FILE
+        // ------------------------------------------------------------------
+        function parseSave() {
+            if (!original || original.length < 0x14) throw new Error("File too small");
+            const count = u32(0x10);
+            let off = 0x14;
+            records = [];
+            for (let idx = 0; idx < count; idx++) {
+                if (off+4 > original.length) throw new Error(`Record ${idx}: missing name length`);
+                const nameLen = u32(off);
+                const nameStart = off+4, nameEnd = nameStart + nameLen;
+                const fixedOffset = nameEnd, fixedEnd = fixedOffset+18, linkCountOffset = fixedEnd;
+                if (nameEnd > original.length || linkCountOffset+4 > original.length) throw new Error(`Record ${idx}: truncated`);
+                const nameBytes = original.slice(nameStart, nameEnd);
+                const name = new TextDecoder("utf-8").decode(nameBytes);
+                const linkCount = u32(linkCountOffset);
+                const linksOffset = linkCountOffset+4;
+                const next = linksOffset + linkCount*4;
+                if (next > original.length) throw new Error(`Record ${idx}: truncated links`);
+                const links = [];
+                for (let j=0; j<linkCount; j++) links.push(u32(linksOffset + j*4));
+                records.push({ idx, offset: off, nameLen, name, fixedOffset, linkCountOffset, linksOffset, links, end: next });
+                off = next;
+            }
+            const tableEnd = off;
+
+            const xoff = tableEnd + 0x34, yoff = tableEnd + 0x38;
+            const x = f32(xoff), y = f32(yoff);
+            locations = [{index:56, offset:-1, length:-1, value:"vial world", isFarm:false, crowd:-1, xoff, yoff, xoff2:-1, yoff2:-1, x, y }];
+            const offset1 = tableEnd + 0xF0, some_count = u32(offset1), offset2 = offset1 + 4 + (8*some_count), offset3 = offset1 + 4 + (6*some_count) ;			
+            WIDTH = u32(offset2); HEIGHT = u32(offset2+4);
+			if(WIDTH>0&&WIDTH<5000&&HEIGHT>0&&HEIGHT<5000){
+				cachedMapStartOffset = offset2 + 8;
+			}else{
+				WIDTH = u32(offset3); HEIGHT = u32(offset3+4);
+				cachedMapStartOffset = offset3 + 8;
+			}
+			console.log("width: "+WIDTH+" height: "+HEIGHT);
+            mapWidthInput.value = WIDTH; mapHeightInput.value = HEIGHT;
+            updateDimInfo();
+            
+            const tiles = decodeRLE(cachedMapStartOffset, original);
+            cachedMapEndOffset = cachedMapStartOffset + lastDecodedBytes;
+            buriedItemsStartOffset = cachedMapEndOffset;
+            const buriedCount = u32(buriedItemsStartOffset);
+            buriedItems = [];
+            for (let i=0; i<buriedCount; i++) {
+                const entryOffset = buriedItemsStartOffset+4 + i*8;
+                const buriedLoc = u32(entryOffset), buriedItemIdx = u32(entryOffset+4);
+                buriedItems.push({ itemIndex: buriedItemIdx, x: (buriedLoc % WIDTH)*32, y: Math.floor(buriedLoc/WIDTH)*32+32 });
+            }
+            buriedItemsEndOffset = buriedItemsStartOffset + 4 + buriedCount*8;
+            const wordLength = u32(buriedItemsEndOffset);
+            const unknownOffset = buriedItemsEndOffset + 4 + wordLength;
+            worldItemCountOffset = unknownOffset + 8;
+            worldItemStartOffset = worldItemCountOffset + 4;
+            worldItemCount = u32(worldItemCountOffset);
+            let wio = worldItemStartOffset;
+			
+            const locationLookup = {};
+            for (let i=0; i<worldItemCount; i++) {
+	
+
+                const itemOffset = wio;
+				//console.log(itemOffset);
+                const itemType = u32(wio);
+                const itemIndex = original[wio+5];
+                const itemX = f32(wio+25), itemY = f32(wio+29);
+                wio += 41;
+                if (itemType == 0) {
+	
+					
+                    wio += 0xF0 + 0x08;					
+                    const horseId = u32(wio); wio += 4;
+                    const voiceStrLen = u32(wio+19);
+		
+                    const itemCount = u32(wio+27+voiceStrLen);
+				
+                    wio += 20 + 39 + voiceStrLen + (8*itemCount);
+
+                } else if (itemType == 1) {
+
+                    wio += 20;
+                    locations.push({ index:48, offset:-1, length:-1, value:"Truck", isFarm:false, crowd:-1, xoff:itemOffset+25, yoff:itemOffset+29, xoff2:-1, yoff2:-1, x:itemX, y:itemY });
+                } else if (itemType == 2) {
+					
+                    locationLookup[itemIndex] = { index:itemIndex, x:itemX, y:itemY, offx:itemOffset+25, offy:itemOffset+29 };
+					//itemindex matches with tmx gid-97
+                } else if (itemType == 3) {
+					
+					
+					if(u32(itemOffset+8)>0){
+						wio += 0xF0;
+					}
+
+                    wio += 8;
+					
+                } else if (itemType == 4) { /* hole */ 
+					
+				}else{
+					console.log("unknown item "+itemType);
+					console.log(itemOffset);
+				}
+            }
+
+            worldItemEndOffset = wio;
+            cachedWorldEndOffset = worldItemEndOffset;
+            locationList = Object.entries(locationLookup).sort((a,b)=>Number(a[0])-Number(b[0])).map(e=>e[1]);
+            trailingDataStart = buriedItemsEndOffset;
+            renderBuriedItemsTable();
+            hexInput.value = bytesToHex(Array.from(original.slice(cachedMapStartOffset, cachedMapEndOffset)));
+            csvOutput.value = toCSV(tiles, WIDTH, HEIGHT);
+            findVariableStrings(original, cachedWorldEndOffset);
+            renderLocationsTable();
+        }
+
+        // ------------------------------------------------------------------
+        //  HELPER: Re‑build pointers from the current world‑items block
+        // ------------------------------------------------------------------
+        function refreshWorldItemDerivedOffsets() {
+            // Re‑parse the current world‑items block to obtain fresh offsets
+            const newLocationLookup = {};
+            let wio = worldItemStartOffset;
+            for (let i = 0; i < worldItemCount; i++) {
+                const itemOffset = wio;
+                const itemType = u32(wio);
+                const itemIndex = original[wio+5];
+                const itemX = f32(wio+25), itemY = f32(wio+29);
+                wio += 41;
+                if (itemType == 0) {
+                    wio += 0xF0 + 0x08;
+                    const horseId = u32(wio); wio += 4;
+                    const voiceStrLen = u32(wio+19);
+                    const itemCount = u32(wio+27+voiceStrLen);
+                    wio += 20 + 39 + voiceStrLen + (8*itemCount);
+                } else if (itemType == 1) {
+                    wio += 20;
+                    // Update Truck location
+                    const truck = locations.find(loc => loc.value === "Truck");
+                    if (truck) {
+                        truck.xoff = itemOffset + 25;
+                        truck.yoff = itemOffset + 29;
+                        writeF32(truck.xoff, truck.x);
+                        writeF32(truck.yoff, truck.y);
+                    }
+                } else if (itemType == 2) {
+                    newLocationLookup[itemIndex] = { x: itemX, y: itemY, offx: itemOffset+25, offy: itemOffset+29 };
+                } else if (itemType == 3) {
+					if(u32(itemOffset+8)>0){
+						wio += 0xF0;
+					}				
+                    wio += 8;
+                } else if (itemType == 4) { /* hole */ }
+            }
+            // Update other locations' xoff2/yoff2 using the new lookup
+            const newLocationList = Object.entries(newLocationLookup).sort((a,b)=>Number(a[0])-Number(b[0])).map(e=>e[1]);
+            for (let i = 0; i < locations.length; i++) {
+                const loc = locations[i];
+                if (loc.value === "vial world" || loc.value === "Truck") continue;
+                // The index in locationList corresponds to the order; find matching entry
+                const oldIdx = locationList.findIndex(entry => entry.offx === loc.xoff2);
+                if (oldIdx !== -1 && oldIdx < newLocationList.length) {
+                    const newEntry = newLocationList[oldIdx];
+                    loc.xoff2 = newEntry.offx;
+                    loc.yoff2 = newEntry.offy;
+                    writeF32(loc.xoff2, loc.x);
+                    writeF32(loc.yoff2, loc.y);
+                }
+            }
+            locationList = newLocationList; // update global lookup
+        }
+
+        // ------------------------------------------------------------------
+        //  CLEAR WORLD ITEMS TYPE 3 & 4 (fully offset‑aware)
+        // ------------------------------------------------------------------
+        function clearAll() {
+            if (!original || !view) return;
+            const oldWorldItemData = original.slice(worldItemStartOffset, worldItemEndOffset);
+            const oldView = new DataView(oldWorldItemData.buffer, oldWorldItemData.byteOffset, oldWorldItemData.byteLength);
+            let offset = 0;
+            const keepItems = [];
+            while (offset < oldWorldItemData.length) {
+                if (offset + 4 > oldWorldItemData.length) break;
+                const itemType = oldView.getUint32(offset, true);
+                const itemStart = offset;
+                let itemSize = 41;
+                if (itemType == 0) {
+                    if (offset + itemSize + 0xF0 + 0x08 > oldWorldItemData.length) break;
+                    itemSize += 0xF0 + 0x08;
+                    const horseIdOff = itemStart + itemSize;
+                    if (horseIdOff + 4 > oldWorldItemData.length) break;
+                    itemSize += 4;
+                    const voiceOff = itemStart + itemSize;
+                    if (voiceOff + 19 > oldWorldItemData.length) break;
+                    const voiceStrLen = oldView.getUint32(voiceOff + 19, true);
+                    if (voiceOff + 27 + voiceStrLen + 4 > oldWorldItemData.length) break;
+                    const itemCount = oldView.getUint32(voiceOff + 27 + voiceStrLen, true);
+                    itemSize += 20 + 39 + voiceStrLen + (8 * itemCount);
+                } else if (itemType == 1) {
+                    if (offset + 41 + 20 > oldWorldItemData.length) break;
+                    itemSize += 20;
+                } else if (itemType == 3) {
+
+                    if (offset + 41 + 8 > oldWorldItemData.length) break;
+                    itemSize += 8;
+					if(u32(offset+8)>0){
+						if (offset + 41 + 0xF0 +8 > oldWorldItemData.length) break;
+						itemSize += 0xF0;
+					}					
+                }
+                if (itemType == 1||itemType == 2) {
+                    keepItems.push(oldWorldItemData.slice(itemStart, itemStart + itemSize));
+                }
+                offset += itemSize;
+            }
+            const newCount = keepItems.length;
+            const newWorldItems = new Uint8Array(keepItems.reduce((acc, arr) => acc + arr.length, 0));
+            let pos = 0;
+            for (const item of keepItems) { newWorldItems.set(item, pos); pos += item.length; }
+            const oldWorldSectionSize = worldItemEndOffset - worldItemStartOffset;
+            const newWorldSectionSize = newWorldItems.length;
+            const delta = newWorldSectionSize - oldWorldSectionSize;
+            const beforeWorldItems = original.slice(0, worldItemStartOffset);
+            const afterWorldItems = original.slice(worldItemEndOffset);
+            const newTotalSize = beforeWorldItems.length + newWorldSectionSize + afterWorldItems.length;
+            const newBuffer = new Uint8Array(newTotalSize);
+            newBuffer.set(beforeWorldItems, 0);
+            newBuffer.set(newWorldItems, beforeWorldItems.length);
+            newBuffer.set(afterWorldItems, beforeWorldItems.length + newWorldSectionSize);
+            original = newBuffer;
+            view = new DataView(newBuffer.buffer);
+            view.setUint32(worldItemCountOffset, newCount, true);
+            worldItemEndOffset = worldItemStartOffset + newWorldSectionSize;
+            cachedWorldEndOffset = worldItemEndOffset;
+            worldItemCount = newCount;
+
+            // Update pointers that lie AFTER the world‑item block
+            for (const loc of locations) {
+                if (loc.xoff >= worldItemEndOffset) loc.xoff += delta;
+                if (loc.yoff >= worldItemEndOffset) loc.yoff += delta;
+                if (loc.xoff2 >= worldItemEndOffset) loc.xoff2 += delta;
+                if (loc.yoff2 >= worldItemEndOffset) loc.yoff2 += delta;
+            }
+
+            // Re‑build offsets that point INTO the world‑item block (Truck, locations)
+            refreshWorldItemDerivedOffsets();
+        }
+		
+        function clearHoles() {
+            if (!original || !view) return;
+            const oldWorldItemData = original.slice(worldItemStartOffset, worldItemEndOffset);
+            const oldView = new DataView(oldWorldItemData.buffer, oldWorldItemData.byteOffset, oldWorldItemData.byteLength);
+            let offset = 0;
+            const keepItems = [];
+            while (offset < oldWorldItemData.length) {
+                if (offset + 4 > oldWorldItemData.length) break;
+                const itemType = oldView.getUint32(offset, true);
+                const itemStart = offset;
+                let itemSize = 41;
+                if (itemType == 0) {
+                    if (offset + itemSize + 0xF0 + 0x08 > oldWorldItemData.length) break;
+                    itemSize += 0xF0 + 0x08;
+                    const horseIdOff = itemStart + itemSize;
+                    if (horseIdOff + 4 > oldWorldItemData.length) break;
+                    itemSize += 4;
+                    const voiceOff = itemStart + itemSize;
+                    if (voiceOff + 19 > oldWorldItemData.length) break;
+                    const voiceStrLen = oldView.getUint32(voiceOff + 19, true);
+                    if (voiceOff + 27 + voiceStrLen + 4 > oldWorldItemData.length) break;
+                    const itemCount = oldView.getUint32(voiceOff + 27 + voiceStrLen, true);
+                    itemSize += 20 + 39 + voiceStrLen + (8 * itemCount);
+                } else if (itemType == 1) {
+                    if (offset + 41 + 20 > oldWorldItemData.length) break;
+                    itemSize += 20;
+                } else if (itemType == 3) {
+
+                    if (offset + 41 + 8 > oldWorldItemData.length) break;
+                    itemSize += 8;
+					if(u32(offset+8)>0){
+						if (offset + 41 + 0xF0 +8 > oldWorldItemData.length) break;
+						itemSize += 0xF0;
+					}					
+                }
+                if (itemType !== 4) {
+                    keepItems.push(oldWorldItemData.slice(itemStart, itemStart + itemSize));
+                }
+                offset += itemSize;
+            }
+            const newCount = keepItems.length;
+            const newWorldItems = new Uint8Array(keepItems.reduce((acc, arr) => acc + arr.length, 0));
+            let pos = 0;
+            for (const item of keepItems) { newWorldItems.set(item, pos); pos += item.length; }
+            const oldWorldSectionSize = worldItemEndOffset - worldItemStartOffset;
+            const newWorldSectionSize = newWorldItems.length;
+            const delta = newWorldSectionSize - oldWorldSectionSize;
+            const beforeWorldItems = original.slice(0, worldItemStartOffset);
+            const afterWorldItems = original.slice(worldItemEndOffset);
+            const newTotalSize = beforeWorldItems.length + newWorldSectionSize + afterWorldItems.length;
+            const newBuffer = new Uint8Array(newTotalSize);
+            newBuffer.set(beforeWorldItems, 0);
+            newBuffer.set(newWorldItems, beforeWorldItems.length);
+            newBuffer.set(afterWorldItems, beforeWorldItems.length + newWorldSectionSize);
+            original = newBuffer;
+            view = new DataView(newBuffer.buffer);
+            view.setUint32(worldItemCountOffset, newCount, true);
+            worldItemEndOffset = worldItemStartOffset + newWorldSectionSize;
+            cachedWorldEndOffset = worldItemEndOffset;
+            worldItemCount = newCount;
+
+            // Update pointers that lie AFTER the world‑item block
+            for (const loc of locations) {
+                if (loc.xoff >= worldItemEndOffset) loc.xoff += delta;
+                if (loc.yoff >= worldItemEndOffset) loc.yoff += delta;
+                if (loc.xoff2 >= worldItemEndOffset) loc.xoff2 += delta;
+                if (loc.yoff2 >= worldItemEndOffset) loc.yoff2 += delta;
+            }
+
+            // Re‑build offsets that point INTO the world‑item block (Truck, locations)
+            refreshWorldItemDerivedOffsets();
+        }
+		
+        function clearWorldItemsType3And4() {
+            if (!original || !view) return;
+            const oldWorldItemData = original.slice(worldItemStartOffset, worldItemEndOffset);
+            const oldView = new DataView(oldWorldItemData.buffer, oldWorldItemData.byteOffset, oldWorldItemData.byteLength);
+            let offset = 0;
+            const keepItems = [];
+            while (offset < oldWorldItemData.length) {
+                if (offset + 4 > oldWorldItemData.length) break;
+                const itemType = oldView.getUint32(offset, true);
+                const itemStart = offset;
+                let itemSize = 41;
+                if (itemType == 0) {
+                    if (offset + itemSize + 0xF0 + 0x08 > oldWorldItemData.length) break;
+                    itemSize += 0xF0 + 0x08;
+                    const horseIdOff = itemStart + itemSize;
+                    if (horseIdOff + 4 > oldWorldItemData.length) break;
+                    itemSize += 4;
+                    const voiceOff = itemStart + itemSize;
+                    if (voiceOff + 19 > oldWorldItemData.length) break;
+                    const voiceStrLen = oldView.getUint32(voiceOff + 19, true);
+                    if (voiceOff + 27 + voiceStrLen + 4 > oldWorldItemData.length) break;
+                    const itemCount = oldView.getUint32(voiceOff + 27 + voiceStrLen, true);
+                    itemSize += 20 + 39 + voiceStrLen + (8 * itemCount);
+                } else if (itemType == 1) {
+                    if (offset + 41 + 20 > oldWorldItemData.length) break;
+                    itemSize += 20;
+                } else if (itemType == 3) {
+
+                    if (offset + 41 + 8 > oldWorldItemData.length) break;
+                    itemSize += 8;
+					if(u32(offset+8)>0){
+						if (offset + 41 + 0xF0 +8 > oldWorldItemData.length) break;
+						itemSize += 0xF0;
+					}					
+                }
+                if (itemType !== 3 && itemType !== 4) {
+                    keepItems.push(oldWorldItemData.slice(itemStart, itemStart + itemSize));
+                }
+                offset += itemSize;
+            }
+            const newCount = keepItems.length;
+            const newWorldItems = new Uint8Array(keepItems.reduce((acc, arr) => acc + arr.length, 0));
+            let pos = 0;
+            for (const item of keepItems) { newWorldItems.set(item, pos); pos += item.length; }
+            const oldWorldSectionSize = worldItemEndOffset - worldItemStartOffset;
+            const newWorldSectionSize = newWorldItems.length;
+            const delta = newWorldSectionSize - oldWorldSectionSize;
+            const beforeWorldItems = original.slice(0, worldItemStartOffset);
+            const afterWorldItems = original.slice(worldItemEndOffset);
+            const newTotalSize = beforeWorldItems.length + newWorldSectionSize + afterWorldItems.length;
+            const newBuffer = new Uint8Array(newTotalSize);
+            newBuffer.set(beforeWorldItems, 0);
+            newBuffer.set(newWorldItems, beforeWorldItems.length);
+            newBuffer.set(afterWorldItems, beforeWorldItems.length + newWorldSectionSize);
+            original = newBuffer;
+            view = new DataView(newBuffer.buffer);
+            view.setUint32(worldItemCountOffset, newCount, true);
+            worldItemEndOffset = worldItemStartOffset + newWorldSectionSize;
+            cachedWorldEndOffset = worldItemEndOffset;
+            worldItemCount = newCount;
+
+            // Update pointers that lie AFTER the world‑item block
+            for (const loc of locations) {
+                if (loc.xoff >= worldItemEndOffset) loc.xoff += delta;
+                if (loc.yoff >= worldItemEndOffset) loc.yoff += delta;
+                if (loc.xoff2 >= worldItemEndOffset) loc.xoff2 += delta;
+                if (loc.yoff2 >= worldItemEndOffset) loc.yoff2 += delta;
+            }
+
+            // Re‑build offsets that point INTO the world‑item block (Truck, locations)
+            refreshWorldItemDerivedOffsets();
+        }
+
+        // ------------------------------------------------------------------
+        //  LOAD SAVE
+        // ------------------------------------------------------------------
+        document.getElementById('fileInput').addEventListener('click', async () => {
+            try {
+                const options = { suggestedName:"save1.dat", types:[{description:"DAT Files", accept:{"application/x-dat":[".dat"]}}] };
+                if (currentSaveHandle) options.startIn = currentSaveHandle;
+                const [handle] = await window.showOpenFilePicker(options);
+                currentSaveHandle = handle;
+                await saveHandleByKey("lastUsedSave", handle);
+                const file = await handle.getFile();
+                const buf = await file.arrayBuffer();
+                original = new Uint8Array(buf);
+                view = new DataView(buf);
+                try {
+					parseSave();
+					//clearHoles();					
+					//clearWorldItemsType3And4();
+					clearAll();
+				} catch(e) { original = null; alert("Could not parse save: " + e.message); }
+            } catch(err) { if (err.name !== "AbortError") console.error(err); }
+        });
+
+        // ------------------------------------------------------------------
+        //  TMX LOADER
+        // ------------------------------------------------------------------
+        document.getElementById('tmxInput').addEventListener('click', async () => {
+            if (!original || !view) { alert("Please load a save file first."); return; }
+            try {
+                const options = { suggestedName:"map.tmx", types:[{description:"TMX Files", accept:{"application/x-tmx":[".tmx"]}}] };
+                if (lastUsedTMXHandle) options.startIn = lastUsedTMXHandle;
+                const [handle] = await window.showOpenFilePicker(options);
+                lastUsedTMXHandle = handle;
+                await saveHandleByKey("lastUsedTMX", handle);
+                const file = await handle.getFile();
+                const text = await file.text();
+                const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+                const mapElem = xmlDoc.querySelector("map");
+                if (!mapElem) throw new Error("Invalid TMX");
+                const width = parseInt(mapElem.getAttribute("width"),10), height = parseInt(mapElem.getAttribute("height"),10);
+                let layer = xmlDoc.querySelector("layer[name='Tiles']") || xmlDoc.querySelector("layer");
+                if (!layer) throw new Error("No layer found");
+                const dataElem = layer.querySelector("data");
+                if (!dataElem || dataElem.getAttribute("encoding") !== "csv") throw new Error("Only CSV encoding supported");
+                const csvText = dataElem.textContent;
+                const numberMatches = csvText.match(/\d+/g);
+                if (!numberMatches) throw new Error("No numbers found");
+                const numbers = numberMatches.map(n => parseInt(n,10));
+                if (numbers.length !== width*height) throw new Error(`Tile count mismatch: ${numbers.length} vs ${width*height}`);
+                WIDTH = width; HEIGHT = height;
+                mapWidthInput.value = WIDTH; mapHeightInput.value = HEIGHT;
+                updateDimInfo();
+                csvOutput.value = numbers.reduce((rows, _, i) => (i%width===0 ? rows.push(numbers.slice(i,i+width).join(',')) : null, rows), []).join(',\n');
+                const encoded = encodeRLE(width, height, numbers);
+                hexInput.value = bytesToHex(encoded);
+                originalHexBytes = null;
+                byteDeltaSpan.innerHTML = `Byte change: — (TMX loaded, encoded to ${encoded.length} bytes)`;
+                clearWorldItemsType3And4();
+                const tmxObjects = parseObjectsFromTMX(xmlDoc);
+                let updatedCount = 0;
+                for (const obj of tmxObjects) {
+					//obj.gid-97 should match with locationList
+                   // let locationName = mapObjectTypeToLocationName(obj.type, obj.name);
+					let locId = Number(obj.gid)-97;
+					//console.log(locId);
+                    //if (!locationName) continue;
+                    //const locEntry = locations.find(loc => loc.value.includes(locationName) || locationName.includes(loc.value));
+					const locEntry = locations.find(loc => loc.index==locId );
+                    if (!locEntry) continue;
+                    //const isVial = (locationName === "vial world");
+					const isVial = (locId === 56);
+                    const converted = convertCoordinates(obj.x, obj.y, isVial);
+                    locEntry.x = converted.x; locEntry.y = converted.y;
+                    if (locEntry.xoff >= 0 && locEntry.xoff+4 <= original.length) { writeF32(locEntry.xoff, converted.x); writeF32(locEntry.yoff, converted.y); }
+                    if (locEntry.xoff2 >= 0 && locEntry.xoff2+4 <= original.length) { writeF32(locEntry.xoff2, converted.x); writeF32(locEntry.yoff2, converted.y); }
+                    updatedCount++;
+                }
+                const newBuried = parseBuriedFromTMX(xmlDoc);
+                if (newBuried.length > 0) { buriedItems = newBuried; renderBuriedItemsTable(); alert(`Replaced buried items with ${buriedItems.length} entries from TMX.`); }
+                else { buriedItems = []; renderBuriedItemsTable(); alert("No buried items found in TMX – buried list cleared."); }
+                renderLocationsTable();
+                alert(`Updated ${updatedCount} location coordinates from TMX objects.`);
+            } catch(err) { if (err.name !== "AbortError") alert("TMX load error: "+err.message); }
+        });
+
+        function mapObjectTypeToLocationName(type, objectName) {
+            const directMap = { "hacienda":"Hacienda Picante","willaby":"Willaby Ranch","home":"My House","track":"Race Track","paddock":"Paddock","surebreed":"Surebreed Steeples","supply":"Lasso-Mart","crispr":"CRISPR Lab","saloon":"Saloon","acres":"O'er Yonder Acres","sumo":"Sumo Ring","ecologist":"Tent","circled":"Circle-D Corral","powerplant":"Power Plant","paradise":"Paradise Pastures","zoo":"The Secret Zoo","club":"The Jockey Club","hermit":"Cave","circus":"The Circus","abandoned":"Old Abandoned Track","truck":"Truck","vial world":"vial world","bobs":"'s Farm","mabels":"'s Stables","sweetie":"'s House","hutch":"'s Hutch","glue":"'s Glues","car lot":"'s Rides","biohackers":"Normal Suburban House Bio-Hacker","junk":"Junk Shop" };
+            return directMap[type] || null;
+        }
+        function convertCoordinates(x, y, isVialWorld = false) {
+            if (isVialWorld) return { x: Math.floor(x/32)*32, y: Math.ceil(y/32)*32 - 32 };
+            else return { x: Math.floor(x/32)*32 + 16, y: Math.ceil(y/32)*32 - 16 };
+        }
+        function parseObjectsFromTMX(xmlDoc) {
+            const objects = [];
+            xmlDoc.querySelectorAll("objectgroup").forEach(group => group.querySelectorAll("object").forEach(obj => {
+                const type = obj.getAttribute("type")||"", name = obj.getAttribute("name")||"",gid = obj.getAttribute("gid")||"0", x = parseFloat(obj.getAttribute("x")), y = parseFloat(obj.getAttribute("y"));
+                if (!isNaN(x)&&!isNaN(y)) objects.push({ type:type.toLowerCase(), name, gid,x, y });
+            }));
+            return objects;
+        }
+        function parseBuriedFromTMX(xmlDoc) {
+            const newBuried = [];
+            xmlDoc.querySelectorAll("objectgroup").forEach(group => group.querySelectorAll("object").forEach(obj => {
+                if (obj.getAttribute("gid") === "154") {
+                    let buriedValue = null;
+                    obj.querySelectorAll("property").forEach(prop => { if (prop.getAttribute("name")==="buried") buriedValue = prop.getAttribute("value"); });
+                    if (buriedValue !== null) {
+                        const x = parseFloat(obj.getAttribute("x")), y = parseFloat(obj.getAttribute("y"));
+                        if (!isNaN(x)&&!isNaN(y)) newBuried.push({ itemIndex:parseInt(buriedValue,10), x, y });
+                    }
+                }
+            }));
+            return newBuried;
+        }
+
+        // ------------------------------------------------------------------
+        //  EXPORT BUTTON
+        // ------------------------------------------------------------------
+        document.getElementById('replaceMapBtn').addEventListener('click', async () => {
+            if (!original || !view) { alert("No save file loaded."); return; }
+            for (let loc of locations) {
+                if (loc.xoff >= 0 && loc.xoff+4 <= original.length) { writeF32(loc.xoff, loc.x); writeF32(loc.yoff, loc.y); }
+                if (loc.xoff2 >= 0 && loc.xoff2+4 <= original.length) { writeF32(loc.xoff2, loc.x); writeF32(loc.yoff2, loc.y); }
+            }
+            const hexStr = hexInput.value.trim(); if (!hexStr) { alert("Hex input is empty."); return; }
+            const newMapBytes = hexToBytes(hexStr);
+            const newWidth = parseInt(mapWidthInput.value,10), newHeight = parseInt(mapHeightInput.value,10);
+            if (isNaN(newWidth)||isNaN(newHeight)||newWidth<1||newHeight<1) { alert("Invalid dimensions"); return; }
+            let off = 0x14;
+            const count = u32(0x10);
+            for (let i=0; i<count; i++) {
+                if (off+4 > original.length) break;
+                const nameLen = u32(off);
+                const nextOff = off + 4 + nameLen + 18;
+                if (nextOff+4 > original.length) break;
+                const linkCount = u32(nextOff);
+                off = nextOff + 4 + linkCount*4;
+                if (off > original.length) break;
+            }
+            const tableEnd = off;
+            const offset1 = tableEnd + 0xF0;
+            if (offset1+4 > original.length) { alert("File structure error."); return; }
+            const some_count = u32(offset1);
+            const offset2 = offset1 + 4 + (8*some_count);
+            if (offset2+8 > original.length) { alert("File structure error."); return; }
+            const newBuriedCount = 0;
+            const newBuriedSize = 4 + newBuriedCount*8;
+            const newBuriedBuffer = new Uint8Array(newBuriedSize);
+            const tmpView = new DataView(newBuriedBuffer.buffer);
+            tmpView.setUint32(0, newBuriedCount, true);
+            for (let i=0; i<newBuriedCount; i++) {
+                const item = buriedItems[i];
+                const buriedLoc = ((Math.floor(item.y/32)-1)*WIDTH) + Math.floor(item.x/32);
+                tmpView.setUint32(4+i*8, buriedLoc, true);
+                tmpView.setUint32(4+i*8+4, item.itemIndex, true);
+            }
+            const headerSize = cachedMapStartOffset;
+            const liveTrailing = original.slice(trailingDataStart);
+            const newBuffer = new Uint8Array(headerSize + newMapBytes.length + newBuriedSize + liveTrailing.length);
+            newBuffer.set(original.slice(0, headerSize), 0);
+            newBuffer.set(newMapBytes, headerSize);
+            newBuffer.set(newBuriedBuffer, headerSize + newMapBytes.length);
+            newBuffer.set(liveTrailing, headerSize + newMapBytes.length + newBuriedSize);
+            const finalView = new DataView(newBuffer.buffer);
+            finalView.setUint32(offset2, newWidth, true);
+            finalView.setUint32(offset2+4, newHeight, true);
+            try {
+                const saveOptions = {
+                    suggestedName: currentSaveHandle ? (await currentSaveHandle.getFile()).name : "modified_save.dat",
+                    types: [{ description: "DAT Files", accept: { "application/x-dat": [".dat"] } }]
+                };
+                if (currentSaveHandle) saveOptions.startIn = currentSaveHandle;
+                const saveHandle = await window.showSaveFilePicker(saveOptions);
+                const writable = await saveHandle.createWritable();
+                await writable.write(newBuffer);
+                await writable.close();
+                alert("Save file exported successfully.");
+            } catch(err) { if (err.name !== "AbortError") alert("Save cancelled or failed: " + err.message); }
+        });
+
+        // Hidden decode/encode
+        let originalHexBytes = null;
+        function updateByteDelta(newHexStr) {
+            if (originalHexBytes===null) { byteDeltaSpan.innerText = 'Byte change: —'; return; }
+            const newLen = getByteLength(newHexStr), diff = newLen - originalHexBytes;
+            byteDeltaSpan.innerHTML = `Byte change: ${diff>=0?'+':''}${diff} (orig: ${originalHexBytes}, new: ${newLen})`;
+        }
+        decodeBtn.addEventListener('click', () => {
+            const hexStr = hexInput.value.trim(); if (!hexStr) return alert('Paste hex data first.');
+            try { csvOutput.value = toCSV(decodeRLE(0, hexToBytes(hexStr)), WIDTH, HEIGHT); originalHexBytes = getByteLength(hexStr); byteDeltaSpan.innerHTML = `Byte change: — (loaded ${originalHexBytes} bytes)`; } catch(e) { alert('Decode error: '+e.message); }
+        });
+        encodeBtn.addEventListener('click', () => {
+            const csvStr = csvOutput.value.trim(); if (!csvStr) return alert('No CSV data.');
+            try { const newHex = bytesToHex(encodeRLE(WIDTH, HEIGHT, parseCSV(csvStr, WIDTH, HEIGHT))); hexInput.value = newHex; if (originalHexBytes!==null) updateByteDelta(newHex); else byteDeltaSpan.innerHTML = `Byte change: — (new: ${getByteLength(newHex)} bytes)`; } catch(e) { alert('Encode error: '+e.message); }
+        });
+        clearHexBtn.addEventListener('click', ()=>{ hexInput.value=''; originalHexBytes=null; byteDeltaSpan.innerHTML='Byte change: —'; });
+        clearCsvBtn.addEventListener('click', ()=>{ csvOutput.value=''; });
+        (async () => { currentSaveHandle = await loadHandleByKey("lastUsedSave") || null; lastUsedTMXHandle = await loadHandleByKey("lastUsedTMX") || null; })();
+    </script>
+    <script src="./js/headers.js"></script>
+</body>
+</html>
