@@ -1,0 +1,200 @@
+/* ===== Compact layout – ≤600 px ===== */
+@media (max-width: 600px) {
+    /* Hide the left sidebar entirely */
+    .left-sidebar {
+        display: none;
+    }
+
+    /* Main content takes full width */
+    .main-content {
+        max-width: 100%;
+        width: 100%;
+        padding: 4px;
+    }
+
+    /* The top bar that will hold the moved buttons and helix dropdown */
+    #compactTopBar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 4px;
+        background: #0f172a;
+        border-bottom: 1px solid #2d3a4a;
+    }
+
+    /* Make the moved buttons smaller */
+    #compactTopBar button {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        flex: none;
+    }
+
+    /* Helix dropdown in the top bar */
+    #helixDropdown {
+        background: #0f1720;
+        border: 1px solid #4b5563;
+        color: #e2e8f0;
+        border-radius: 20px;
+        padding: 4px 8px;
+        font-family: monospace;
+        font-size: 0.75rem;
+        min-width: 60px;
+        cursor: pointer;
+    }
+
+    /* Table wrapper – remove extra padding */
+    .table-wrapper {
+        border-radius: 12px;
+		min-width:300px;
+    }
+
+    /* Make the table scrollable if needed */
+    .gene-table {
+        min-width: auto;
+        width: 100%;
+		min-width:
+    }
+	.right-sidebar {
+		right: -342px;
+	}
+	
+	.option-item {
+		padding: 4px 8px !important;
+		gap: 4px !important;
+		font-size: 0.72rem !important;
+	}	
+	
+	.selected-option .value-part {
+		font-weight: 500 !important;
+		font-size: 0.72rem !important;
+	}
+
+	.selected-option .bases-part {
+		font-size: 0.7rem !important;
+	}
+	
+	.option-item .value-part {
+		font-weight: 500 !important;
+	}
+	.option-item .bases-part {
+		font-size: 0.7rem !important;
+	}
+	.dropdown-options {
+		max-height: 280px;
+		min-width: 120px;               /* will be overridden by JS to match button width */
+	}
+
+	.custom-dropdown {
+		min-width: 120px;            /* smaller in main table */
+		max-width: 130px;
+	}
+	
+}
+
+/* ===== Ultra‑compact – ≤400px ===== */
+@media (max-width: 400px) {
+    /* Main content – remove all padding */
+    .main-content {
+        padding: 2px 0;
+    }
+
+    /* Table cells – minimal padding */
+    .gene-table th,
+    .gene-table td {
+        padding: 4px 2px;
+        font-size: 0.65rem;
+    }
+
+    /* Filter bar – stack vertically and shrink */
+    .filter-cell {
+        flex-wrap: wrap;
+        gap: 2px;
+        padding: 4px;
+    }
+    .filter-input {
+        max-width: 100%;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        margin: 0;
+    }
+    .clear-filter-btn {
+        width: 28px;
+        max-width: 28px;
+        padding: 2px 4px;
+        font-size: 0.6rem;
+    }
+
+    /* Compact top bar – reduce gap */
+    #compactTopBar {
+        gap: 4px;
+        padding: 4px 2px;
+    }
+    #compactTopBar button {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+    }
+    #helixDropdown {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    /* Custom dropdowns – smaller text */
+    .custom-dropdown {
+        min-width: 90px;
+        max-width: 100px;
+    }
+    .selected-option {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    .selected-option .value-part {
+        font-size: 0.75rem;
+    }
+    .selected-option .bases-part {
+        font-size: 0.65rem;
+    }
+    .dropdown-options .option-item {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    /* Textarea – reduce height */
+    #rawGeneInput {
+        rows: 8;   /* attribute override */
+        min-height: 80px;
+    }
+
+    /* Bookmark items – tighter */
+    .bookmark-item {
+        padding: 4px 6px;
+        font-size: 0.65rem;
+    }
+    .bookmark-item .custom-dropdown {
+        min-width: 100px;
+        max-width: 110px;
+    }
+
+    /* Right sidebar – narrower when open */
+    .right-sidebar.open {
+        width: 280px;
+        max-width: 90vw;
+    }
+
+    /* Hide less critical elements */
+    .desc-td {
+        max-width: 120px;        /* keep description short */
+    }
+    /* Optional: hide the helix dropdown label in the compact top bar */
+    .filter-cell label {
+        display: none;
+    }
+
+    /* Shrink header bar slightly */
+    .header-bar {
+        padding: 6px 12px;
+    }
+    .header-title {
+        font-size: 1rem;
+    }
+}
