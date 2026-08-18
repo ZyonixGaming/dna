@@ -71,12 +71,6 @@
     font-weight: bold;
 }
 
-.selected-option .arrow {
-    font-size: 0.6rem;
-    color: #b9c7d9;
-    flex-shrink: 0;
-}
-
 /* Fixed-position dropdown menu – escapes clipping */
 .dropdown-options {
     position: fixed;                 /* no longer bound by parent overflow */
@@ -134,33 +128,6 @@
 .nuc-G { color: #22c55e; }   /* green */
 .nuc-T { color: #ef4444; }   /* red */
 
-/* In bookmark lists, dropdown wider */
-.bookmark-item .custom-dropdown {
-    min-width: 120px;
-    max-width: 120px;
-}
-.bookmark-item .selected-option {
-    padding: 3px 6px;
-    font-size: 0.6rem;
-}
-.bookmark-item .selected-option .value-part {
-    font-size: 0.7rem;
-}
-.bookmark-item .selected-option .bases-part {
-    font-size: 0.6rem;
-}
-
-.bookmark-info strong {
-	font-size: 0.63rem;
-}
-.bookmark-info{
-	font-size: 0.67rem;
-}
-
-button[title="Load into compare"] {
-    display: none !important;
-}
-
 .desc-td {
     cursor: pointer;
     transition: background 0.15s;
@@ -173,4 +140,332 @@ button[title="Load into compare"] {
     text-decoration: underline;
     text-decoration-color: #676767;
     text-underline-offset: 2px;
+}
+
+/* ---------- Header abbreviations ---------- */
+.gene-table th[title] {
+    cursor: help;
+}
+
+/* ---------- Gap between helix groups ----------
+   border-collapse is on, so this 8px border wins over the previous row's
+   1px border-bottom and paints an opaque band of page background. */
+.gene-table tr.helix-first > td {
+    border-top: 8px solid #0f172a;   /* must match .table-wrapper background */
+}
+
+
+/* ---------- Right sidebar: Modifications panel ---------- */
+.mods-section,
+.presets-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+.mods-section h3,
+.presets-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.mod-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.mod-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 7px;
+    font-size: 0.68rem;
+    background: #1e293b;
+    border-bottom-color: #3b4e6b;
+    text-align: left;
+    overflow: hidden;
+}
+.mod-btn .mod-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+.mod-btn .mod-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* dim = available but not currently applied; still clickable */
+.mod-btn.dim {
+    opacity: 0.45;
+    filter: grayscale(0.8);
+}
+.mod-btn.dim:hover {
+    opacity: 0.75;
+    filter: grayscale(0.2);
+}
+
+/* active = lit, i.e. the genome already satisfies this profile */
+.mod-btn.active {
+    background: #14532d;
+    border-bottom-color: #22c55e;
+    color: #e6ffe9;
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.45);
+}
+
+/* disabled = dim and inert (empty undo/redo stack) */
+.mod-btn.disabled {
+    opacity: 0.3;
+    filter: grayscale(1);
+    cursor: not-allowed;
+}
+.mod-btn.disabled:hover {
+    opacity: 0.3;
+}
+
+/* ---------- Collapsible section header ---------- */
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+}
+.collapsible-header .chevron {
+    display: inline-block;
+    font-size: 0.6rem;
+    transition: transform 0.15s;
+}
+.collapsible-header.collapsed .chevron {
+    transform: rotate(-90deg);
+}
+
+.presets-empty {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-style: italic;
+    padding: 4px 2px;
+}
+
+
+/* ---------- Mod button disabled (distinct from unassigned) ---------- */
+.mod-btn.disabled {
+    opacity: 0.35;
+}
+
+/* ---------- Remove Diversity armed for a second press ---------- */
+.diversity-remove.armed {
+    background: #b45309 !important;
+    border-bottom-color: #fbbf24 !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.45);
+}
+
+
+/* ---------- Compare mode status bar ---------- */
+.compare-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    margin: 0 0 6px 0;
+    background: #1e2a3a;
+    border: 1px solid #3b4e6b;
+    border-left: 3px solid #48b5b5;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    color: #cbd5e6;
+}
+.compare-bar-label {
+    flex: 1;
+}
+.compare-bar-label strong {
+    color: #48b5b5;
+}
+.compare-bar-exit {
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+/* ---------- Compare column ---------- */
+.gene-table .compare-cell {
+    white-space: nowrap;
+}
+
+
+/* ---------- Preset rows (DNA Library idiom) ---------- */
+.presets-body {
+    /* the filter box stays fixed here; only .preset-list scrolls */
+}
+
+.preset-list {
+    max-height: 192px;      /* 60% of the previous 320px */
+    overflow-y: auto;
+}
+
+/* ---------- Preset filter ---------- */
+.preset-filter-wrap {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+.preset-filter {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    font-size: 0.68rem;
+    background: #0f1720;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: #e2e8f0;
+    outline: none;
+}
+.preset-filter:focus {
+    border-color: #48b5b5;
+}
+.preset-filter::placeholder {
+    color: #64748b;
+}
+.preset-filter-clear {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    font-size: 0.62rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+.preset-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin: 3px 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: #cbd5e6;
+}
+.preset-row:hover {
+    background: #2d3e52;
+    color: #fff;
+}
+
+.preset-twist {
+    flex-shrink: 0;
+    width: 12px;
+    font-size: 0.55rem;
+    text-align: center;
+    color: #94a3b8;
+    display: inline-block;
+    transition: transform 0.15s;
+}
+.preset-twist.collapsed {
+    transform: rotate(-90deg);
+}
+.preset-twist.empty {
+    visibility: hidden;
+}
+.preset-twist:not(.empty):hover {
+    color: #48b5b5;
+}
+
+.preset-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preset-compare {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    background: #334155;
+    border-bottom-color: #475569;
+    line-height: 1.4;
+}
+
+.preset-separator {
+    height: 1px;
+    background: #334155;
+    margin: 5px 2px;
+}
+
+
+/* ---------- Preset validity dot ---------- */
+.preset-dot {
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #22c55e;
+    cursor: help;
+}
+.preset-dot.invalid {
+    color: #ef4444;
+}
+.preset-dot.empty {
+    visibility: hidden;
+}
+
+
+/* ---------- DNA input diagnostics ---------- */
+.dna-warnings {
+    margin-top: 4px;
+    padding: 3px 7px;
+    background: #422006;
+    border: 1px solid #a16207;
+    border-radius: 4px;
+    color: #fcd34d;
+    font-size: 0.65rem;
+    cursor: help;
+}
+
+
+/* ---------- Custom data section ---------- */
+.customdata-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+.customdata-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+.custom-file-row {
+    margin-bottom: 6px;
+}
+.custom-file-row label {
+    display: block;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+.custom-file-row input[type="file"] {
+    width: 100%;
+    font-size: 0.62rem;
+    color: #94a3b8;
+}
+.custom-status {
+    font-size: 0.65rem;
+    color: #64748b;
+    font-style: italic;
+    margin: 6px 0;
+}
+.custom-status.active {
+    color: #facc15;
+    font-style: normal;
+    font-weight: bold;
+}
+#resetCustomDataBtn {
+    width: 100%;
+    font-size: 0.68rem;
+    padding: 4px 8px;
+    background: #334155;
+    border-bottom-color: #475569;
 }

@@ -90,6 +90,11 @@
 		max-width: 130px;
 	}
 	
+
+    /* Tighter helix gap to match the reduced cell padding */
+    .gene-table tr.helix-first > td {
+        border-top: 4px solid #0f172a;   /* must match .table-wrapper background */
+    }
 }
 
 /* ===== Ultra‑compact – ≤400px ===== */
