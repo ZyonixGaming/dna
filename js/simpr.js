@@ -505,9 +505,14 @@ const MOD_BUTTONS = [
     { icon: '🌿', label: 'Herbivore', state: 'profile', profile: 'herbivore', fn: () => applyGeneProfile('herbivore') },
     { icon: '🍽️', label: 'Omnivore',  state: 'profile', profile: 'omnivore',  fn: () => applyGeneProfile('omnivore') },
     { icon: '🚫', label: 'No Mouth',  state: 'profile', profile: 'nomouth',   fn: () => applyGeneProfile('nomouth') },
-    { icon: '👥', label: 'Homozyg',   state: 'action',  fn: () => { pushSnapshot('Homozygous'); forceDominant(); } },
+    { icon: '👥', label: 'Homozyg',   state: 'action',  checkLit: () => isGenomeHomozygous(), fn: () => { pushSnapshot('Homozygous'); forceDominant(); } },
     { icon: '🎰', label: 'Randomize', state: 'action',  fn: () => randomiseWholeGenome() }
 ];
+
+// Check if every gene in the genome is homozygous (allele1 === allele2).
+function isGenomeHomozygous() {
+    return currentGenePairs.every(gp => gp.allele1 === gp.allele2);
+}
 
 function renderModPanel() {
     const grid = document.getElementById('modGrid');
@@ -534,7 +539,10 @@ function updateModPanelState() {
         let disabled = false;
         let title = b.label;
 
-        if (b.state === 'stack') {
+        if (b.checkLit) {
+            lit = !!b.checkLit();
+            title = b.actionTitle || b.label;
+        } else if (b.state === 'stack') {
             const stack = b.stack === 'undo' ? undoStack : redoStack;
             lit = stack.length > 0;
             disabled = stack.length === 0;
@@ -960,7 +968,8 @@ const GENE_PROFILES = {
             { gene: 'WHITE_IS_LETHAL', value: 0 },
             { gene: 'LEG_AND_ARM_LIMP', value: 0 },
             { gene: 'EAR_SIZE', atLeast: 20 },
-            { gene: 'NOSE_SIZE', atLeast: 10 }
+            { gene: 'NOSE_SIZE', atLeast: 10 },
+			{ gene: 'SPEED_FACTOR', value: 133 }
         ]
     },
     carnivore: {
