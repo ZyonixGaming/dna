@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <link rel="icon" type="image/x-icon" href="dna.ico">
     <title>SIMPR Horsey Genome Editor</title>
-    <link rel="stylesheet" href="./css/crispr.css">
+    <!-- crispr.css + simpr.css + mobile.css + compact.css, merged and pruned.
+         headers.css stays separate: it is shared with the other tools. -->
+    <link rel="stylesheet" href="./css/simpr-main.css">
     <link rel="stylesheet" href="./css/headers.css">
-    <link rel="stylesheet" href="./css/simpr.css">
-    <link rel="stylesheet" href="./css/mobile.css">
-    <link rel="stylesheet" href="./css/compact.css">
 </head>
 <body>
     <!-- Main container with max-width constraint -->
@@ -62,15 +61,6 @@
                     <div class="helix-buttons" id="helixNavButtons"></div>
                 </div>
 
-                <!-- Hidden dummy elements for removed features -->
-                <div style="display:none">
-                    <button id="toggleCompareBtn"></button>
-                    <textarea id="compareGeneInput"></textarea>
-                    <button id="clearCompareBtn"></button>
-                    <div id="compareArea"></div>
-                    <div id="bookmarksList"></div>
-                </div>
-
                 <!-- REMOVE DIVERSITY BUTTON -->
                 <div class="controls-section" style="border-top: none; padding-top: 8px; padding-bottom: 16px">
                     <div class="btn-group" style="flex-direction: column; gap: 8px;">
@@ -89,6 +79,7 @@
                 </div>
                 <div class="compare-bar" id="compareBar" style="display:none;">
                     <span class="compare-bar-label" id="compareBarLabel"></span>
+                    <button class="compare-bar-diff" id="compareDiffToggle" title="Show only the genes whose value differs from the reference">Differences only</button>
                     <button class="compare-bar-exit" id="compareBarExit" title="Exit compare mode">✖</button>
                 </div>
                 <div class="table-wrapper">
@@ -160,14 +151,18 @@
     <button id="mobileRightToggle" title="Bookmarks &amp; Library">📑</button>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+    <!-- Kept separate because other pages share them, and because both carry a
+         large inlined XML fallback used when fetch() cannot read ./data/:
+           genes.js  crispr.html + DNA Shortener; also encodeSequences/decodeToLines
+           pop.js    pop.html + the save-editor pages
+         pop.js must come before the bundle, which uses defaultWeights,
+         loadPopDataFromXml and window.popData. -->
     <script src="./js/genes.js"></script>
-    <!--<script src="./js/dna-encoder.js"></script>-->
-    <script src="./js/crispr.js"></script>
     <script src="./js/headers.js"></script>
     <script src="./js/pop.js"></script>
-    <script src="./js/simpr.js"></script>
-    <script src="./js/simpr-pop.js"></script>
-    <script src="./js/compact.js"></script>
-    <script src="./js/mobile.js"></script>
+    <!-- crispr.js + simpr.js + simpr-pop.js + compact.js + mobile.js, merged
+         and de-duplicated. Edit js/simpr-main.js, then regenerate with:
+             npx terser js/simpr-main.js -c -m -o js/simpr-main-min.js -->
+    <script src="./js/simpr-main-min.js"></script>
 </body>
 </html>
