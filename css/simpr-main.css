@@ -1,0 +1,1408 @@
+/* ======================================================================
+   SIMPR Horsey Genome Editor - combined stylesheet
+   ----------------------------------------------------------------------
+   Merged from css/crispr.css, css/simpr.css, css/mobile.css and
+   css/compact.css, in that order - the cascade depends on it, since
+   simpr.css overrides crispr.css and the two media-query sheets come
+   last. Those four files are untouched on disk and are no longer loaded
+   by simpr.html.
+
+   css/headers.css is NOT part of this bundle: it styles the shared
+   header/nav and is still linked separately.
+
+   Rules that could no longer match anything were dropped - see the
+   comment above each section.
+   ====================================================================== */
+
+/* ======================================================================
+   BASE LAYOUT, TABLE, LIBRARY, TOASTS
+   was css/crispr.css
+   ====================================================================== */
+
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", "Roboto", "Courier New", monospace;
+}
+
+body {
+    background: #1e2a2e;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Outer container – fills viewport, no rounding */
+.app-container {
+    max-width: 1280px;
+    width: 100%;
+    height: 100vh;
+    background: #11181c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header – no rounding */
+.header-bar {
+    background: #0b1218;
+    border-bottom: 2px solid #2d3a46;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.header-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #48b5b5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Tools dropdown */
+.tools-dropdown {
+    position: relative;
+}
+
+.tools-btn {
+    background: #1e293b;
+    border: 2px solid #3b4e6b;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    min-width: 200px;
+    z-index: 100;
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    color: #cbd5e6;
+    text-decoration: none;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #1e293b;
+}
+
+.dropdown-menu a:hover {
+    background: #1e293b;
+    color: #48b5b5;
+}
+
+/* ---- Three‑column layout – fills remaining height, scrolls inside ---- */
+.app-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    background: #11181c;
+    overflow: hidden;
+}
+
+.left-sidebar {
+    width: 260px;
+    background: #0f172a;
+    border-right: 2px solid #2d3a46;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.right-sidebar {
+    background: #0f172a;
+    border-left: 2px solid #2d3a46;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #11181c;
+    min-width: 0;
+    padding: 12px;
+}
+
+.table-wrapper {
+    flex: 1;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Section containers – compact padding */
+.controls-section,
+.textarea-section,
+.helix-nav,
+.saved-dna-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+
+.controls-section:last-child,
+.textarea-section:last-child {
+    border-bottom: none;
+}
+
+/* ---- Right sidebar headings – reduced margins/padding ---- */
+.helix-nav h3,
+.saved-dna-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+/* ---- Buttons (reduced rounding) ---- */
+button {
+    background: #2d3e44;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+    color: white;
+    font-family: monospace;
+}
+
+button.primary {
+    background: #2c6e6e;
+    border-bottom: 2px solid #48b5b5;
+}
+
+button.success {
+    background: #2b6e4c;
+    border-bottom: 2px solid #67b886;
+}
+
+
+
+
+
+button.diversity-remove {
+    background: #8b5a2b;
+    border-bottom: 2px solid #d49b3a;
+}
+
+button.random-diversity {
+    background: #2b6e4c;
+    border-bottom: 2px solid #67b886;
+}
+
+button.small,
+button.clear-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+}
+
+button.clear-btn {
+    background: #7f4a4a;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Textareas & links */
+textarea {
+    background: #0f1720;
+    border: 1px solid #334155;
+    color: #cbd5e6;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    resize: vertical;
+    width: 100%;
+}
+
+.textarea-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.textarea-actions a {
+    color: #add8e6;
+    font-size: 0.7rem;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.textarea-actions a:hover {
+    text-decoration: underline;
+}
+
+/* ---- Table header links (?) – updated to match theme ---- */
+.gene-table th a {
+    color: #48b5b5;
+    text-decoration: none;
+    font-weight: normal;
+    margin-left: 4px;
+}
+
+.gene-table th a:hover {
+    text-decoration: underline;
+    color: #7fdbdb;
+}
+
+/* Filter bar */
+.filter-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.filter-input {
+    background: #0f1720;
+    border: 1px solid #475569;
+    color: #e2e8f0;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    flex: 1;
+    max-width: 300px;
+}
+
+.clear-filter-btn {
+    background: #7f4a4a;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    color: white;
+}
+
+/* Gene table */
+.gene-table {
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: "Courier New", monospace;
+}
+
+
+.gene-table th {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 8px 6px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.gene-table td {
+    padding: 6px 4px;
+    border-bottom: 1px solid #2d3a4a;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.gene-table tr.helix-even {
+    background-color: #0f172a;
+	scroll-margin-top:36px;
+}
+
+.gene-table tr.helix-odd {
+    background-color: #1a2533;
+	scroll-margin-top:36px;
+}
+
+
+/* ---- Nucleotide select – fixed width, subtle rounding, compact, centered ---- */
+
+
+/* Try to center the dropdown options (works in Firefox) */
+
+
+/* Color coding for selected value (keeps the select itself colored) */
+
+
+
+
+
+/* The dropdown options inside the select are NOT modified – they keep native styling */
+
+.final-value-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+/* Bookmark star */
+
+
+
+
+/* Bookmark items */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Helix navigation */
+.helix-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.helix-btn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.helix-btn:hover {
+    background: #3b4e6b;
+}
+
+.helix-highlight {
+    background-color: #2c6e6e !important;
+    transition: background 0.1s;
+}
+
+/* Compare mode */
+.diff-highlight {
+    background-color: rgba(255, 140, 100, 0.25) !important;
+}
+
+
+
+/* DNA Library (fully restored) */
+.category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.category-item {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border: 2px solid transparent;
+}
+
+.category-item.selected {
+    border-color: #3b82f6;
+    background: #1e2a3a;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.category-name {
+    flex: 1;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.drag-handle {
+    cursor: grab;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.entry-list {
+    list-style: none;
+    padding-left: 20px;
+    margin: 6px 0 0;
+}
+
+.entry-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin: 4px 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.entry-item:hover {
+    background: #334155;
+}
+
+.entry-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.entry-actions button {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 2px 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    min-width: auto;
+}
+
+.entry-actions button:hover {
+    color: #f1f5f9;
+}
+
+.library-controls,
+.import-export-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.library-controls button,
+.import-export-btns button {
+    flex: 1;
+    font-size: 0.7rem;
+    padding: 5px 8px;
+}
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2c6e6e;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 1000;
+    transition: opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+/* Description cell */
+.desc-td {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #b9c7d9;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.desc-td:hover {
+    white-space: normal;
+    word-break: break-word;
+}
+
+#dnaShortenerLink {
+    display: none;
+    margin-right: auto;
+}
+#dnaShortenerLink.visible {
+    display: inline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    .left-sidebar {
+        width: 220px;
+    }
+    .right-sidebar {
+        width: 260px;
+    }
+}
+
+/* ======================================================================
+   SIMPR OVERRIDES AND SIMPR-ONLY COMPONENTS
+   was css/simpr.css
+   ====================================================================== */
+
+/* ===== crispr2-override.css ===== */
+
+/* ---------- Layout adjustments ---------- */
+.helix-btn {
+    min-width: 36px;
+    max-width: 36px;
+}
+
+.right-sidebar {
+	width:100%;
+    
+	max-width:350px;
+	min-width:350px;
+}
+.main-content {
+    /* flex: 1 already set, shrinks to accommodate wider sidebar */
+	
+}
+
+/* ---------- Custom dropdown (table & bookmark) ---------- */
+.custom-dropdown {
+    position: relative;          /* no z-index here → doesn't trap fixed child */
+    user-select: none;
+    min-width: 150px;            /* smaller in main table */
+    max-width: 160px;
+	margin:auto;
+}
+
+.gene-table {
+	margin-bottom:300px;
+	max-width:800px;
+	width:100%;
+	min-width:300px;
+}
+
+.selected-option {
+    background: #0f1720;
+    border: 1px solid #4b5563;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.85rem;
+    color: white;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+}
+.selected-option:hover {
+    border-color: #48b5b5;
+}
+
+.selected-option .value-part {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #facc15;              /* prominent value */
+    flex-shrink: 0;
+}
+
+.selected-option .bases-part {
+    display: flex;
+    gap: 1px;
+    margin-left: auto;           /* push to right */
+    font-size: 0.75rem;
+    font-family: "Courier New", monospace;
+    opacity: 0.5;
+}
+.selected-option .bases-part span {
+    font-weight: bold;
+}
+
+/* Fixed-position dropdown menu – escapes clipping */
+.dropdown-options {
+    position: fixed;                 /* no longer bound by parent overflow */
+    background: #0f1720;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 10000;                 /* on top of everything */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    min-width: 160px;               /* will be overridden by JS to match button width */
+}
+
+.option-item {
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.85rem;
+    color: #cbd5e6;
+    transition: background 0.1s;
+    white-space: nowrap;
+}
+.option-item:hover {
+    background: #1e293b;
+}
+.option-item .value-part {
+    font-weight: 700;
+    color: #22c55e;              /* bright in list */
+    flex-shrink: 0;
+}
+.option-item .bases-part {
+    display: flex;
+    gap: 1px;
+    margin-left: auto;           /* push to right */
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+.option-item .bases-part span {
+    font-weight: bold;
+}
+.option-item.selected {
+    background: #2c6e6e;
+    color: white;
+}
+.option-item.selected .bases-part {
+    opacity: 0.8;
+}
+
+/* Nucleotide colour classes */
+.nuc-A { color: #facc15; }   /* yellow */
+.nuc-C { color: #3b82f6; }   /* blue */
+.nuc-G { color: #22c55e; }   /* green */
+.nuc-T { color: #ef4444; }   /* red */
+
+.desc-td {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.desc-td:hover {
+    background: rgba(72, 181, 181, 0.15);
+}
+
+.desc-td.inverted {
+    text-decoration: underline;
+    text-decoration-color: #676767;
+    text-underline-offset: 2px;
+}
+
+/* ---------- Header abbreviations ---------- */
+.gene-table th[title] {
+    cursor: help;
+}
+
+/* ---------- Sticky helix group headers ----------
+   Replaces the old 8px .helix-first gap: with 240 rows the useful question
+   while scrolling is "which helix am I in", not "where did one end".
+   The thead is already sticky at top:0, so the group header parks directly
+   beneath it. Both heights are measured after each render (syncStickyOffsets)
+   rather than hardcoded, so this survives the compact breakpoints. */
+:root {
+    --thead-h: 30px;
+    --helix-group-h: 24px;
+}
+
+.gene-table tr.helix-group > td {
+    position: sticky;
+    top: var(--thead-h);
+    z-index: 5;
+    background: #16202e;
+    text-align: left;
+    padding: 4px 10px;
+    border-top: 1px solid #3b4e6b;
+    border-bottom: 1px solid #3b4e6b;
+}
+
+.gene-table tr.helix-group {
+    scroll-margin-top: var(--thead-h);
+}
+
+/* Landing point for scrollToPair(), which targets a data row and therefore
+   has to clear BOTH sticky layers. */
+.gene-table tr.helix-even,
+.gene-table tr.helix-odd {
+    scroll-margin-top: calc(var(--thead-h) + var(--helix-group-h));
+}
+
+.helix-group-name {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #7fd4d4;
+    text-transform: uppercase;
+}
+
+.helix-group-count {
+    float: right;
+    font-size: 0.62rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+/* Dropdowns that flip above their button get their shadow flipped too. */
+.dropdown-options.drops-up {
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ---------- Right sidebar: Modifications panel ---------- */
+.mods-section,
+.presets-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+.mods-section h3,
+.presets-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.mod-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.mod-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 7px;
+    font-size: 0.68rem;
+    background: #1e293b;
+    border-bottom-color: #3b4e6b;
+    text-align: left;
+    overflow: hidden;
+}
+.mod-btn .mod-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+.mod-btn .mod-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* dim = available but not currently applied; still clickable */
+.mod-btn.dim {
+    opacity: 0.45;
+    filter: grayscale(0.8);
+}
+.mod-btn.dim:hover {
+    opacity: 0.75;
+    filter: grayscale(0.2);
+}
+
+/* active = lit, i.e. the genome already satisfies this profile */
+.mod-btn.active {
+    background: #14532d;
+    border-bottom-color: #22c55e;
+    color: #e6ffe9;
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.45);
+}
+
+/* disabled = dim and inert (empty undo/redo stack) */
+.mod-btn.disabled {
+    opacity: 0.35;      /* was split across two rules */
+    filter: grayscale(1);
+    cursor: not-allowed;
+}
+.mod-btn.disabled:hover {
+    opacity: 0.3;
+}
+
+/* ---------- Collapsible section header ---------- */
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+}
+.collapsible-header .chevron {
+    display: inline-block;
+    font-size: 0.6rem;
+    transition: transform 0.15s;
+}
+.collapsible-header.collapsed .chevron {
+    transform: rotate(-90deg);
+}
+
+.presets-empty {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-style: italic;
+    padding: 4px 2px;
+}
+
+
+
+
+/* ---------- Compare mode status bar ---------- */
+.compare-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    margin: 0 0 6px 0;
+    background: #1e2a3a;
+    border: 1px solid #3b4e6b;
+    border-left: 3px solid #48b5b5;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    color: #cbd5e6;
+}
+.compare-bar-label {
+    flex: 1;
+}
+.compare-bar-label strong {
+    color: #48b5b5;
+}
+.compare-bar-diff {
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    background: #334155;
+    border-bottom-color: #475569;
+    white-space: nowrap;
+}
+.compare-bar-diff.active {
+    background: #2c6e6e;
+    border-bottom-color: #48b5b5;
+    color: #ffffff;
+}
+.compare-bar-diff:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.compare-diff-count {
+    color: #f0a04b;
+}
+.compare-bar-exit {
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+/* ---------- Compare column ---------- */
+.gene-table .compare-cell {
+    white-space: nowrap;
+}
+
+
+/* ---------- Preset rows (DNA Library idiom) ---------- */
+.presets-body {
+    /* the filter box stays fixed here; only .preset-list scrolls */
+}
+
+.preset-list {
+    max-height: 192px;      /* 60% of the previous 320px */
+    overflow-y: auto;
+}
+
+/* ---------- Preset filter ---------- */
+.preset-filter-wrap {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+.preset-filter {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    font-size: 0.68rem;
+    background: #0f1720;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: #e2e8f0;
+    outline: none;
+}
+.preset-filter:focus {
+    border-color: #48b5b5;
+}
+.preset-filter::placeholder {
+    color: #64748b;
+}
+.preset-filter-clear {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    font-size: 0.62rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+.preset-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin: 3px 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: #cbd5e6;
+}
+.preset-row:hover {
+    background: #2d3e52;
+    color: #fff;
+}
+
+
+
+
+
+
+.preset-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preset-compare {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    background: #334155;
+    border-bottom-color: #475569;
+    line-height: 1.4;
+}
+
+
+
+
+/* ---------- Preset validity dot ---------- */
+.preset-dot {
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #22c55e;
+    cursor: help;
+}
+.preset-dot.invalid {
+    color: #ef4444;
+}
+.preset-dot.empty {
+    visibility: hidden;
+}
+
+
+/* ---------- DNA input diagnostics ---------- */
+.dna-warnings {
+    margin-top: 4px;
+    padding: 3px 7px;
+    background: #422006;
+    border: 1px solid #a16207;
+    border-radius: 4px;
+    color: #fcd34d;
+    font-size: 0.65rem;
+    cursor: help;
+}
+
+
+/* ---------- Custom data section ---------- */
+.customdata-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+.customdata-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+.custom-file-row {
+    margin-bottom: 6px;
+}
+.custom-file-row label {
+    display: block;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+.custom-file-row input[type="file"] {
+    width: 100%;
+    font-size: 0.62rem;
+    color: #94a3b8;
+}
+.custom-status {
+    font-size: 0.65rem;
+    color: #64748b;
+    font-style: italic;
+    margin: 6px 0;
+}
+.custom-status.active {
+    color: #facc15;
+    font-style: normal;
+    font-weight: bold;
+}
+#resetCustomDataBtn {
+    width: 100%;
+    font-size: 0.68rem;
+    padding: 4px 8px;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+/* ======================================================================
+   RESPONSIVE - 1200 / 1070 / 800 px
+   was css/mobile.css
+   ====================================================================== */
+
+/* ===== Mobile layout overrides ===== */
+
+/* Floating toggle button – hidden on desktop */
+#mobileRightToggle {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 110;
+    background: #2c6e6e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay – hidden by default */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 98;
+}
+
+/* ---- Mobile breakpoint ---- */
+@media (max-width: 1200px) {
+
+    /* Shrink left sidebar */
+    .left-sidebar {
+        width: 160px;
+    }
+
+}
+
+@media (max-width: 1070px) {
+	
+    /* Shrink left sidebar */
+    .left-sidebar {
+        width: 250px;
+    }
+
+    /* Right sidebar becomes a fixed floating panel */
+    .right-sidebar {
+        position: fixed;
+        top: 0;
+        right: -320px;              /* hidden off‑screen */
+        width: 300px;
+        max-width: 85vw;            /* avoid overflow on small phones */
+        height: 100%;
+        transition: right 0.3s ease;
+        z-index: 99;
+        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+    }
+
+    .right-sidebar.open {
+        right: 0;
+    }
+
+    /* Show the toggle button */
+    #mobileRightToggle {
+        display: flex;
+    }
+
+    /* Overlay visible when sidebar is open */
+    .sidebar-overlay.active {
+        display: block;
+    }
+	
+}
+
+
+@media (max-width: 800px) {
+    /* Shrink left sidebar */
+    .left-sidebar {
+        width: 160px;
+    }
+	
+	
+}
+
+/* ======================================================================
+   RESPONSIVE - 600 / 400 px
+   was css/compact.css
+   ====================================================================== */
+
+/* ===== Compact layout – ≤600 px ===== */
+@media (max-width: 600px) {
+    /* Hide the left sidebar entirely */
+    .left-sidebar {
+        display: none;
+    }
+
+    /* Main content takes full width */
+    .main-content {
+        max-width: 100%;
+        width: 100%;
+        padding: 4px;
+    }
+
+    /* The top bar that will hold the moved buttons and helix dropdown */
+    #compactTopBar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 4px;
+        background: #0f172a;
+        border-bottom: 1px solid #2d3a4a;
+    }
+
+    /* Make the moved buttons smaller */
+    #compactTopBar button {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        flex: none;
+    }
+
+    /* Helix dropdown in the top bar */
+    #helixDropdown {
+        background: #0f1720;
+        border: 1px solid #4b5563;
+        color: #e2e8f0;
+        border-radius: 20px;
+        padding: 4px 8px;
+        font-family: monospace;
+        font-size: 0.75rem;
+        min-width: 60px;
+        cursor: pointer;
+    }
+
+    /* Table wrapper – remove extra padding */
+    .table-wrapper {
+        border-radius: 12px;
+		min-width:300px;
+    }
+
+    /* Make the table scrollable if needed */
+    .gene-table {
+        min-width: auto;
+        width: 100%;
+    }
+	.right-sidebar {
+		right: -342px;
+	}
+	
+	.option-item {
+		padding: 4px 8px !important;
+		gap: 4px !important;
+		font-size: 0.72rem !important;
+	}	
+	
+	.selected-option .value-part {
+		font-weight: 500 !important;
+		font-size: 0.72rem !important;
+	}
+
+	.selected-option .bases-part {
+		font-size: 0.7rem !important;
+	}
+	
+	.option-item .value-part {
+		font-weight: 500 !important;
+	}
+	.option-item .bases-part {
+		font-size: 0.7rem !important;
+	}
+	.dropdown-options {
+		max-height: 280px;
+		min-width: 120px;               /* will be overridden by JS to match button width */
+	}
+
+	.custom-dropdown {
+		min-width: 120px;            /* smaller in main table */
+		max-width: 130px;
+	}
+	
+
+    /* Tighter helix group header to match the reduced cell padding */
+    .gene-table tr.helix-group > td {
+        padding: 3px 6px;
+    }
+}
+
+/* ===== Ultra‑compact – ≤400px ===== */
+@media (max-width: 400px) {
+    /* Main content – remove all padding */
+    .main-content {
+        padding: 2px 0;
+    }
+
+    /* Table cells – minimal padding */
+    .gene-table th,
+    .gene-table td {
+        padding: 4px 2px;
+        font-size: 0.65rem;
+    }
+
+    /* Filter bar – stack vertically and shrink */
+    .filter-cell {
+        flex-wrap: wrap;
+        gap: 2px;
+        padding: 4px;
+    }
+    .filter-input {
+        max-width: 100%;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        margin: 0;
+    }
+    .clear-filter-btn {
+        width: 28px;
+        max-width: 28px;
+        padding: 2px 4px;
+        font-size: 0.6rem;
+    }
+
+    /* Compact top bar – reduce gap */
+    #compactTopBar {
+        gap: 4px;
+        padding: 4px 2px;
+    }
+    #compactTopBar button {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+    }
+    #helixDropdown {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    /* Custom dropdowns – smaller text */
+    .custom-dropdown {
+        min-width: 90px;
+        max-width: 100px;
+    }
+    .selected-option {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    .selected-option .value-part {
+        font-size: 0.75rem;
+    }
+    .selected-option .bases-part {
+        font-size: 0.65rem;
+    }
+    .dropdown-options .option-item {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    /* Textarea – reduce height */
+    #rawGeneInput {
+        rows: 8;   /* attribute override */
+        min-height: 80px;
+    }
+
+    /* Bookmark items – tighter */
+    
+    
+
+    /* Right sidebar – narrower when open */
+    .right-sidebar.open {
+        width: 280px;
+        max-width: 90vw;
+    }
+
+    /* Hide less critical elements */
+    .desc-td {
+        max-width: 120px;        /* keep description short */
+    }
+    /* Optional: hide the helix dropdown label in the compact top bar */
+    .filter-cell label {
+        display: none;
+    }
+
+    /* Shrink header bar slightly */
+    .header-bar {
+        padding: 6px 12px;
+    }
+    .header-title {
+        font-size: 1rem;
+    }
+}
+
