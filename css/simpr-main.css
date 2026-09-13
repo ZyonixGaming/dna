@@ -1406,3 +1406,142 @@ textarea {
     }
 }
 
+
+/* ======================================================================
+   COMPARE TOGGLE + COMPARE TEXTAREA
+   ====================================================================== */
+
+.compare-toggle-row {
+    margin-top: 8px;
+}
+
+.compare-toggle-btn {
+    flex: 1;
+    background: #334155;
+    border-bottom-color: #475569;
+    font-size: 0.72rem;
+}
+
+.compare-toggle-btn.active {
+    background: #2c6e6e;
+    border-bottom-color: #48b5b5;
+    color: #ffffff;
+}
+
+.compare-input-block {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #2d3a46;
+}
+
+.compare-input-block label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b9c7d9;
+    letter-spacing: 0.03em;
+}
+
+.compare-source-tag {
+    font-weight: 400;
+    color: #48b5b5;
+}
+
+#compareGeneInput {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    background: #0b1218;
+    color: #cbd5e6;
+    border: 1px solid #2d3a4a;
+    border-left: 3px solid #48b5b5;
+    border-radius: 8px;
+    padding: 8px;
+    font-family: "Courier New", monospace;
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+#compareGeneInput:focus {
+    outline: none;
+    border-color: #48b5b5;
+}
+
+/* ======================================================================
+   POPULATION ODDS MODE
+   ====================================================================== */
+
+.preset-odds {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #334155;
+    border-bottom-color: #475569;
+    line-height: 1.4;
+}
+
+.preset-odds.active {
+    background: #7c4a9e;
+    border-bottom-color: #c084fc;
+    color: #ffffff;
+}
+
+.odds-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    margin: 0 0 6px 0;
+    background: #241c33;
+    border: 1px solid #5b4a7a;
+    border-left: 3px solid #c084fc;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    color: #cbd5e6;
+}
+
+.odds-bar-label {
+    flex: 1;
+}
+
+.odds-bar-label strong {
+    color: #c084fc;
+}
+
+.odds-impossible-count {
+    color: #f87171 !important;
+}
+
+.odds-bar-exit {
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+/* Banded rather than a continuous ramp, so a column of 240 reads at a glance. */
+.gene-table .odds-cell {
+    white-space: nowrap;
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 0.72rem;
+    cursor: help;
+}
+
+.odds-cell .odds-pct {
+    font-weight: 400;
+    opacity: 0.55;
+    margin-left: 1px;
+}
+
+.odds-cell.odds-high { color: #22c55e; }
+.odds-cell.odds-mid  { color: #a3e635; }
+.odds-cell.odds-low  { color: #facc15; }
+.odds-cell.odds-rare { color: #fb923c; }
+
+.odds-cell.odds-zero {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
+}
