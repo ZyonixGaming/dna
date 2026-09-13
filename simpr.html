@@ -37,6 +37,9 @@
                         <button id="pasteBtn" class="primary">PASTE</button>
                         <button id="exportBtn" class="success">COPY</button>
                     </div>
+                    <div class="btn-group compare-toggle-row">
+                        <button id="compareToggleBtn" class="compare-toggle-btn" title="Compare the genome above against another one">⚖️ COMPARE</button>
+                    </div>
                 </div>
 
                 <div class="textarea-section">
@@ -53,6 +56,19 @@
                             <button id="clearRawBtn" class="clear-btn clear-textarea-btn">✖ Clear</button>
                         </span>
                     </div>
+
+                    <!-- Only shown while compare mode is on. Editing it re-reads
+                         the reference genome; the ⚖️ buttons on presets and on
+                         saved DNA write into it. -->
+                    <div class="compare-input-block" id="compareSection" style="display:none;">
+                        <label>⚖️ COMPARE AGAINST <span class="compare-source-tag" id="compareSourceTag"></span></label>
+                        <div class="textarea-with-clear">
+                            <textarea id="compareGeneInput" rows="8" placeholder="Paste a genome to compare against, or press ⚖️ on a preset or a saved DNA entry."></textarea>
+                            <span class="textarea-actions">
+                                <button id="clearCompareBtn" class="clear-btn clear-textarea-btn">✖ Clear</button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- GO TO HELIX (moved from right sidebar) -->
@@ -68,7 +84,6 @@
                         <button id="randomDiversityBtn" title="Randomize the genes where possible without changing the horse (except antler/hat and skin patterns)" class="random-diversity" style="background: #2b6e4c; border-bottom-color: #67b886;">🎲 RANDOM DIVERSITY</button>
                     </div>
                 </div>
-
             </div>
 
             <!-- MAIN TABLE AREA -->
@@ -77,6 +92,10 @@
                     <label>🔍 Search: </label>
                     <input type="text" id="filterInput" class="filter-input" placeholder="" value="">
                     <button id="clearFilterBtn" class="clear-filter-btn">✖</button>
+                </div>
+                <div class="odds-bar" id="oddsBar" style="display:none;">
+                    <span class="odds-bar-label" id="oddsBarLabel"></span>
+                    <button class="odds-bar-exit" id="oddsBarExit" title="Exit odds mode">✖</button>
                 </div>
                 <div class="compare-bar" id="compareBar" style="display:none;">
                     <span class="compare-bar-label" id="compareBarLabel"></span>
