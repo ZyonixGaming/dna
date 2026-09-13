@@ -244,6 +244,25 @@ button.clear-btn {
     flex-wrap: wrap;
 }
 
+/* Two equal halves, the same shape as .mod-grid. Opt-in rather than applied to
+   every .btn-group, because the diversity pair is deliberately stacked and the
+   compare toggle is deliberately full width.
+   minmax(0, 1fr) instead of 1fr so the tracks can shrink below their content:
+   the left sidebar narrows to 160px, and 1fr would push the buttons past it. */
+.btn-group.split-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.btn-group.split-2 > button {
+    padding: 6px 4px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Textareas & links */
 textarea {
     background: #0f1720;
