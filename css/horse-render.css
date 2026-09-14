@@ -1,0 +1,81 @@
+/* Horse render integration — single minimal stylesheet. */
+
+.sequence-and-render {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-top: 0.4rem;
+}
+
+/* Narrow screens: canvas ABOVE the sequence area. */
+.render-col {
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* Wide screens: canvas to the RIGHT of the sequence area. */
+@media (min-width: 900px) {
+  .sequence-and-render {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .render-col { order: 0; }
+}
+
+.horse-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  
+  border: 1px solid #475569;
+  border-radius: 0.8rem;
+  background:
+    repeating-conic-gradient(#B2FF7E 0% 25%, #33E443 0% 50%) 50% / 16px 16px;
+  overflow: auto;
+      padding: 0.9rem;
+      margin-top: 0.4rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      outline: none;
+      position: relative;  
+}
+
+.horse-stage canvas {
+  image-rendering: pixelated;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.horse-status {
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+.horse-status.error {
+  border-color: #7f1d1d;
+  background: #2a1013;
+  color: #fca5a5;
+}
+.horse-status.ok {
+  border-color: #14532d;
+  background: #0d2318;
+  color: #86efac;
+}
+
+.horse-dims {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  display:none;
+}
