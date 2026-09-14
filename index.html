@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="folder.ico">
   <title>DNA Shortener</title>
+  <link rel="stylesheet" href="./css/horse-render.css">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -518,15 +519,31 @@
 
   <div id="errorMessage" class="error-msg"></div>
 
-  <div id="sequenceArea" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
+  <!-- ============================================================= -->
+  <!-- Sequence editor (left) + Horsey render canvas (right on wide,  -->
+  <!-- above on narrow).                                              -->
+  <!-- ============================================================= -->
+  <div class="sequence-and-render">
+
+    <div id="sequenceArea" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
 00:CTATCGCAAT
 00:CTATCGCAAT
 01:CTCTAAGGAGGGA
 ..."></div>
 
+    <div class="render-col">
+      <div class="horse-stage" >
+        <canvas id="horseCanvas" width="10" height="10"></canvas>
+      </div>
+      <div id="horseStatus" class="horse-status" hidden></div>
+      <div id="horseDims" class="horse-dims"></div>
+    </div>
+
+  </div>
+
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-	<a id="crisprLink" href="https://zyonixgaming.github.io/dna/simpr.html" target="_blank" rel="noopener noreferrer">🧪</a>
+	<a id="crisprLink" href="https://zyonixgaming.github.io/dna/crispr.html" target="_blank" rel="noopener noreferrer">🧪</a>
     <a id="simprLink" href="https://zyonixgaming.github.io/dna/simpr.html" target="_blank" rel="noopener noreferrer">Open SIMPR Horsey Genome Editor</a>
   </div>
 
@@ -563,11 +580,16 @@
 
 
 <script src="./js/genes.js"></script>
+<!-- ============================================================= -->
+<!-- Horsey render pipeline (existing files, loaded here)           -->
+<!-- ============================================================= -->
+<script src="./js/horse-render.js"></script>
+
 <script>
   (function() {
 
 	const simprUrl = "https://zyonixgaming.github.io/dna/simpr.html"
-	const crisprUrl = "https://zyonixgaming.github.io/dna/simpr.html"
+	const crisprUrl = "https://zyonixgaming.github.io/dna/crispr.html"
 
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
@@ -1327,6 +1349,9 @@
     });
 })();
 </script>
+
+<!-- Horsey render integration (new single JS file) -->
+
 
  <script src="./js/headers.js"></script>
  
