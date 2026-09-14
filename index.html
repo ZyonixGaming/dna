@@ -525,7 +525,7 @@
   <!-- ============================================================= -->
   <div class="sequence-and-render">
 
-    <div id="sequenceArea" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
+    <div id="rawGeneInput" contenteditable="true" spellcheck="false" class="dna-editor" data-placeholder="Paste your DNA lines here, e.g.:
 00:CTATCGCAAT
 00:CTATCGCAAT
 01:CTCTAAGGAGGGA
@@ -596,7 +596,7 @@
     }
 
     // ---------- DOM elements ----------
-    const editor = document.getElementById('sequenceArea');
+    const editor = document.getElementById('rawGeneInput');
     const linkDisplay = document.getElementById('linkDisplay');
     const errorDiv = document.getElementById('errorMessage');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
