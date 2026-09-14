@@ -149,7 +149,7 @@ root.Render={render:render,bounds:bounds,UNIT:UNIT};
 /* ===== integration: wire the pipeline to the Shortener's #sequenceArea ===== */
 (function(){
 var canvas=document.getElementById('horseCanvas');
-var source=document.getElementById('sequenceArea');
+var source=document.getElementById('rawGeneInput');
 var statusEl=document.getElementById('horseStatus');
 var dimsEl=document.getElementById('horseDims');
 if(!canvas||!source)return;
@@ -157,8 +157,9 @@ if(!root.Genome||!root.Phenotype||!root.Colors||!root.Rig||!root.Render){if(stat
 var ZOOM=4;
 function setStatus(msg,kind){if(!statusEl)return;statusEl.hidden=!msg;statusEl.className='horse-status'+(kind?' '+kind:'');statusEl.textContent=msg||'';}
 function clearCanvas(){var g=canvas.getContext('2d');g.clearRect(0,0,canvas.width,canvas.height);if(dimsEl)dimsEl.textContent='';}
-function draw(){var text=(source.innerText||'').trim();if(!text){clearCanvas();setStatus('','');return;}var parsed;try{parsed=root.Genome.parse(text);}catch(e){setStatus('Parse failed: '+e.message,'error');clearCanvas();return;}if(!parsed.ok){var msg=parsed.errors.slice(0,4).join('\n');if(parsed.errors.length>4)msg+='\n\u2026and '+(parsed.errors.length-4)+' more.';setStatus(msg,'error');clearCanvas();return;}try{var gt=new root.Genome.Genotype(parsed.alleles);var hash=root.Genome.hash(parsed.alleles);var ph=root.Phenotype.build(gt);var colors=root.Colors.build(gt,hash);var parts=root.Rig.build(ph,colors,hash);var info=root.Render.render(canvas,parts,ph,colors,hash,{zoom:ZOOM,background:null});setStatus('','');if(dimsEl)dimsEl.textContent=info.width+'\u00d7'+info.height+' px @ 1\u00d7 \u00b7 shown at '+ZOOM+'\u00d7 \u00b7 '+parts.length+' parts';}catch(e){setStatus('Render failed: '+e.message,'error');}}
+function draw(){var text=((source.value!=null?source.value:source.innerText)||'').trim();if(!text){clearCanvas();setStatus('','');return;}var parsed;try{parsed=root.Genome.parse(text);}catch(e){setStatus('Parse failed: '+e.message,'error');clearCanvas();return;}if(!parsed.ok){var msg=parsed.errors.slice(0,4).join('\n');if(parsed.errors.length>4)msg+='\n\u2026and '+(parsed.errors.length-4)+' more.';setStatus(msg,'error');clearCanvas();return;}try{var gt=new root.Genome.Genotype(parsed.alleles);var hash=root.Genome.hash(parsed.alleles);var ph=root.Phenotype.build(gt);var colors=root.Colors.build(gt,hash);var parts=root.Rig.build(ph,colors,hash);var info=root.Render.render(canvas,parts,ph,colors,hash,{zoom:ZOOM,background:null});setStatus('','');if(dimsEl)dimsEl.textContent=info.width+'\u00d7'+info.height+' px @ 1\u00d7 \u00b7 shown at '+ZOOM+'\u00d7 \u00b7 '+parts.length+' parts';}catch(e){setStatus('Render failed: '+e.message,'error');}}
 var timer=null;function schedule(){clearTimeout(timer);timer=setTimeout(draw,250);}
+root.HorseyRender={draw:draw,schedule:schedule};
 if(window.MutationObserver){new MutationObserver(schedule).observe(source,{childList:true,subtree:true,characterData:true});}
 source.addEventListener('input',schedule);
 source.addEventListener('paste',function(){setTimeout(schedule,0);});
