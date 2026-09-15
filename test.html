@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Horsey Render</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 16px; background:#1b1b1f; color:#e7e7ea; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  textarea {
+    width: 100%; max-width: 720px; height: 140px;
+    font-family: ui-monospace, monospace; font-size: 12px;
+    background:#141418; color:#e7e7ea; border:1px solid #333; border-radius:6px;
+    padding:8px; resize: vertical; box-sizing: border-box;
+  }
+  button {
+    margin-top: 8px; padding: 6px 14px; font-size: 14px; cursor: pointer;
+    border-radius: 6px; border: 1px solid #555; background:#2b2b33; color:#e7e7ea;
+  }
+  button:hover { background:#3a3a44; }
+  .horse-status { margin-top: 8px; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+  .horse-status.error { color: #ff7a7a; }
+  #horseDims { margin-top: 6px; font-family: ui-monospace, monospace; font-size: 11px; color:#9a9aa2; }
+  #horseCanvas { margin-top: 12px; image-rendering: pixelated; background:#101014; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<h1>Horsey Render</h1>
+
+<textarea id="encodedInput" placeholder="Paste encoded genome (base64url) here..."></textarea>
+<br>
+<button id="renderBtn">Render</button>
+
+
+<img id="myImageId" src="https://zyonix.gamer.free/?dna=s2PLNjRHkyjRxMoHloEt5YCb1SyUl1OyUlHkFseUW2I-Yj8TeTRN595Yflh_N2d83Z3riF-uIWgqUY46lHNl4tr1t4tbHWRbxVkO8XNuVV2xlzAKnMAapUTb6ZE80PT9KkPTdJkKFCAIUA8hk_-ET-s5eBPrOXgT"/>
+<script>
+  document.getElementById('renderBtn').addEventListener('click', function () {
+    const myImage = document.getElementById('myImageId');
+    const inputVal = document.getElementById('encodedInput').value;
+
+    // Use + to concatenate strings and encodeURIComponent for safe URL parameters
+    myImage.src = 'https://zyonix.gamer.free/?dna=' + encodeURIComponent(inputVal);
+  });
+</script>
+</body>
+</html>
