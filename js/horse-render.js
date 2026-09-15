@@ -49,7 +49,9 @@ p.bodyArea=area;p.bodyAspect=aspect;p.bodyWidth=Math.sqrt(aspect*area);p.bodyHei
 p.bodyMaxDim=Math.max(p.bodyWidth,p.bodyHeight);p.bodyMinDim=Math.min(p.bodyWidth,p.bodyHeight);
 p.vbase=p.posture==='centaur'?-p.bodyHeight:0;
 p.slopedChest=gt.hasAllele('CHEST_SMALL',3);
-p.gut=gt.f('GUT');p.gutIsUdder=gt.i('GUT_IS_UDDER');p.derriere=gt.f('DERRIERE');p.ostoSize=gt.f('OSTO_SIZE');
+p.gut=gt.f('GUT');p.gutIsUdder=gt.i('GUT_IS_UDDER');
+p.derriere=gt.f('DERRIERE')<0.125?0:gt.f('DERRIERE');
+p.ostoSize=gt.f('OSTO_SIZE');
 var osz=gt.pair('OSTO_SIZE');p.ostoRounded=Math.max(osz[0],osz[1])===3;p.ostoderm=Math.min(osz[0],osz[1])===3?0:gt.i('OSTODERM');
 var cs=gt.pair('CHEST_SMALL');p.bodyBack=Math.max(cs[0],cs[1])===3?Math.min(p.bodyWidth-0,0.25*p.bodyMinDim):0;
 p.swapSlot=(gt.i('BASE_BLACK')===1&&gt.i('AGOUTI')!==1)?2:0;
@@ -65,7 +67,10 @@ var armStretch=gt.f('LEG_STRETCH2')+(gt.f('LEG_STRETCH')+1.0);p.armLength=gt.f('
 if(p.armType===2)p.armLength=p.armLength*0.5;
 p.armThick=gt.f('ARM_STRENGTH')*0.16;p.legIn=gt.f('LEG_IN');p.legIn2=gt.f('LEG_IN2');
 p.legIn2Back=gt.pair('LEG_IN2')[0]===3?0.2:p.legIn2;p.legIn2Front=gt.pair('LEG_IN2')[0]===3?0:p.legIn2;
-p.armSkew=gt.f('ARM_SKEW');p.armNodeScale=gt.f('ARM_NODE_SCALE');p.armHasHand=gt.i('ARM_HAS_HAND')===1&&gt.i('HAS_HAND')===1;
+p.armSkew=p.armType===2?0:gt.f('ARM_SKEW');p.armNodeScale=gt.f('ARM_NODE_SCALE');p.armHasHand=gt.i('ARM_HAS_HAND')===1&&gt.i('HAS_HAND')===1;
+p.handWidth=gt.f('HAND_WIDTH');p.handLength=gt.f('HAND_LENGTH');p.handFinger=gt.f('HAND_FINGER');
+p.legJointed=gt.i('HAS_KNEE')===1&&p.legType!==2&&(gt.f('KNEE_MIN')!==0||gt.f('KNEE_MAX')!==0);
+p.armJointed=gt.i('HAS_ELBOW')===1&&p.armType!==2&&gt.f('ELBOW_RANGE')!==0;
 p.hasFoot=gt.i('HAS_FOOT')===1;p.footSize=gt.f('FOOT_SIZE');p.footClown=gt.f('FOOT_CLOWN');p.footThickness=gt.f('FOOT_THICKNESS');p.footToe=gt.f('FOOT_TOE');
 p.footIsCircle=gt.i('FOOT_IS_CIRCLE')===1&&p.legIsCircle;p.footIsHoof=gt.i('FOOT_IS_HOOF')===1;
 p.tags={leg:gt.i('LEG_TAG'),arm:gt.i('ARM_TAG'),tail:gt.i('TAIL_TAG'),neck:gt.i('NECK_TAG'),uparm:gt.i('UPARM_TAG')};
@@ -75,6 +80,14 @@ p.tailShape=gt.i('TAIL_SHAPE');p.tailAngle=gt.i('TAIL_ANGLE');p.tailSegments=gt.
 if(p.tailShape===5){p.tailLength=p.tailBase;p.tailShape=1;}
 p.tailSegCount=1;if((p.tailShape===1)&&p.tailSegments>1){p.tailSegCount=p.tailSegments;if(p.tailLength>2*p.tailBase)p.tailLength/=p.tailSegments;}
 p.tailTotalLength=p.tailLength*p.tailSegCount;
+var isQuad=gt.i('QUADRUPED')>0;
+var tailY=(p.tailShape===1)?p.tailBase/2:0;
+p.tailJointAngle=p.tailAngle;
+if(!isQuad){var belly=gt.f('PAT_BELLY');tailY=(belly<1?belly:0.6667)*p.bodyHeight;}
+else if(p.tailBottom&&p.derriere===0){tailY=p.bodyHeight-tailY;p.tailJointAngle=90;}
+p.tailJointY=tailY;
+p.tailDouble=p.tailExists===2;
+p.jointType={tail:gt.i('TAIL_JOINT_TYPE'),leg:gt.i('LEG_JOINT_TYPE'),arm:gt.i('ARM_JOINT_TYPE'),neck:gt.i('NECK_JOINT_TYPE'),uparm:0};
 p.neckType=gt.i('NECK_TYPE');p.neckGiraffe=gt.f('NECK_GIRAFFE');
 p.neckLength=p.neckType===2?0:gt.f('NECK_LENGTH')*(p.bodyMaxDim*0.5)+p.neckGiraffe;
 p.neckThick=gt.f('NECK_THICKNESS');p.neckAngle=gt.f('NECK_ANGLE')+gt.f('NECK_COCK');p.neckSlouch=gt.f('NECK_SLOUCH');p.neckOnTop=gt.f('NECK_ONTOP');p.neckCock=gt.f('NECK_COCK');
@@ -157,10 +170,6 @@ var agouti=gt.i('AGOUTI')===1;var blackAll=baseBlack&&!agouti;var blackPoints=ba
 var coatRole=blackAll?'BASE':'TORSO';var pointsRole=baseBlack?'BASE':coatRole;
 var bellyAlt=gt.i('BELLY_ALT');var bellyRole=bellyAlt===1?2:bellyAlt===2?1:null;
 out.part={
-  limb:gt.i('SKIN_HANDS')===2?'SKIN':(bellyRole===null?coatRole:bellyRole),
-  limbLower:gt.i('SKIN_HANDS')===2?'SKIN':pointsRole,
-  hand:gt.i('SKIN_HANDS')>=1?'SKIN':coatRole,
-  head:gt.i('SKIN_HEAD')>=1?'SKIN':coatRole,
   torso:'TORSO',
   neck:gt.i('SKIN_HEAD')>=2?'SKIN':'TORSO',
   tail:[null,'SPOT','ALT'][gt.i('TAIL_ALT')]||(gt.i('SKIN_HANDS')===2?'SKIN':pointsRole),
@@ -173,13 +182,24 @@ out.hex.NOSE_FIXED='#110b03';out.verified.NOSE_FIXED=true;
 var SLOTS=['PAT_BASE','PAT_SPOT','PAT_ALT','SKIN','HOOF','WHITE','RED',null,'EYE','NOSE','WHITE','PINK',null,null,null,'MAGENTA','BLACK','RED','BLUE','WHITE'];
 var REMAP=[[0,1,2],[1,0,2],[2,1,0],[3,0,1]];
 out.remapSlot=function(slot,variant){if(slot>=4)return slot;return REMAP[mod(slot,4)][mod(variant,3)];};
-var black2=(baseBlack&&gt.i('AGOUTI')!==1)?2:0;
-out.slot={
-  head:gt.i('SKIN_HEAD')>=1?3:black2,
-  ear:gt.i('SKIN_HEAD')>=1?3:black2,
-  tail:gt.i('TAIL_ALT')===1?1:gt.i('TAIL_ALT')===2?2:gt.i('SKIN_HANDS')>=2?3:(baseBlack?2:0),
-  SKIN:3,WHITE:5,EYE:8,HOOF:4
-};
+var S={legSplit:0,legSkin:0,legA:0,legB:0,armSplit:0,armSkin:0,armA:0,armB:0,tailSkin:0,tail:0,neck:0,head:0,ear:0,hand:0,foot:0,patRemap:0};
+var AG=gt.i('AGOUTI')>0;
+if(baseBlack){
+  if(AG){S.legB=2;S.legSplit=0.5;S.armB=2;S.armSplit=0.5;S.tail=2;}
+  else{S.patRemap=2;S.legA=2;S.armA=2;S.hand=2;S.foot=2;S.neck=2;S.head=2;S.tail=2;S.ear=2;}
+}
+var ba=gt.i('BELLY_ALT');
+if(ba===1){S.legA=S.armA=S.hand=S.foot=2;}
+else if(ba===2){S.legA=S.armA=S.hand=S.foot=1;}
+var ta=gt.i('TAIL_ALT');
+if(ta===1)S.tail=1;else if(ta===2)S.tail=2;
+if(gt.i('FOOT_IS_HOOF')>0)S.foot=4;
+var skHead=gt.i('SKIN_HEAD'),skHands=gt.i('SKIN_HANDS');
+if(skHead>=1){S.head=3;S.ear=3;}
+if(skHead>=2){S.neck=3;S.patRemap=3;}
+if(skHands>=1)S.hand=3;
+if(skHands>=2){S.armA=3;S.armSkin=3;S.legA=3;S.legSkin=3;S.tail=3;S.tailSkin=3;S.foot=3;}
+out.slot={head:S.head,ear:S.ear,tail:S.tail,neck:S.neck,hand:S.hand,foot:S.foot,legA:S.legA,legB:S.legB,legSplit:S.legSplit,legSkin:S.legSkin,armA:S.armA,armB:S.armB,armSplit:S.armSplit,armSkin:S.armSkin,SKIN:3,WHITE:5,EYE:8,HOOF:4};
 out.hex.WHITE=PAL[5];out.hex.RED=PAL[15];out.hex.PINK=PAL[30];out.hex.MAGENTA=PAL[27];out.hex.BLACK=PAL[0];out.hex.BLUE=PAL[22];
 out.slotHex=function(i){var role=SLOTS[i];if(role==='NOSE')return out.hex[out.part.nose]||out.hex.NOSE_FIXED;return out.hex[role]||out.hex.PAT_BASE;};
 out.resolve=function(role){if(typeof role==='number')return out.slotHex(role);return out.hex[role]||hex(role);};
@@ -246,7 +266,7 @@ var flat=grid&&grid.uniform?(c.patternHex[grid.flatSlot]||c.resolve(c.part.torso
 var patterned=!(grid&&grid.uniform);
 var gut=ph.gut;
 if(gut>0){if(ph.gutIsUdder===1){addArc(ctx,0,ph.bodyHeight,ph.bodyWidth/3,ph.bodyHeight,ph.bodyWidth*gut,c.slotHex(3),true,-5,'gut');}else{var gi=grid?grid.cols*grid.rows-Math.trunc(grid.cols/2):0;addArc(ctx,0,ph.bodyHeight,ph.bodyWidth,ph.bodyHeight,gut,cell(gi),ph.gutIsUdder===2,-5,'gut');}}
-var derriere=ph.derriere<0.125?0:ph.derriere;var tailY=tailJointY(ph);
+var derriere=ph.derriere;var tailY=ph.tailJointY;
 if(derriere>0){var di=grid?(grid.rows-1)*grid.cols:0;addArc(ctx,0,tailY,0,ph.bodyHeight,(ph.bodyHeight-tailY)*derriere,cell(di),false,-5,'derriere');}
 if(ph.ostoderm>0&&ph.ostoSize>0){var col=c.slotHex(ph.ostoRounded?ph.swapSlot:ph.antler.color);var big=ph.ostoderm===2;if(ph.bodyWidth>ph.bodyHeight){var span=ph.bodyWidth-ph.bodyBack;if(big){var m=Math.min(span,ph.ostoSize*1.5);addSpikes(ctx,span/2-m/2,0,span/2+m/2,0,m*0.99,ph.ostoRounded,col,-10,'ostoderm');}else{addSpikes(ctx,0,0,span,0,ph.ostoSize,ph.ostoRounded,col,-10,'ostoderm');}}else{var yTop=derriere>0?tailY:ph.bodyHeight;if(big){var m2=Math.min(yTop,ph.ostoSize*1.5);addSpikes(ctx,0,yTop/2+m2/2,0,yTop/2-m2/2,m2*0.99,ph.ostoRounded,col,-10,'ostoderm');}else{addSpikes(ctx,0,yTop,0,0,ph.ostoSize,ph.ostoRounded,col,-10,'ostoderm');}}}
 var back=Math.min(ph.bodyBack,ph.bodyWidth);var full={x:0,y:0,w:ph.bodyWidth,h:ph.bodyHeight};
@@ -255,19 +275,37 @@ if(back>0){ctx.parts.push({type:'poly',pts:[[ph.bodyWidth-back,0],[ph.bodyWidth,
 if(ph.posture==='centaur'){var w2=(ph.bodyHeight*ph.bodyHeight)/ph.bodyWidth;ctx.parts.push({type:'rect',x:ph.bodyWidth-w2-ph.bodyBack,y:-ph.bodyHeight,w:w2,h:ph.bodyHeight,color:c.resolve(c.part.torso),z:0.1,tag:'torso2',patterned:true});}
 }
 var SPACING_PAD=0.0625;
-function layoutGroundSockets(ph){var out=[];var legThick=ph.legThick>0?ph.legThick:0.01;var armThick=ph.armThick>0?ph.armThick:legThick;var wheelShift=ph.legWheel?ph.legLength*0.25:0;var legShift=ph.tags.leg===PART.LEG?wheelShift:0;var armShift=ph.tags.arm===PART.LEG?wheelShift:0;var legPos=ph.legIn+ph.legIn2Back+legThick/2+legShift;var armPos=ph.bodyWidth-ph.legIn-ph.legIn2Front-armThick/2-armShift;var span=armPos-legPos;var gap=ph.tags.leg===PART.NECK?neckThickness(ph):ph.tags.leg===PART.ARM?armThick:ph.tags.leg===PART.TAIL?ph.tailBase:legThick+SPACING_PAD;if(!(gap>0))gap=legThick+SPACING_PAD;var fit=Math.trunc(span/gap-1);var nExtra=Math.min(Math.max(0,ph.legCount-1),Math.max(0,fit));for(var i=0;i<=nExtra;i++){var c=legPos+(span*i)/(nExtra+1);out.push({x:c,y:ph.bodyHeight,isFront:false,tag:ph.tags.leg,angle:ph.legThrustBack===2?3*ph.splay:ph.splay});}out.push({x:armPos,y:ph.bodyHeight,isFront:true,tag:ph.tags.arm,angle:ph.legThrustBack===2?-3*ph.splay:-ph.splay-ph.armForward});return out;}
+function layoutGroundSockets(ph){var out=[];var legThick=ph.legThick>0?ph.legThick:0.01;var armThick=ph.armThick>0?ph.armThick:legThick;var wheelShift=ph.legWheel?ph.legLength*0.25:0;var legShift=ph.tags.leg===PART.LEG?wheelShift:0;var armShift=ph.tags.arm===PART.LEG?wheelShift:0;var legPos=ph.legIn+ph.legIn2Back+legThick/2+legShift;var armPos=ph.bodyWidth-ph.legIn-ph.legIn2Front-armThick/2-armShift;var span=armPos-legPos;var gap=ph.tags.leg===PART.NECK?neckThickness(ph):ph.tags.leg===PART.ARM?armThick:ph.tags.leg===PART.TAIL?ph.tailBase:legThick+SPACING_PAD;if(!(gap>0))gap=legThick+SPACING_PAD;var fit=Math.trunc(span/gap-1);var nExtra=Math.min(Math.max(0,ph.legCount-1),Math.max(0,fit));for(var i=0;i<=nExtra;i++){var c=legPos+(span*i)/(nExtra+1);out.push({x:c,y:ph.bodyHeight,isFront:false,tag:ph.tags.leg,joint:ph.jointType.leg,angle:ph.legThrustBack===2?3*ph.splay:ph.splay});}out.push({x:armPos,y:ph.bodyHeight,isFront:true,tag:ph.tags.arm,joint:ph.jointType.arm,angle:ph.legThrustBack===2?-3*ph.splay:-ph.splay-ph.armForward});return out;}
 function uparmSockets(ph){if(!ph.tags.uparm)return[];var biped=ph.posture==='biped'||ph.posture==='centaur';if(ph.tailExists>0&&!ph.tailBottom&&!biped)return[];var y=Math.min(Math.max(ph.uparmY*ph.bodyHeight+ph.vbase,ph.vbase+ph.bodyBack),ph.bodyHeight);var angle=ph.uparmAngle-90;var centaur=ph.posture==='centaur';var backX=centaur?ph.bodyWidth-(ph.bodyHeight*ph.bodyHeight)/ph.bodyWidth:0;var shift=centaur?ph.bodyBack:0;var front={x:ph.bodyWidth-shift,y:y,angle:angle};var back={x:backX-shift,y:y,angle:-angle};if(ph.uparmGoofy===1){back.x=front.x;back.y=y+0.03125;back.angle=angle+30;}if(ph.uparmGoofy===2)return[back];if(ph.uparmGoofy===3)return[front];return[front,back];}
-function spawnUparms(ctx){var ph=ctx.ph;var socks=uparmSockets(ph);for(var i=0;i<socks.length;i++){var u=socks[i];spawn(ctx,ph.tags.uparm,u.x,u.y,false,{angle:u.angle,scale:ph.armNodeScale,z:6});}}
-function spawn(ctx,tag,x,y,isFront,opt){opt=opt||{};var ph=ctx.ph;var a=opt.angle||0;var s={rot:a,scale:opt.scale!=null?opt.scale:(isFront?ph.armNodeScale:1),z:opt.z!=null?opt.z:(isFront?5:3),px:x,y:y};if(tag===PART.LEG)addLeg(ctx,x-ph.legThick/2,y,s);else if(tag===PART.ARM)addArm(ctx,x-ph.armThick/2,y,s);else if(tag===PART.TAIL)addTailAt(ctx,x,y,a,s.z);else if(tag===PART.NECK)addNeckAt(ctx,x,y,-90-a,true);}
+function spawnUparms(ctx){var ph=ctx.ph;var socks=uparmSockets(ph);for(var i=0;i<socks.length;i++){var u=socks[i];spawn(ctx,ph.tags.uparm,u.x,u.y,false,{angle:u.angle,scale:ph.armNodeScale,z:6,joint:ph.jointType.uparm});}}
+function spawn(ctx,tag,x,y,isFront,opt){opt=opt||{};var ph=ctx.ph;var a=opt.angle||0;var s={rot:a,scale:opt.scale!=null?opt.scale:(isFront?ph.armNodeScale:1),z:opt.z!=null?opt.z:(isFront?5:3),px:x,y:y};if(tag===PART.LEG)addLeg(ctx,x-ph.legThick/2,y,s);else if(tag===PART.ARM)addArm(ctx,x-ph.armThick/2,y,s);else if(tag===PART.TAIL){addTailAt(ctx,x,y,a,s.z);if(ph.tailDouble&&opt.joint!==2)addTailAt(ctx,x,y,a-10,s.z);}else if(tag===PART.NECK)addNeckAt(ctx,x,y,-90-a,true);}
 function leaning(s,partX,segY){if(!s.rot)return null;return{angle:s.rot,pivot:[s.px-partX,s.y-segY]};}
 function push(ctx,part,extra){if(extra)for(var k in extra)part[k]=extra[k];ctx.parts.push(part);return part;}
 function spin(pt,pivot,deg){if(!deg)return pt;var a=deg*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);var dx=pt[0]-pivot[0],dy=pt[1]-pivot[1];return[pivot[0]+dx*ca-dy*sa,pivot[1]+dx*sa+dy*ca];}
-function addLeg(ctx,x,y,s){var ph=ctx.ph,c=ctx.colors;if(ph.legType===0)return;var t=ph.legThick;var total=ph.legLength*s.scale;var half=total/2;if(ph.legWheel){addWheel(ctx,x+t/2,y,(total+t)/4,s,true);return;}var shear=(s.scale===1?1:-1)*ph.legSkew*ph.legLength*1.25;if(Math.abs(shear)>0.01&&ph.legLength>2*t){var top=ph.legLength/2,bot=ph.legLength;push(ctx,{type:'rect',x:x,y:y,w:t,h:top,color:c.resolve(c.part.limb),z:s.z,tag:'leg-upper'},leaning(s,x,y));var quad=[[x,y+top],[x+t,y+top],[x+t+shear,y+bot],[x+shear,y+bot]];if(s.rot){var pv=[s.px,s.y];for(var qi=0;qi<quad.length;qi++)quad[qi]=spin(quad[qi],pv,s.rot);}ctx.parts.push({type:'poly',pts:quad,color:c.resolve(c.part.limb),z:s.z,tag:'leg-lower'});addFoot(ctx,x+shear,y+bot,t,s);return;}push(ctx,{type:'rect',x:x,y:y,w:t,h:half,color:c.resolve(c.part.limb),z:s.z,tag:'leg-upper'},leaning(s,x,y));push(ctx,{type:'rect',x:x,y:y+half,w:t,h:total-half,color:c.resolve(c.part.limbLower),z:s.z,tag:'leg-lower'},leaning(s,x,y+half));addFoot(ctx,x,y+total,t,s);}
-function addArm(ctx,x,y,s){var ph=ctx.ph,c=ctx.colors;if(ph.armType===0)return;var t=ph.armThick;var aTotal=ph.armLength;var half=aTotal/2;push(ctx,{type:'rect',x:x,y:y,w:t,h:half,color:c.resolve(c.part.limb),z:s.z,tag:'arm-upper'},leaning(s,x,y));push(ctx,{type:'rect',x:x,y:y+half,w:t,h:aTotal-half,color:c.resolve(c.part.limbLower),z:s.z,tag:'arm-lower'},leaning(s,x,y+half));if(ph.armHasHand){push(ctx,{type:'rect',x:x,y:y+aTotal,w:t,h:t*0.8,color:c.resolve(c.part.hand),z:s.z,tag:'hand'},leaning(s,x,y+ph.armLength));}}
-function addWheel(ctx,cx,cy,r,s,withFoot){var ph=ctx.ph,c=ctx.colors;var z=s.z,lean=s.rot;function spun(px,py){return lean?{angle:lean,pivot:[s.px-px,s.y-py]}:null;}push(ctx,{type:'circle',x:cx-r,y:cy-r,w:r*2,h:r*2,color:c.slotHex(2),z:z,tag:'wheel'},spun(cx-r,cy-r));push(ctx,{type:'rect',x:cx-r/2,y:cy-r/2,w:r,h:r,color:c.slotHex(1),z:z+0.01,tag:'wheel-hub'},spun(cx-r/2,cy-r/2));if(withFoot&&ph.hasFoot&&ph.legHasFoot){var fw=ph.footSize+ph.legThick+(ph.footSize>0?ph.footClown:0);push(ctx,{type:'rect',x:cx-fw/2,y:cy+r,w:fw,h:ph.footThickness,color:c.resolve(c.part.foot),z:z,tag:'foot'},spun(cx-fw/2,cy+r));}}
-function addFoot(ctx,x,yTop,legThick,s){var ph=ctx.ph,c=ctx.colors;if(!ph.hasFoot||!ph.legHasFoot)return;var socketY=s.y!=null?s.y:yTop;var lean=s.rot;var pivot=[s.px!=null?s.px:x+legThick/2,socketY];var w=ph.footSize+legThick+(ph.footSize>0?ph.footClown:0);var h=ph.footThickness;var z=s.z;var w2=w+ph.footToe*h;if(ph.footIsCircle){var fc=[x+legThick/2,yTop];if(s.rot)fc=spin(fc,pivot,s.rot);addWheel(ctx,fc[0],fc[1],w2,{rot:0,z:s.z,px:fc[0],y:fc[1]},false);return;}push(ctx,{type:'rect',x:x,y:yTop,w:w,h:h,color:c.resolve(c.part.foot),z:z,tag:'foot'},lean?{angle:lean,pivot:[pivot[0]-x,pivot[1]-yTop]}:null);if(w2>w){var back=ctx.ph.footBackwards;var edge=back?x+legThick-w:x+w;var tip=back?x+legThick-w2:x+w2;ctx.parts.push({type:'poly',pts:[spin([edge,yTop],pivot,lean),spin([tip,yTop+h],pivot,lean),spin([edge,yTop+h],pivot,lean)],color:c.resolve(c.part.foot),z:z,tag:'foot-toe'});}}
-function tailJointY(ph){var offset=(ph.tailShape===1)?ph.tailBase/2:0;return ph.tailBottom?ph.bodyHeight-offset:offset;}
-function spawnTail(ctx){var ph=ctx.ph;if(ph.tags.tail!==PART.TAIL){spawn(ctx,ph.tags.tail,0,ph.tailBottom?ph.bodyHeight:0,false,{angle:ph.tailAngle});return;}addTailAt(ctx,0,tailJointY(ph),ph.tailAngle,-2);}
+function shaft(ctx,x,y,t,len,s,jointed,split,skin,slotA,slotB,tag){
+  var c=ctx.colors;
+  function seg(sx,sy,sw,sh,slot,name){push(ctx,{type:'rect',x:sx,y:sy,w:sw,h:sh,color:c.slotHex(slot),z:s.z,tag:name},leaning(s,sx,sy));}
+  if(jointed){seg(x,y,t,len/2,slotA,tag+'-upper');seg(x,y+len/2,t,len/2,slotB,tag+'-lower');return;}
+  if(slotA===slotB||split>0.99){seg(x,y,t,len,slotB,tag);return;}
+  if(split<0.01){seg(x,y,t,len,slotA,tag);return;}
+  if(skin){seg(x,y,t*split,len,slotA,tag+'-upper');seg(x+t*split,y,t*(1-split),len,slotB,tag+'-lower');}
+  else{seg(x,y,t,len*split,slotA,tag+'-upper');seg(x,y+len*split,t,len*(1-split),slotB,tag+'-lower');}
+}
+function addLeg(ctx,x,y,s){var ph=ctx.ph,c=ctx.colors;if(ph.legType===0)return;var t=ph.legThick;var total=ph.legLength*s.scale;var half=total/2;if(ph.legWheel){addWheel(ctx,x+t/2,y,(total+t)/4,s,true);return;}var shear=(s.scale===1?1:-1)*ph.legSkew*ph.legLength*1.25;if(Math.abs(shear)>0.01&&ph.legLength>2*t){var top=ph.legLength/2,bot=ph.legLength;push(ctx,{type:'rect',x:x,y:y,w:t,h:top,color:c.slotHex(c.slot.legA),z:s.z,tag:'leg-upper'},leaning(s,x,y));var quad=[[x,y+top],[x+t,y+top],[x+t+shear,y+bot],[x+shear,y+bot]];if(s.rot){var pv=[s.px,s.y];for(var qi=0;qi<quad.length;qi++)quad[qi]=spin(quad[qi],pv,s.rot);}ctx.parts.push({type:'poly',pts:quad,color:c.slotHex(c.slot.legA),z:s.z,tag:'leg-lower'});addFoot(ctx,x+shear,y+bot,t,s);return;}
+shaft(ctx,x,y,t,total,s,ph.legJointed,c.slot.legSplit,c.slot.legSkin,c.slot.legA,c.slot.legB,'leg');
+addFoot(ctx,x,y+total,t,s);}
+function addArm(ctx,x,y,s){var ph=ctx.ph,c=ctx.colors;if(ph.armType===0)return;var t=ph.armThick;var aTotal=ph.armLength;shaft(ctx,x,y,t,aTotal,s,ph.armJointed,c.slot.armSplit,c.slot.armSkin,c.slot.armA,c.slot.armB,'arm');if(ph.armHasHand)addHand(ctx,x+t/2,y+aTotal,t,s);}
+function addHand(ctx,cx,yTop,limbThick,s){var ph=ctx.ph,c=ctx.colors;var w=ph.handWidth+limbThick;var h=ph.handLength;if(!(w>0)||!(h>0))return;var col=c.slotHex(c.slot.hand);var pivot=[s.px,s.y],lean=s.rot;var x0=cx-w/2;
+  if(ph.handFinger>0){var hw=w*0.75,tip=yTop+h*(1+ph.handFinger);
+    ctx.parts.push({type:'poly',color:col,z:s.z,tag:'hand',pts:[spin([cx-w/2,yTop],pivot,lean),spin([cx+w/2,yTop],pivot,lean),spin([cx+hw,yTop+h],pivot,lean),spin([cx-hw,yTop+h],pivot,lean)]});
+    ctx.parts.push({type:'poly',color:col,z:s.z,tag:'hand-finger',pts:[spin([cx-hw,yTop+h],pivot,lean),spin([cx+hw,yTop+h],pivot,lean),spin([cx,tip],pivot,lean)]});
+    return;}
+  push(ctx,{type:'rect',x:x0,y:yTop,w:w,h:h,color:col,z:s.z,tag:'hand'},lean?{angle:lean,pivot:[pivot[0]-x0,pivot[1]-yTop]}:null);
+  var flare=w*0.25;
+  if(flare>0.001){ctx.parts.push({type:'poly',color:col,z:s.z,tag:'hand-toe',pts:[spin([x0+w,yTop],pivot,lean),spin([x0+w+flare,yTop+h],pivot,lean),spin([x0+w,yTop+h],pivot,lean)]});}}
+function addWheel(ctx,cx,cy,r,s,withFoot){var ph=ctx.ph,c=ctx.colors;var z=s.z,lean=s.rot;function spun(px,py){return lean?{angle:lean,pivot:[s.px-px,s.y-py]}:null;}push(ctx,{type:'circle',x:cx-r,y:cy-r,w:r*2,h:r*2,color:c.slotHex(2),z:z,tag:'wheel'},spun(cx-r,cy-r));push(ctx,{type:'rect',x:cx-r/2,y:cy-r/2,w:r,h:r,color:c.slotHex(1),z:z+0.01,tag:'wheel-hub'},spun(cx-r/2,cy-r/2));if(withFoot&&ph.hasFoot&&ph.legHasFoot){var fw=ph.footSize+ph.legThick+(ph.footSize>0?ph.footClown:0);push(ctx,{type:'rect',x:cx-fw/2,y:cy+r,w:fw,h:ph.footThickness,color:c.slotHex(c.slot.foot),z:z,tag:'foot'},spun(cx-fw/2,cy+r));}}
+function addFoot(ctx,x,yTop,legThick,s){var ph=ctx.ph,c=ctx.colors;if(!ph.hasFoot||!ph.legHasFoot)return;var socketY=s.y!=null?s.y:yTop;var lean=s.rot;var pivot=[s.px!=null?s.px:x+legThick/2,socketY];var w=ph.footSize+legThick+(ph.footSize>0?ph.footClown:0);var h=ph.footThickness;var z=s.z;var w2=w+ph.footToe*h;if(ph.footIsCircle){var fc=[x+legThick/2,yTop];if(s.rot)fc=spin(fc,pivot,s.rot);addWheel(ctx,fc[0],fc[1],w2,{rot:0,z:s.z,px:fc[0],y:fc[1]},false);return;}push(ctx,{type:'rect',x:x,y:yTop,w:w,h:h,color:c.slotHex(c.slot.foot),z:z,tag:'foot'},lean?{angle:lean,pivot:[pivot[0]-x,pivot[1]-yTop]}:null);if(w2>w){var back=ctx.ph.footBackwards;var edge=back?x+legThick-w:x+w;var tip=back?x+legThick-w2:x+w2;ctx.parts.push({type:'poly',pts:[spin([edge,yTop],pivot,lean),spin([tip,yTop+h],pivot,lean),spin([edge,yTop+h],pivot,lean)],color:c.slotHex(c.slot.foot),z:z,tag:'foot-toe'});}}
+function spawnTail(ctx){var ph=ctx.ph;spawn(ctx,ph.tags.tail,0,ph.tailJointY,false,{angle:ph.tailJointAngle,joint:ph.jointType.tail,z:ph.tags.tail===PART.TAIL?-2:undefined});}
 function addTailAt(ctx,x,y,angleDeg,z){var ph=ctx.ph,c=ctx.colors;if(!(ph.tailExists>0))return;if(z==null)z=-2;var color=c.slotHex(c.slot.tail);var sweep=angleDeg-90;var rad=sweep*Math.PI/180;var dx=-Math.cos(rad),dy=-Math.sin(rad);if(ph.tailShape===6){addChromosomeTail(ctx,x,y,dx,dy,z);return;}var segLen=ph.tailLength;var w=ph.tailBase;for(var i=0;i<ph.tailSegCount;i++){var sx=x+dx*segLen*i;var sy=y+dy*segLen*i;ctx.parts.push({type:ph.tailShape===2?'tritail':'rect',x:sx-segLen,y:sy-w/2,w:segLen,h:w,angle:sweep,pivot:[segLen,w/2],color:color,z:z,tag:'tail'});}}
 var BASE_TILE={A:17,C:22,G:19,T:15};
 var BASE_GLYPH={A:32,C:37,G:34,T:30};
@@ -276,8 +314,8 @@ function neckJoint(ph){var t=ph.tags.neck!==PART.NECK?0:(ph.neckType===2?0.125:n
 function slouchAmount(ph){if(ph.posture==='centaur')return 0;if(ph.neckOnTop>0)return 0;return ph.neckSlouch*(ph.bodyHeight>ph.bodyWidth?0.666:1);}
 function mainNeckAngle(ph){return slouchAmount(ph)>0?Math.min(60,ph.neckAngle-15):ph.neckAngle;}
 function neckThickness(ph){return ph.neckThick*(ph.bodyMinDim*0.25);}
-function spawnNeckAndHead(ctx){var ph=ctx.ph;var j=neckJoint(ph);if(ph.tags.neck!==PART.NECK){spawn(ctx,ph.tags.neck,j.x,j.y,true,{angle:-90-mainNeckAngle(ph)});return;}addNeckAt(ctx,j.x,j.y,mainNeckAngle(ph),ph.hasNeck);}
-function addNeckAt(ctx,x,y,angleDeg,drawNeck){var ph=ctx.ph,c=ctx.colors;if(!ph.hasHead)return;var rad=angleDeg*Math.PI/180;var dx=Math.cos(rad),dy=-Math.sin(rad);var tipX=x,tipY=y;if(drawNeck){var w=neckThickness(ph);ctx.parts.push({type:'rect',x:x,y:y-w/2,w:ph.neckLength,h:w,angle:-angleDeg,pivot:[0,w/2],color:c.resolve(c.part.neck),z:1,tag:'neck'});tipX=x+dx*ph.neckLength;tipY=y+dy*ph.neckLength;}addHead(ctx,tipX,tipY,angleDeg,mainNeckAngle(ph)-angleDeg);}
+function spawnNeckAndHead(ctx){var ph=ctx.ph;var j=neckJoint(ph);if(ph.tags.neck!==PART.NECK){spawn(ctx,ph.tags.neck,j.x,j.y,true,{angle:-90-mainNeckAngle(ph),joint:ph.jointType.neck});return;}addNeckAt(ctx,j.x,j.y,mainNeckAngle(ph),ph.hasNeck);}
+function addNeckAt(ctx,x,y,angleDeg,drawNeck){var ph=ctx.ph,c=ctx.colors;if(!ph.hasHead)return;var rad=angleDeg*Math.PI/180;var dx=Math.cos(rad),dy=-Math.sin(rad);var tipX=x,tipY=y;if(drawNeck){var w=neckThickness(ph);ctx.parts.push({type:'rect',x:x,y:y-w/2,w:ph.neckLength,h:w,angle:-angleDeg,pivot:[0,w/2],color:c.slotHex(c.slot.neck),z:1,tag:'neck'});tipX=x+dx*ph.neckLength;tipY=y+dy*ph.neckLength;}addHead(ctx,tipX,tipY,angleDeg,mainNeckAngle(ph)-angleDeg);}
 function eyeboxRaise(ph){return ph.eyeboxY>0?ph.eyeboxY:ph.eyeboxY*eyeboxSize(ph);}
 function backOffset(ph){if(ph.bugeye===2)return 0;var e=eyeboxRaise(ph);return e<0?-e:0;}
 function eyeboxSize(ph){return ph.eyeboxSize;}
@@ -286,12 +324,12 @@ function addHead(ctx,x,y,angleDeg,rot){
 var ph=ctx.ph,c=ctx.colors;var hw=ph.headWidth,hh=ph.headHeight;var step=backOffset(ph);var first=ctx.parts.length;
 var B=ph.hasNeck?neckThickness(ph)/2:0;
 var hx=x-B;var mainTop=y+B-hh;var hy=mainTop-step;
-var head={type:'head',x:hx,y:mainTop,w:hw,h:hh,stepH:step,eyeboxAbs:eyeboxStart(ph),eyeboxSizeAbs:eyeboxSize(ph),color:c.resolve(c.part.head),z:2,tag:'head'};
+var head={type:'head',x:hx,y:mainTop,w:hw,h:hh,stepH:step,eyeboxAbs:eyeboxStart(ph),eyeboxSizeAbs:eyeboxSize(ph),color:c.slotHex(c.slot.head),z:2,tag:'head'};
 ctx.parts.push(head);
 var ebs=eyeboxSize(ph);var ebx=hx+eyeboxStart(ph);var eby=mainTop+eyeboxRaise(ph);
 var eyeboxSlot=ph.bugeye===2?c.slot.SKIN:c.remapSlot(c.slot.head,ph.raccoonEye);
 ctx.parts.push({type:'rect',x:ebx,y:eby,w:ebs,h:ebs,color:c.slotHex(eyeboxSlot),z:2.1,tag:'eyebox'});
-if(ph.headHasBack>0&&ebx>hx){ctx.parts.push({type:'rect',x:hx,y:eby,w:ebx-hx,h:ebs,color:c.resolve(c.part.head),z:2.05,tag:'head-back'});}
+if(ph.headHasBack>0&&ebx>hx){ctx.parts.push({type:'rect',x:hx,y:eby,w:ebx-hx,h:ebs,color:c.slotHex(c.slot.head),z:2.05,tag:'head-back'});}
 if(ph.earStyle>0&&ph.earShape!==4){
   var esr=eyeboxStart(ph);
   var onEyebox=ph.headHasBack!==0||!(esr>0);
@@ -302,38 +340,17 @@ if(ph.earStyle>0&&ph.earShape!==4){
   var ey=onEyebox?Math.min(eby,mainTop):mainTop;
   var down=ph.earStyle===2;
   var earSlot=c.remapSlot(c.slot.ear,ph.earComp);
-  if(ew>=0.1){
-    ctx.parts.push({type:ph.earShape===1?'rect':'tri',x:ex,y:down?ey:ey-eh,w:ew,h:eh,slant:ph.earSlant,down:down,color:c.slotHex(earSlot),z:3.8,tag:'ear'});
-  }
+  if(ew>=0.1){ctx.parts.push({type:ph.earShape===1?'rect':'tri',x:ex,y:down?ey:ey-eh,w:ew,h:eh,slant:ph.earSlant,down:down,color:c.slotHex(earSlot),z:3.8,tag:'ear'});}
   var m=ph.earInterior;
-  if(m>0&&ew>3*m&&eh>3*m&&!down){
-    var iL=ex+m,iR=ex+ew-m,iW=iR-iL;
-    var baseY=ey,apexY=ey-eh;
+  if(m>0&&ew>3*m&&eh>3*m&&!down){var iL=ex+m,iR=ex+ew-m,iW=iR-iL;var baseY=ey,apexY=ey-eh;
     if(ph.earShape===1){ctx.parts.push({type:'rect',x:iL,y:apexY+m,w:iW,h:eh-m,color:c.slotHex(c.slot.SKIN),z:3.85,tag:'ear-interior'});}
-    else{var slantFrac=ph.earSlant;ctx.parts.push({type:'poly',pts:[[iL,baseY],[iL+slantFrac*iW,apexY+2*m*(eh/ew)],[iR,baseY]],color:c.slotHex(c.slot.SKIN),z:3.85,tag:'ear-interior'});}
-  }
+    else{var slantFrac=ph.earSlant;ctx.parts.push({type:'poly',pts:[[iL,baseY],[iL+slantFrac*iW,apexY+2*m*(eh/ew)],[iR,baseY]],color:c.slotHex(c.slot.SKIN),z:3.85,tag:'ear-interior'});}}
 }
-if(ph.hasMouth){
-  var mw=ph.mouthSize;var mh=ph.mouthSize*0.33;var my=mainTop+(hh-mh)*ph.mouthY;
-  var mx=hx+hw-mw;
-  head.mouth={x:(mx-hx)/hw,y:(my-mainTop)/hh,w:mw/hw,h:mh/hh,jaw:ph.jaw/hw};
-  if(ph.teethShape>0){ctx.parts.push({type:'teeth',shape:ph.teethShape,x:mx,y:my,w:mw,h:mh,color:c.resolve('TEETH'),z:2.6,tag:'teeth'});}
-}
-if(ph.eyeStyle>0){var eyeR=ph.eyeSize*ebs*0.5;var eyeCx=ebx+ebs/2,eyeCy=eby+ebs/2;
-  ctx.parts.push({type:'circle',x:eyeCx-eyeR,y:eyeCy-eyeR,w:eyeR*2,h:eyeR*2,color:c.slotHex(c.slot.WHITE),z:2.5,tag:'eye-white'});
-  var pupR=ph.hasPupil?ph.pupilSize*eyeR:0;
-  if(pupR>0){ctx.parts.push({type:'circle',x:eyeCx-pupR,y:eyeCy-pupR,w:pupR*2,h:pupR*2,color:c.slotHex(c.slot.EYE),z:2.7,tag:'pupil'});}
-  if(ph.browSize>0){var bw=ph.browSize*eyeR,bh=bw*0.25;ctx.parts.push({type:'rect',x:eyeCx-bw,y:eyeCy-eyeR-bh,w:bw*2,h:bh*2,angle:ph.browSlant,pivot:[bw,bh],color:c.slotHex(c.slot.HOOF),z:2.55,tag:'brow'});}
-}
-if(ph.noseStyle>0){var ns=ph.noseSize;var nx=hx+hw-(ph.noseInny?ns:0);var ny=mainTop+Math.max(0,ph.noseY*(ph.noseSpan-ns));
-  ctx.parts.push({type:ph.noseStyle===3?'circle':(ph.noseStyle===2?'nosetri':'rect'),x:nx,y:ny,w:ns,h:ns,color:c.resolve(c.part.nose),z:2.8,tag:'nose'});
-  var ni=ph.noseInterior;
-  if(ni>0&&ns>0){ctx.parts.push({type:ph.noseStyle===3?'circle':(ph.noseStyle===2?'nosetri':'rect'),x:nx,y:ny+(ns-ni)/2,w:ni,h:ni,color:ph.bugeye===2?c.slotHex(c.slot.SKIN):c.hex.NOSE_FIXED,z:2.85,tag:'nose-interior'});}
-}
-head.rot=rot||0;head.rotPivot=[x,y];
-ctx.heads.push(head);
-if(rot){for(var pi=first;pi<ctx.parts.length;pi++){var p=ctx.parts[pi];if(p.pts){for(var qi=0;qi<p.pts.length;qi++)p.pts[qi]=spin(p.pts[qi],[x,y],rot);}else{p.angle=rot;p.pivot=[x-p.x,y-p.y];}}}
-}
+if(ph.hasMouth){var mw=ph.mouthSize;var mh=ph.mouthSize*0.33;var my=mainTop+(hh-mh)*ph.mouthY;var mx=hx+hw-mw;head.mouth={x:(mx-hx)/hw,y:(my-mainTop)/hh,w:mw/hw,h:mh/hh,jaw:ph.jaw/hw};if(ph.teethShape>0){ctx.parts.push({type:'teeth',shape:ph.teethShape,x:mx,y:my,w:mw,h:mh,color:c.resolve('TEETH'),z:2.6,tag:'teeth'});}}
+if(ph.eyeStyle>0){var eyeR=ph.eyeSize*ebs*0.5;var eyeCx=ebx+ebs/2,eyeCy=eby+ebs/2;ctx.parts.push({type:'circle',x:eyeCx-eyeR,y:eyeCy-eyeR,w:eyeR*2,h:eyeR*2,color:c.slotHex(c.slot.WHITE),z:2.5,tag:'eye-white'});var pupR=ph.hasPupil?ph.pupilSize*eyeR:0;if(pupR>0){ctx.parts.push({type:'circle',x:eyeCx-pupR,y:eyeCy-pupR,w:pupR*2,h:pupR*2,color:c.slotHex(c.slot.EYE),z:2.7,tag:'pupil'});}if(ph.browSize>0){var bw=ph.browSize*eyeR,bh=bw*0.25;ctx.parts.push({type:'rect',x:eyeCx-bw,y:eyeCy-eyeR-bh,w:bw*2,h:bh*2,angle:ph.browSlant,pivot:[bw,bh],color:c.slotHex(c.slot.HOOF),z:2.55,tag:'brow'});}}
+if(ph.noseStyle>0){var ns=ph.noseSize;var nx=hx+hw-(ph.noseInny?ns:0);var ny=mainTop+Math.max(0,ph.noseY*(ph.noseSpan-ns));ctx.parts.push({type:ph.noseStyle===3?'circle':(ph.noseStyle===2?'nosetri':'rect'),x:nx,y:ny,w:ns,h:ns,color:c.resolve(c.part.nose),z:2.8,tag:'nose'});var ni=ph.noseInterior;if(ni>0&&ns>0){ctx.parts.push({type:ph.noseStyle===3?'circle':(ph.noseStyle===2?'nosetri':'rect'),x:nx,y:ny+(ns-ni)/2,w:ni,h:ni,color:ph.bugeye===2?c.slotHex(c.slot.SKIN):c.hex.NOSE_FIXED,z:2.85,tag:'nose-interior'});}}
+head.rot=rot||0;head.rotPivot=[x,y];ctx.heads.push(head);
+if(rot){for(var pi=first;pi<ctx.parts.length;pi++){var p=ctx.parts[pi];if(p.pts){for(var qi=0;qi<p.pts.length;qi++)p.pts[qi]=spin(p.pts[qi],[x,y],rot);}else{p.angle=rot;p.pivot=[x-p.x,y-p.y];}}}}
 root.Rig={build:build,PART:PART,SPACING_PAD:SPACING_PAD};
 })();
 
