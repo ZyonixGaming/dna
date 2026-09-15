@@ -10,7 +10,7 @@
 /* Narrow screens: canvas ABOVE the sequence area. */
 .render-col {
   order: -1;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 0.5rem;
   min-width: 0;
@@ -26,7 +26,7 @@
 }
 
 .horse-stage {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   min-height: 280px;
