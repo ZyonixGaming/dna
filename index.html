@@ -533,10 +533,8 @@
 
     <div class="render-col">
       <div class="horse-stage" >
-        <canvas id="horseCanvas" width="10" height="10"></canvas>
+        <img id="horseCanvas" hidden style="  max-width: 100%; height: auto; display: block; "/>
       </div>
-      <div id="horseStatus" class="horse-status" hidden></div>
-      <div id="horseDims" class="horse-dims"></div>
     </div>
 
   </div>
@@ -583,7 +581,6 @@
 <!-- ============================================================= -->
 <!-- Horsey render pipeline (existing files, loaded here)           -->
 <!-- ============================================================= -->
-<script src="./js/horse-render.js"></script>
 
 <script>
   (function() {
@@ -756,6 +753,7 @@
 
     function refreshLink() {
       const plainText = editor.innerText.trim();
+	  const img=document.getElementById("horseCanvas");
       if (!plainText) {
         linkDisplay.value = '';
         updateUrlParam('');
@@ -764,6 +762,8 @@
 		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
 		crisprLink.target = "_blank";
 		simprLink.target = "_blank";
+		img.removeAttribute("src");
+		//img.addAttribute("hidden");		
         hideError();
         return;
       }
@@ -773,12 +773,16 @@
         const fullUrl = `${window.location.href.split('?')[0]}?dna=${encoded}`;
         linkDisplay.value = fullUrl;
         updateUrlParam(encoded);
+		
         // Update CRISPR editor link with compressed DNA
         crisprLink.href = `${crisprUrl}?dna=${encoded}`;
 		simprLink.href = `${simprUrl}?dna=${encoded}`;
+		
 		simprLink.textContent = "Edit in SIMPR Horsey Genome Editor";
 		crisprLink.target = "_self";
-		simprLink.target = "_self";		
+		simprLink.target = "_self";
+		img.src = `https:/horsey.wasmer.app/images/${encoded}.png`;
+		img.removeAttribute("hidden");
         hideError();
       } catch (e) {
         showError(e.message);
@@ -788,7 +792,9 @@
 		simprLink.href = simprUrl;
 		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
 		crisprLink.target = "_blank";
-		simprLink.target = "_blank";		
+		simprLink.target = "_blank";
+		img.removeAttribute("src");
+		//img.addAttribute("hidden");				
       }
     }
 

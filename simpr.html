@@ -75,11 +75,10 @@
                 <!-- GO TO HELIX (moved from right sidebar) -->
 				    <div class="render-col" style="padding:10px;">
       <div class="horse-stage" style="min-height:150px";>
-        <canvas id="horseCanvas" width="10" height="10"></canvas>
+        <img id="horseCanvas" hidden style="  max-width: 100%; height: auto; display: block; "/>
       </div>
-      <div id="horseStatus" class="horse-status" hidden></div>
-      <div id="horseDims" class="horse-dims"></div>
     </div>
+	
                 <div class="helix-nav" style="padding:16px; border-bottom:1px solid #2d3a46;">
                     <h3>📑 GO TO HELIX (0–19)</h3>
                     <div class="helix-buttons" id="helixNavButtons"></div>
@@ -192,6 +191,6 @@
          and de-duplicated. Edit js/simpr-main.js, then regenerate with:
              npx terser js/simpr-main.js -c -m -o js/simpr-main-min.js -->
     <script src="./js/simpr-main-min.js"></script>
-	<script src="./js/horse-render.js"></script>
+	
 </body>
 </html>
