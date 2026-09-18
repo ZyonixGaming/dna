@@ -733,7 +733,11 @@
 
     function refreshEditorContent(preserveCursor = true) {
       const { text, offset } = getTextAndCursor(editor);
-      const cleaned = text.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+		const cleaned = text
+		  .toUpperCase()
+		  .replace(/[^ACGT0-9:\n]+/g, '\n')
+		  .replace(/\n{2,}/g, '\n')
+		  .replace(/^\n+|\n+$/g, '');
       editor.innerHTML = colorizeDNA(cleaned);
       if (preserveCursor) setCursor(editor, Math.min(offset, cleaned.length));
       updatePlaceholder();
@@ -767,7 +771,7 @@
         hideError();
         return;
       }
-      const lines = plainText.split(/\r?\n/).filter(l => l.trim() !== '');
+      const lines = plainText.split(/[^a-zA-Z0-9:]+/).filter(l => l.trim() !== '');
       try {
         const encoded = encodeSequences(lines);
         const fullUrl = `${window.location.href.split('?')[0]}?dna=${encoded}`;
@@ -1207,7 +1211,11 @@
       if (!sel.rangeCount) return;
       const range = sel.getRangeAt(0);
       range.deleteContents();
-      const cleaned = pastedText.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+		const cleaned = pastedText
+		  .toUpperCase()
+		  .replace(/[^ACGT0-9:]+/g, '\n')   // any separator (space, tab, comma, |…) → newline
+		  .replace(/\n{2,}/g, '\n')          // collapse blank lines
+		  .replace(/^\n+|\n+$/g, '');        // trim leading/trailing newlines
       const textNode = document.createTextNode(cleaned);
       range.insertNode(textNode);
       range.setStartAfter(textNode);
@@ -1244,7 +1252,12 @@
     pasteTextBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
-        const cleaned = text.toUpperCase().replace(/[^ACGT0-9:\n]/g, '');
+			const cleaned = text
+			  .toUpperCase()
+			  .replace(/[^ACGT0-9:]+/g, '\n')
+			  .replace(/\n{2,}/g, '\n')
+			  .replace(/^\n+|\n+$/g, '');
+
         editor.innerHTML = colorizeDNA(cleaned);
         const range = document.createRange();
         range.selectNodeContents(editor);
