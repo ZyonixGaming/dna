@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visual Genome Editor</title>
+<style>
+:root{
+  --bg:#1a1a1c; --panel:#242428; --panel2:#2a2a2e; --panel3:#303034;
+  --border:#3a3a3e; --text:#e0e0e2; --dim:#909096;
+  --accent:#6ea8fe; --accent2:#3d6fb8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
+header{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-weight:600;display:flex;align-items:center;gap:12px}
+header .spacer{flex:1}
+header button{font-size:12px;padding:4px 10px}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 520px;min-height:0}
+.editor-panel{overflow-y:auto;padding-bottom:120px}
+.side-panel{background:var(--panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.preview-wrap{padding:12px;background:#a522b4;text-align:center;border-bottom:1px solid var(--border);min-height:180px}
+.preview-wrap canvas{max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+.dims{font-size:11px;color:var(--dim);padding:4px 12px}
+.tags-panel{padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;line-height:1.6;color:var(--dim);max-height:130px;overflow-y:auto}
+.tags-panel .tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;margin:1px 2px}
+details.section{border-bottom:1px solid var(--border)}
+details.section>summary{padding:8px 16px;cursor:pointer;user-select:none;font-weight:600;background:var(--panel2);list-style:none;display:flex;align-items:center;gap:8px}
+details.section>summary::-webkit-details-marker{display:none}
+details.section>summary::before{content:"▸";color:var(--dim);display:inline-block;transition:transform .12s}
+details.section[open]>summary::before{transform:rotate(90deg)}
+details.section>summary:hover{background:var(--panel3)}
+.section-rnd{margin-left:auto;font-size:10px;padding:2px 8px;flex-shrink:0;background:var(--panel);border:1px solid var(--border);color:var(--dim);border-radius:3px}
+.section-rnd:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+details.section>summary>span{flex:1;margin-left:8px}
+.controls{padding:6px 0 10px}
+.control{display:grid;grid-template-columns:160px 1fr 56px;gap:8px;padding:3px 16px;align-items:center}
+.control-label{color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.control-label.combined{color:var(--accent)}
+.control-value{font-size:11px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text)}
+.control-input{display:flex;align-items:center;gap:6px}
+.control-input input[type=range]{flex:1;width:100%;accent-color:var(--accent)}
+.control-input input[type=checkbox]{accent-color:var(--accent)}
+.control-input select{flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font:inherit;font-size:12px}
+.control-hint{font-size:10px;color:var(--dim);grid-column:2 / span 2;padding:0 0 2px;font-style:italic}
+.badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:var(--accent2);color:#fff;margin-left:6px;vertical-align:middle;letter-spacing:.5px}
+/* Advanced section */
+.advanced-section{margin:8px 16px 4px;border:1px solid var(--border);border-radius:4px;background:var(--panel)}
+.advanced-section>summary{padding:6px 12px;cursor:pointer;user-select:none;font-size:11px;color:var(--dim);list-style:none;display:flex;align-items:center;gap:6px}
+.advanced-section>summary::-webkit-details-marker{display:none}
+.advanced-section>summary::before{content:"▸";display:inline-block;transition:transform .12s;font-size:10px}
+.advanced-section[open]>summary::before{transform:rotate(90deg)}
+.advanced-section>summary:hover{color:var(--text)}
+.advanced-controls{padding:4px 0}
+.advanced-controls .control{opacity:0.85}
+/* Color dropdown with swatch */
+.color-select-wrap{display:flex;align-items:center;gap:6px;flex:1}
+.color-select-wrap select{flex:1}
+.color-swatch{width:14px;height:14px;border-radius:2px;border:1px solid var(--border);flex-shrink:0}
+/* Control group (collapsible) */
+.control-group{margin:8px 12px 4px;border:1px solid var(--border);border-radius:4px;background:var(--panel2)}
+.control-group-header{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;user-select:none;list-style:none}
+.control-group-header::-webkit-details-marker{display:none}
+.control-group-header::before{content:"▸";display:inline-block;transition:transform .12s;font-size:10px;color:var(--dim)}
+.control-group[open]>.control-group-header::before{transform:rotate(90deg)}
+.control-group[open]>.control-group-header{border-bottom:1px solid var(--border)}
+.control-group-label{flex:1}
+.group-swatch{width:20px;height:20px;border-radius:3px}
+.control-group-children{padding:4px 0}
+.control-group-children .control{padding:3px 12px}
+/* Search input */
+.search-input{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 8px;width:140px;font-size:12px}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.control.hidden,.control-group.hidden{display:none}
+.section.no-matches>.controls{display:none}
+.section.no-matches>summary::after{content:' (no matches)';color:var(--dim);font-weight:400}
+/* Export button */
+.export-wrap{padding:4px 12px;text-align:center}
+/* Tooltip */
+.gene-tooltip{position:fixed;z-index:1000;background:var(--panel3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:11px;line-height:1.4;max-width:280px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.gene-tooltip .gene-name{font-weight:600;color:var(--accent)}
+.gene-tooltip .gene-values{font-family:monospace;color:var(--dim)}
+/* Color picker */
+.color-picker-wrap{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.color-palette{display:flex;flex-wrap:wrap;gap:2px;max-width:200px}
+.palette-swatch{width:18px;height:18px;border:1px solid var(--border);border-radius:2px;cursor:pointer;padding:0}
+.palette-swatch:hover{border-color:var(--accent);transform:scale(1.15)}
+.color-any{width:28px;height:28px;padding:0;border:1px solid var(--border);cursor:pointer}
+.current-color{width:24px;height:24px;border-radius:3px}
+textarea{width:100%;background:#101014;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:8px;font:11px/1.5 ui-monospace,Consolas,monospace;resize:vertical;min-height:200px}
+button{background:var(--accent2);color:#fff;border:0;border-radius:3px;padding:5px 12px;cursor:pointer;font:inherit;font-size:12px}
+button:hover{background:var(--accent)}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+button.ghost:hover{background:var(--panel3)}
+.raw-wrap{padding:12px}
+.raw-wrap .row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.status{font-size:11px;color:var(--dim);flex:1}
+.status.error{color:#ff6b6b}
+.section-controls>details>summary{font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <span>🐴 Visual Genome Editor</span>
+    <input type="text" id="searchInput" placeholder="Filter genes..." class="search-input">
+    <span class="spacer"></span>
+    <button id="btnExpandAll" class="ghost">Expand All</button>
+    <button id="btnCollapseAll" class="ghost">Collapse All</button>
+    <button id="btnRandomize" class="ghost">Randomize</button>
+    <button id="btnReset" class="ghost">Reset</button>
+    <button id="btnCopy">Copy DNA</button>
+    <button id="btnPaste" class="ghost">Paste DNA</button>
+  </header>
+  <main>
+    <div class="editor-panel" id="editorPanel"></div>
+    <aside class="side-panel">
+      <div class="preview-wrap">
+        <canvas id="preview"></canvas>
+      </div>
+      <div class="dims" id="dims"></div>
+      <div class="export-wrap"><button id="btnExport">Export PNG</button></div>
+      <div class="tags-panel" id="tagsPanel"></div>
+      <details class="section" open>
+        <summary>Raw Genome</summary>
+        <div class="raw-wrap">
+          <textarea id="rawGenome" spellcheck="false"></textarea>
+          <div class="row">
+            <button id="btnApplyRaw">Apply</button>
+            <span class="status" id="rawStatus"></span>
+          </div>
+        </div>
+      </details>
+    </aside>
+  </main>
+</div>
+
+<script src="horse-render.js"></script>
+<script src="editor-core.js"></script>
+<script src="editor-specs.js"></script>
+<script src="editor-app.js"></script>
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('zyonixgaming', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Support me',
+    'floating-chat.donateButton.background-color': '#00b9fe',
+    'floating-chat.donateButton.text-color': '#fff'
+  });
+</script>
+</body>
+</html>
