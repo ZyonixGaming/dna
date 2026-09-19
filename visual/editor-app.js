@@ -11,6 +11,8 @@
   var gt = null, ph = null, colors = null, parts = null, hash = 0;
   var updating = false;
   var controlRefs = Object.create(null); // id → { el, spec, input, valueEl, swatch? }
+  var previewZoom = 4;
+  var previewBg = null;
 
   // ---- tooltip element ----
   var tooltipEl = document.createElement('div');
@@ -48,10 +50,10 @@
     if (!parts || !canvas) return;
     try {
       var info = root.Render.render(canvas, parts, ph, colors, hash, {
-        zoom: 4, background: null
+        zoom: previewZoom, background: previewBg
       });
       if (dimsEl) dimsEl.textContent = info.width + '×' + info.height +
-        ' @1×  ·  shown 4×  ·  ' + parts.length + ' parts';
+        ' @1×  ·  shown ' + previewZoom + '×  ·  ' + parts.length + ' parts';
     } catch (e) {
       console.error(e);
     }
@@ -326,6 +328,29 @@
       swatch.className = 'color-swatch current-color';
       row.appendChild(swatch);
 
+    } else if (spec.type === 'skinPicker') {
+      var skinWrap = document.createElement('div');
+      skinWrap.className = 'skin-picker-wrap';
+      var skinPal = spec.palette || [];
+      for (var sp = 0; sp < skinPal.length; sp++) {
+        (function(idx) {
+          var sw = document.createElement('button');
+          sw.type = 'button';
+          sw.className = 'skin-swatch';
+          sw.style.backgroundColor = skinPal[idx];
+          sw.title = 'HUE=' + (idx % 4) + ' HUE2=' + Math.floor(idx / 4);
+          sw.addEventListener('click', function () {
+            if (updating) return;
+            applyControl(spec.id, idx);
+          });
+          skinWrap.appendChild(sw);
+        })(sp);
+      }
+      inputWrap.appendChild(skinWrap);
+      swatch = document.createElement('span');
+      swatch.className = 'color-swatch current-color';
+      row.appendChild(swatch);
+
     } else if (spec.type === 'group') {
       // Group is handled separately by buildGroup, return null
       return null;
@@ -566,7 +591,6 @@
         }
 
       } else if (spec.type === 'colorPicker') {
-        // Update HTML color input and current swatch
         var hexVal = v || '#888888';
         if (ref.input) ref.input.value = hexVal;
         if (ref.swatch) {
@@ -574,6 +598,20 @@
           ref.swatch.style.display = 'inline-block';
         }
         if (ref.valueEl) ref.valueEl.textContent = hexVal;
+
+      } else if (spec.type === 'skinPicker') {
+        var skinHex = v || '#888888';
+        if (ref.swatch) {
+          ref.swatch.style.backgroundColor = skinHex;
+          ref.swatch.style.display = 'inline-block';
+        }
+        if (ref.valueEl) ref.valueEl.textContent = skinHex;
+        // Highlight active swatch in grid
+        var skinSwatches = ref.el.querySelectorAll('.skin-swatch');
+        for (var ss = 0; ss < skinSwatches.length; ss++) {
+          skinSwatches[ss].classList.toggle('skin-active', skinSwatches[ss].style.backgroundColor === skinHex ||
+            skinSwatches[ss].style.backgroundColor === hexToRgb(skinHex));
+        }
       }
 
       // Handle group swatch sync
@@ -586,8 +624,42 @@
           ref.swatch.style.display = 'none';
         }
       }
+
+      // Precondition dimming
+      if (spec.disabledWhen) {
+        var reason = spec.disabledWhen(ctx);
+        ref.el.classList.toggle('control-disabled', !!reason);
+        ref.el.setAttribute('data-reason', reason || '');
+      }
+
+      // Allele annotation badge
+      if (spec.annotation) {
+        var note = spec.annotation(ctx);
+        var badge = ref.el.querySelector('.annotation-badge');
+        if (note) {
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'annotation-badge';
+            var lbl = ref.el.querySelector('.control-label');
+            if (lbl) lbl.appendChild(badge);
+          }
+          badge.textContent = note;
+          badge.style.display = '';
+        } else if (badge) {
+          badge.style.display = 'none';
+        }
+      }
     }
     updating = false;
+  }
+
+  // Helper for matching CSS rgb() to hex
+  function hexToRgb(hex) {
+    if (!hex || hex.charAt(0) !== '#') return '';
+    var r = parseInt(hex.slice(1,3),16);
+    var g = parseInt(hex.slice(3,5),16);
+    var b = parseInt(hex.slice(5,7),16);
+    return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }
 
   // ---- applying edits ----
@@ -698,6 +770,30 @@
     var searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.addEventListener('input', function () {
       filterControls(this.value);
+    });
+
+    // Background color buttons
+    var bgBtns = document.querySelectorAll('.bg-btn');
+    bgBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        previewBg = btn.getAttribute('data-bg') || null;
+        var wrap = document.querySelector('.preview-wrap');
+        if (wrap) wrap.style.background = previewBg || '#a522b4';
+        bgBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        renderPreview();
+      });
+    });
+
+    // Zoom buttons
+    var zoomBtns = document.querySelectorAll('.zoom-btn');
+    zoomBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        previewZoom = parseInt(btn.getAttribute('data-zoom'));
+        zoomBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        renderPreview();
+      });
     });
   }
 

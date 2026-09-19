@@ -383,6 +383,32 @@
     };
   }
 
+  // ---------- SKIN color grid (16 entries, SKIN_HUE2 * 4 + SKIN_HUE) ----------
+  var SKIN_COLORS = [
+    '#ffa799','#d6cbbc','#d6a660','#ffc768',
+    '#d67c6d','#8a8a8a','#d8db30','#ffaf40',
+    '#8f3636','#47310f','#b0a207','#7a3f00',
+    '#2c1852','#95c9bc','#ffffff','#82d7ff'
+  ];
+
+  function skinPicker(id, label) {
+    return {
+      id: 'sp-' + id,
+      label: label,
+      type: 'skinPicker',
+      palette: SKIN_COLORS,
+      read: function (ctx) {
+        return ctx.colors && ctx.colors.hex ? ctx.colors.hex.SKIN : '#888888';
+      },
+      write: function (ctx, idx) {
+        var hue = idx % 4;
+        var hue2 = Math.floor(idx / 4);
+        C.writeGenePair(ctx.lines, 'SKIN_HUE', hue, hue);
+        C.writeGenePair(ctx.lines, 'SKIN_HUE2', hue2, hue2);
+      }
+    };
+  }
+
   // ---------- controls ----------
 
   var CONTROLS = {};
@@ -859,6 +885,7 @@
     // Color pickers with reverse mapping
     colorPicker('base', 'Pick Base Color', 'BASE', BASE_COLOR_TABLE),
     colorPicker('alt', 'Pick Alt Color', 'ALT', ALT_COLOR_TABLE),
+    skinPicker('skin', 'Pick Skin Color'),
 
     // Base color group — these genes combine to determine the coat BASE color
     group('baseColor', 'Base Color (genes)', [
@@ -1073,10 +1100,96 @@
     return null;
   }
 
+  // ---------- preconditions (gene -> reason when inactive) ----------
+  var noMouth = function(ctx) { return !ctx.ph.hasMouth ? 'Requires Has Mouth' : null; };
+  var noAntlers = function(ctx) { return ctx.gt.i('HAS_ANTLERS') === 0 ? 'Requires Has Antlers' : null; };
+  var noLegs = function(ctx) { return ctx.gt.i('LEG_TYPE') === 0 ? 'No legs' : null; };
+  var noArms = function(ctx) { return ctx.gt.i('ARM_TYPE') === 0 ? 'No arms' : null; };
+  var uparmBlocked = function(ctx) {
+    return ctx.ph.tailExists > 0 && !ctx.ph.tailBottom &&
+      ctx.ph.posture !== 'biped' && ctx.ph.posture !== 'centaur'
+      ? 'Blocked by tail position' : null;
+  };
+
+  var PRECONDITIONS = {
+    PAT_SPOT: function(ctx) { return ctx.gt.f('PAT_STRIPE') === 0 ? 'Requires Stripe > 0' : null; },
+    FOOT_IS_CIRCLE: function(ctx) { return ctx.gt.i('LEG_IS_CIRCLE') !== 1 ? 'Requires Circle Legs' : null; },
+    AGOUTI: function(ctx) { return ctx.gt.i('BASE_BLACK') !== 1 ? 'Requires Base Black' : null; },
+    MOUTH_Y: noMouth, MOUTH_SIZE: noMouth, JAW: noMouth,
+    TEETH_SHAPE: noMouth, TONGUE: noMouth, TONGUE_SEGS: noMouth,
+    TEETH_UPPER: noMouth, TEETH_UPPER2: noMouth,
+    RACCOON_EYE: function(ctx) { return ctx.gt.i('SKIN_HEAD') >= 1 ? 'Overridden by Skin Head' : null; },
+    HAS_KNEE: noLegs, KNEE_MIN: noLegs, KNEE_MAX: noLegs,
+    HAS_ELBOW: noArms, ELBOW_RANGE: noArms,
+    NECK_ONTOP: function(ctx) { return ctx.ph.posture === 'centaur' ? 'Skipped for centaur' : null; },
+    NECK_SLOUCH: function(ctx) { return ctx.ph.posture === 'centaur' ? 'Skipped for centaur' : null; },
+    TAIL_BOTTOM: function(ctx) {
+      var p = ctx.ph.posture;
+      return p !== 'quadruped' && p !== 'centaur' ? 'Quadruped only' : null;
+    },
+    UPARM_Y: uparmBlocked, UPARM_ANGLE: uparmBlocked, UPARM_GOOFY: uparmBlocked, UPARM_TAG: uparmBlocked,
+    ANTLER_X: noAntlers, ANTLER_W: noAntlers, ANTLER_H: noAntlers,
+    ANTLER_TAPER: noAntlers, ANTLER_POM: noAntlers, ANTLER_REC: noAntlers,
+    ANTLER_REC2: noAntlers, ANTLER_FLIP: noAntlers, ANTLER_MOD: noAntlers,
+    ANTLER_SCALEH: noAntlers, ANTLER_SCALEW: noAntlers,
+    ANTLER_ANGLE: noAntlers, ANTLER_ANGLE2: noAntlers, ANTLER_ANGLE_RAND: noAntlers,
+    ANTLER_COLOR: noAntlers, POM_COLOR: noAntlers, POM_USECOLOR: noAntlers,
+    ANTLER_T1: noAntlers, ANTLER_T2: noAntlers,
+    HAT_EXISTS: noAntlers, HAT_SIZE: noAntlers, HAT_RAKE: noAntlers,
+    HAT_ASPECT: noAntlers, HAT_TAPER: noAntlers, HAT_POM: noAntlers,
+    HAT_POM_IS_LID: noAntlers, HAT_CLONE: noAntlers,
+    HAT_BACK_SCALE: noAntlers, HAT_FRONT_SCALE: noAntlers,
+    HAT_BACK_ANGLE: noAntlers, HAT_FRONT_ANGLE: noAntlers,
+    HAT_ANGLE_RAND: noAntlers, HAT_FLIP: noAntlers, HAT_T: noAntlers
+  };
+
+  // ---------- allele-driven annotations ----------
+  var ANNOTATIONS = {
+    CHEST_SMALL: function(ctx) {
+      return ctx.gt.hasAllele('CHEST_SMALL', 3) ? 'Sloped Chest' : null;
+    },
+    OSTO_SIZE: function(ctx) {
+      var p = ctx.gt.pair('OSTO_SIZE');
+      var notes = [];
+      if (p[1] === 3) notes.push('Rounded');
+      if (p[0] === 3) notes.push('Forces Ostoderm=2');
+      return notes.length ? notes.join(', ') : null;
+    },
+    LEG_IN2: function(ctx) {
+      return ctx.gt.pair('LEG_IN2')[0] === 3 ? 'Bug: back leg +0.2' : null;
+    },
+    LEG_IS_CIRCLE: function(ctx) {
+      if (ctx.gt.i('LEG_IS_CIRCLE') !== 1) return null;
+      return !ctx.ph.legHasFoot || !ctx.ph.footIsCircle ? 'Wheel mode' : 'Foot circle mode';
+    },
+    BASE_BLACK: function(ctx) {
+      if (ctx.gt.i('BASE_BLACK') !== 1) return null;
+      return ctx.gt.i('AGOUTI') === 1 ? 'Bay (with Agouti)' : 'Full black points';
+    },
+    WHITE: function(ctx) {
+      if (ctx.gt.i('WHITE') !== 1) return null;
+      return ctx.gt.i('WHITE_IS_LETHAL') === 1 ? 'White + Lethal' : 'White coat';
+    }
+  };
+
+  // ---------- apply preconditions & annotations to all controls ----------
+  function applyMeta(specs) {
+    for (var i = 0; i < specs.length; i++) {
+      var s = specs[i];
+      if (s.gene) {
+        if (PRECONDITIONS[s.gene]) s.disabledWhen = PRECONDITIONS[s.gene];
+        if (ANNOTATIONS[s.gene]) s.annotation = ANNOTATIONS[s.gene];
+      }
+      if (s.children) applyMeta(s.children);
+    }
+  }
+  Object.keys(CONTROLS).forEach(function(key) { applyMeta(CONTROLS[key]); });
+
   root.EditorSpecs = {
     CONTROLS: CONTROLS,
     SECTIONS: SECTIONS,
     PALETTE: PALETTE,
+    SKIN_COLORS: SKIN_COLORS,
     findSpec: findSpec,
     autoSlider: autoSlider,
     toggle: toggle,

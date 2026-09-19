@@ -75,7 +75,7 @@ details.section>summary>span{flex:1;margin-left:8px}
 .section.no-matches>.controls{display:none}
 .section.no-matches>summary::after{content:' (no matches)';color:var(--dim);font-weight:400}
 /* Export button */
-.export-wrap{padding:4px 12px;text-align:center}
+.export-wrap{padding:0;text-align:center}
 /* Tooltip */
 .gene-tooltip{position:fixed;z-index:1000;background:var(--panel3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:11px;line-height:1.4;max-width:280px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
 .gene-tooltip .gene-name{font-weight:600;color:var(--accent)}
@@ -87,6 +87,26 @@ details.section>summary>span{flex:1;margin-left:8px}
 .palette-swatch:hover{border-color:var(--accent);transform:scale(1.15)}
 .color-any{width:28px;height:28px;padding:0;border:1px solid var(--border);cursor:pointer}
 .current-color{width:24px;height:24px;border-radius:3px}
+/* Skin picker */
+.skin-picker-wrap{display:grid;grid-template-columns:repeat(4,20px);gap:2px}
+.skin-swatch{width:20px;height:20px;border:1px solid var(--border);border-radius:2px;cursor:pointer;padding:0}
+.skin-swatch:hover{border-color:var(--accent);transform:scale(1.15)}
+.skin-swatch.skin-active{border:2px solid #fff;box-shadow:0 0 4px var(--accent)}
+/* Preview toolbar */
+.preview-toolbar{display:flex;align-items:center;gap:6px;padding:4px 12px;font-size:11px;color:var(--dim);flex-wrap:wrap}
+.preview-toolbar label{font-size:10px;color:var(--dim)}
+.preview-toolbar .export-wrap{padding:0}
+.toolbar-sep{width:1px;height:16px;background:var(--border);margin:0 2px}
+.bg-btn{width:20px;height:20px;border:2px solid var(--border);border-radius:2px;padding:0;cursor:pointer;font-size:8px;color:var(--dim);line-height:20px;text-align:center}
+.bg-btn:hover,.bg-btn.active{border-color:var(--accent)}
+.zoom-btn{font-size:10px;padding:1px 6px;background:var(--panel2);border:1px solid var(--border);color:var(--dim);border-radius:2px;cursor:pointer}
+.zoom-btn:hover,.zoom-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+/* Precondition dimming */
+.control-disabled{opacity:0.3;position:relative}
+.control-disabled .control-input{pointer-events:none}
+.control-disabled[data-reason]::after{content:attr(data-reason);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--dim);font-style:italic;pointer-events:none}
+/* Allele annotations */
+.annotation-badge{font-size:9px;padding:1px 5px;border-radius:3px;background:#4a3520;color:#f0c070;margin-left:4px;font-weight:400;white-space:nowrap}
 textarea{width:100%;background:#101014;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:8px;font:11px/1.5 ui-monospace,Consolas,monospace;resize:vertical;min-height:200px}
 button{background:var(--accent2);color:#fff;border:0;border-radius:3px;padding:5px 12px;cursor:pointer;font:inherit;font-size:12px}
 button:hover{background:var(--accent)}
@@ -119,7 +139,22 @@ button.ghost:hover{background:var(--panel3)}
         <canvas id="preview"></canvas>
       </div>
       <div class="dims" id="dims"></div>
-      <div class="export-wrap"><button id="btnExport">Export PNG</button></div>
+      <div class="preview-toolbar">
+        <div class="export-wrap"><button id="btnExport">Export PNG</button></div>
+        <span class="toolbar-sep"></span>
+        <label>BG:</label>
+        <button class="bg-btn" data-bg="" title="Transparent" style="background:repeating-conic-gradient(#666 0% 25%,#999 0% 50%) 50%/8px 8px">T</button>
+        <button class="bg-btn active" data-bg="#a522b4" title="Purple" style="background:#a522b4"></button>
+        <button class="bg-btn" data-bg="#82d7ff" title="Game blue" style="background:#82d7ff"></button>
+        <button class="bg-btn" data-bg="#ffffff" title="White" style="background:#fff"></button>
+        <button class="bg-btn" data-bg="#1a1a1c" title="Dark" style="background:#1a1a1c"></button>
+        <span class="toolbar-sep"></span>
+        <label>Zoom:</label>
+        <button class="zoom-btn" data-zoom="2">2x</button>
+        <button class="zoom-btn active" data-zoom="4">4x</button>
+        <button class="zoom-btn" data-zoom="6">6x</button>
+        <button class="zoom-btn" data-zoom="8">8x</button>
+      </div>
       <div class="tags-panel" id="tagsPanel"></div>
       <details class="section" open>
         <summary>Raw Genome</summary>
