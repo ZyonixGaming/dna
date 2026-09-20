@@ -425,10 +425,14 @@
       ],
       read: function (ctx) { return ctx.ph.posture; },
       write: function (ctx, v) {
-        var biped = (v === 'biped'    || v === 'centaur') ? 1 : 0;
-        var quad  = (v === 'quadruped'|| v === 'centaur') ? 1 : 0;
-        C.writeGenePair(ctx.lines, 'BIPED', biped, biped);
-        C.writeGenePair(ctx.lines, 'QUADRUPED', quad, quad);
+        // BIPED: g=[0,1,0,1] → allele 0/2 gives 0, allele 1/3 gives 1
+        // QUADRUPED: g=[1,0,1,0] → allele 0/2 gives 1, allele 1/3 gives 0
+        var wantBiped = (v === 'biped' || v === 'centaur') ? 1 : 0;
+        var wantQuad  = (v === 'quadruped' || v === 'centaur') ? 1 : 0;
+        var bipedAllele = wantBiped === 1 ? 1 : 0;  // 1→allele1, 0→allele0
+        var quadAllele  = wantQuad === 1 ? 0 : 1;   // 1→allele0, 0→allele1
+        C.writeGenePair(ctx.lines, 'BIPED', bipedAllele, bipedAllele);
+        C.writeGenePair(ctx.lines, 'QUADRUPED', quadAllele, quadAllele);
       }
     },
 
