@@ -335,6 +335,7 @@
 
   // Group wrapper: visually groups related controls with a header and swatch
   // children is an array of control specs that belong to the group
+
   function group(id, label, children, opts) {
     opts = opts || {};
     return {
@@ -413,8 +414,10 @@
 
   var CONTROLS = {};
 
-  // ==== POSTURE ====
-  CONTROLS.posture = [
+
+
+  // ==== BODY ====
+  CONTROLS.body = [
     {
       id: 'posture', label: 'Posture', type: 'dropdown',
       options: [
@@ -423,7 +426,7 @@
         { label: 'Centaur',   value: 'centaur' },
         { label: 'Quadruped', value: 'quadruped' }
       ],
-      read: function (ctx) { return ctx.ph.posture; },
+      read: function (ctx) {return ctx.ph.posture; },
       write: function (ctx, v) {
         // BIPED: g=[0,1,0,1] → allele 0/2 gives 0, allele 1/3 gives 1
         // QUADRUPED: g=[1,0,1,0] → allele 0/2 gives 1, allele 1/3 gives 0
@@ -434,72 +437,7 @@
         C.writeGenePair(ctx.lines, 'BIPED', bipedAllele, bipedAllele);
         C.writeGenePair(ctx.lines, 'QUADRUPED', quadAllele, quadAllele);
       }
-    },
-
-    // Leg/arm angles (moved from legs/arms)
-    autoSlider('SPLAY', 'Splay'),
-    autoSlider('ARM_FORWARD', 'Arm Forward'),
-    enumGene('LEG_THRUST_BACK', 'Thrust Back', ['None', 'Back', 'None', 'Extreme']),
-
-    // Tail position (moved from tail)
-    autoSlider('TAIL_ANGLE', 'Tail Angle'),
-    toggle('TAIL_BOTTOM', 'Tail Bottom'),
-
-    // Neck angle (moved from neck)
-    combined('neckAngle', 'Neck Angle',
-      { min: 0, max: 120, step: 1,
-        hint: 'NECK_ANGLE + NECK_COCK',
-        autoRange: function () {
-          var naR = getRange('NECK_ANGLE'), ncR = getRange('NECK_COCK');
-          return [naR[0] + ncR[0], naR[1] + ncR[1]];
-        },
-        target:  function (ctx) { return ctx.ph.neckAngle; },
-        resolve: function (ctx, target) {
-          var naR = getRange('NECK_ANGLE');
-          var needed = target - ctx.gt.f('NECK_COCK');
-          if (needed >= naR[0] && needed <= naR[1]) {
-            return { gene: 'NECK_ANGLE', value: needed };
-          }
-          var clamped = Math.max(naR[0], Math.min(naR[1], needed));
-          return [
-            { gene: 'NECK_ANGLE', value: clamped },
-            { gene: 'NECK_COCK', value: target - clamped }
-          ];
-        }
-      }),
-    autoSlider('NECK_SLOUCH', 'Neck Slouch'),
-    autoSlider('NECK_ONTOP', 'Neck on Top'),
-
-    // Upper arm positioning (moved from arms)
-    autoSlider('UPARM_Y', 'Up-Arm Y'),
-    autoSlider('UPARM_ANGLE', 'Up-Arm Angle'),
-    enumGene('UPARM_GOOFY', 'Up-Arm Goofy', ['Both', 'Both (offset)', 'Back only', 'Front only']),
-
-    // Part tags — what spawns in each socket
-    enumGene('LEG_TAG', 'Leg Part Tag', ['Leg', 'Hand', 'Neck/Head', 'Tail']),
-    enumGene('ARM_TAG', 'Arm Part Tag', ['Leg', 'Hand', 'Neck/Head', 'Tail']),
-    enumGene('UPARM_TAG', 'Up-Arm Part Tag', ['None', 'Hand', 'Leg', 'Neck/Head']),
-    enumGene('TAIL_TAG', 'Tail Part Tag', ['Tail', 'Neck/Head', 'Hand', 'Leg']),
-    enumGene('NECK_TAG', 'Neck Part Tag', ['Neck/Head', 'Tail', 'Leg', 'Hand']),
-
-    // Joint types (advanced) — affect position, not part shape
-    enumGene('LEG_JOINT_TYPE', 'Leg Joint',
-      ['Joint 0', 'Joint 1', 'Joint 2', 'Joint 0'], true),
-    enumGene('ARM_JOINT_TYPE', 'Arm Joint',
-      ['Joint 0', 'Joint 1', 'Joint 2', 'Joint 0'], true),
-    enumGene('NECK_JOINT_TYPE', 'Neck Joint',
-      ['Joint 1', 'Joint 0', 'Joint 2', 'Joint 0'], true),
-    enumGene('TAIL_JOINT_TYPE', 'Tail Joint',
-      ['Joint 0', 'Joint 1', 'Joint 0', 'Joint 0'], true),
-
-    // NECK_COCK, speed genes (advanced)
-    autoSlider('NECK_COCK', 'Neck Cock', true),
-    autoSlider('TAIL_SPEED', 'Tail Speed', true),
-    autoSlider('NECK_SPEED', 'Neck Speed', true)
-  ];
-
-  // ==== BODY ====
-  CONTROLS.body = [
+    },  
     combined('bodyArea', 'Body Area',
       { min: 0.05, max: 8, step: 0.02,
         hint: 'SIZE x 2 x bones x CHEST_BIG x CHEST_SMALL x GIANT_DWARF',
@@ -553,10 +491,11 @@
     autoSlider('GUT', 'Gut'),
     enumGene('GUT_IS_UDDER', 'Gut is Udder', ['No', 'Udder', 'No', 'Arc']),
     autoSlider('DERRIERE', 'Derriere'),
-    enumGene('OSTODERM', 'Osteoderm', ['Spikes', 'None', 'Spikes', 'Big']),
+    enumGene('OSTODERM', 'Spikes', ['Spikes', 'None', 'Spikes', 'Big']),
+    autoSlider('OSTO_SIZE', 'Spike Size'),	
     higherAlleleToggle('OSTO_SIZE', 'Rounded Spikes', 3),
     alleleToggle('CHEST_SMALL', 'Sloped Chest', 3),
-    autoSlider('OSTO_SIZE', 'Osteo Size'),
+
 
     // Advanced sub-components
     autoSlider('SIZE', 'Size (raw)', true),
@@ -566,14 +505,74 @@
     autoSlider('BONES2', 'Bones 2', true),
     autoSlider('CHEST_BIG', 'Chest Big', true),
     autoSlider('CHEST_SMALL', 'Chest Small', true),
-    autoSlider('GIANT_DWARF', 'Giant / Dwarf', true),
-    autoSlider('MUSCLE_USE', 'Muscle Use', true)
+    autoSlider('GIANT_DWARF', 'Giant / Dwarf', true)
   ];
+  // ==== LEG_JOINT ====
+  CONTROLS.leg_joint = [
+    enumGene('LEG_TAG', 'Part', ['Leg', 'Hand', 'Neck/Head', 'Tail']),
+    enumGene('LEG_JOINT_TYPE', 'Joint Type',['Normal', 'Rotate', 'Piston', 'Normal']),
+    enumGene('LEG_COUNT', 'Leg Count', ['1', '1', '2', '7']),	
+    autoSlider('SPLAY', 'Splay'),	
+	enumGene('LEG_THRUST_BACK', 'Thrust Back', ['None', 'Back', 'None', 'Extreme']),
+    autoSlider('LEG_IN', 'Leg In'),
+    autoSlider('LEG_IN2', 'Leg In 2'),
 
+    autoSlider('LEG_FLEXIBILITY', 'Leg Flexibility', true),
+    autoSlider('LEG_FLEX_BIAS', 'Leg Flex Bias', true)	
+  ];
+  
   // ==== LEGS ====
   CONTROLS.legs = [
+  
     enumGene('LEG_TYPE', 'Leg Type', ['Normal', 'Stub', 'None', 'Normal']),
-    enumGene('LEG_COUNT', 'Leg Count', ['1', '1', '2', '7']),
+    {
+      id: 'wheel_feet', label: 'Wheel/Feet Type', type: 'dropdown',
+      options: [
+        { label: 'Wheel',    value: 'wheel' },
+		{ label: 'Wheel with Foot',    value: 'wheelfoot' },
+        { label: 'Leg with Wheel',  value: 'legwheel' },
+        { label: 'Leg with Foot',   value: 'legfoot' },
+        { label: 'Leg Only', value: 'leg' }
+      ],
+      read: function (ctx) {
+		  var hasFoot=0;
+		  if(ctx.gt.i('HAS_FOOT')&&ctx.gt.i('LEG_HAS_FOOT')){
+			  hasFoot=1;
+		  }
+		  if(ctx.gt.i('LEG_IS_CIRCLE')){
+			  if(hasFoot){
+				  if(ctx.gt.i('FOOT_IS_CIRCLE')){
+					  return 'legwheel';
+				  }else{
+					  return 'wheelfoot';
+				  }				 
+				  
+			  }else{
+				  return 'wheel';
+			  }
+		  }else{
+			 if(hasFoot){
+				return 'legfoot';
+			 }else{
+				 return 'leg';
+			 }
+			  
+		  }
+		  //return ctx.ph.posture; 
+		  
+	  },
+      write: function (ctx, v) {
+        var legCircle = (v === 'wheel' || v === 'wheelfoot' || v === 'legwheel') ? 1 : 0;
+		var foorCirlce = (v === 'legwheel') ? 1 : 0;
+		var hasFoot = (v === 'wheelfoot' || v === 'legwheel' || v === 'legfoot') ? 1 : 0;
+        
+        var wantFoot = hasFoot === 1 ? 0 : 3;  // 1→allele1, 0→allele0
+		C.writeGenePair(ctx.lines, 'LEG_IS_CIRCLE', legCircle,legCircle);
+		C.writeGenePair(ctx.lines, 'FOOT_IS_CIRCLE', foorCirlce,foorCirlce);
+        C.writeGenePair(ctx.lines, 'LEG_HAS_FOOT', wantFoot, wantFoot);
+        C.writeGenePair(ctx.lines, 'HAS_FOOT', wantFoot, wantFoot);
+      }
+    }, 	
     combined('legLength', 'Leg Length',
       { min: 0.2, max: 2.5, step: 0.01,
         hint: 'LEG_LENGTH x (LEG_STRETCH + LEG_STRETCH2 + 1)',
@@ -609,22 +608,44 @@
       }),
     autoSlider('LEG_STRENGTH', 'Leg Thickness'),
     autoSlider('LEG_SKEW', 'Skew'),
-    toggle('LEG_IS_CIRCLE', 'Circle Legs'),
-    toggle('LEG_HAS_FOOT', 'Has Feet'),
-    toggle('HAS_KNEE', 'Has Knees'),
-    autoSlider('KNEE_MIN', 'Knee Min'),
-    autoSlider('KNEE_MAX', 'Knee Max'),
+	toggle('HAS_KNEE', 'Has Knees'),
+
+    autoSlider('FOOT_SIZE', 'Foot Size'),
+    autoSlider('FOOT_CLOWN', 'Clown Foot'),
+    autoSlider('FOOT_THICKNESS', 'Foot Thickness'),
+    autoSlider('FOOT_TOE', 'Foot Toe'),
+
+    toggle('FOOT_IS_HOOF', 'Hoof'),
+    enumGene('FOOT_BACKWARDS', 'Foot Direction', ['Forward', 'Backward', 'Forward', 'Alt']),
 
     // Advanced
+    autoSlider('KNEE_MIN', 'Knee Min', true),
+    autoSlider('KNEE_MAX', 'Knee Max', true),
+	toggle('LEG_HAS_FOOT', 'Leg Has Foot',undefined,undefined,true),
+    toggle('HAS_FOOT', 'Has Foot',undefined,undefined,true),	
+    toggle('LEG_IS_CIRCLE', 'Circle Legs',undefined,undefined, true),
+    toggle('FOOT_IS_CIRCLE', 'Circle Foot',undefined,undefined, true),	
     autoSlider('LEG_LENGTH', 'Leg Length (raw)', true),
     autoSlider('LEG_STRETCH', 'Leg Stretch', true),
     autoSlider('LEG_STRETCH2', 'Leg Stretch 2', true),
-    autoSlider('LEG_PENCIL', 'Pencil', true),
-    autoSlider('LEG_IN', 'Leg In', true),
-    autoSlider('LEG_IN2', 'Leg In 2', true),
-    autoSlider('LEG_FLEXIBILITY', 'Leg Flexibility', true),
-    autoSlider('LEG_FLEX_BIAS', 'Leg Flex Bias', true)
+    autoSlider('LEG_PENCIL', 'Pencil', true)
   ];
+
+  // ==== ARM_JOINT ====
+  CONTROLS.arm_joint = [
+    enumGene('ARM_TAG', 'Arm Socket', ['Leg', 'Hand', 'Neck/Head', 'Tail']),
+	enumGene('UPARM_TAG', 'Upper Arm Socket', ['None', 'Hand', 'Leg', 'Neck/Head']),
+    enumGene('ARM_JOINT_TYPE', 'Arm/Upper Arm Joint', ['Normal', 'Rotate', 'Piston', 'Normal']),
+    autoSlider('ARM_NODE_SCALE', 'Arm Node Scale'),	
+	autoSlider('ARM_FORWARD', 'Arm Forward'),
+	enumGene('UPARM_GOOFY', 'Upper Arm Positions', ['Front and Back', 'Both in Front', 'Back only', 'Front only']),	
+    autoSlider('UPARM_Y', 'Up-Arm Y'),
+    autoSlider('UPARM_ANGLE', 'Up-Arm Angle'),
+    autoSlider('ARM_FLEXIBILITY', 'Arm Flexibility', true),
+    autoSlider('ARM_FLEX_BIAS', 'Arm Flex Bias', true)
+	
+  ];
+
 
   // ==== ARMS ====
   CONTROLS.arms = [
@@ -664,43 +685,43 @@
           return writes;
         }
       }),
+
     autoSlider('ARM_STRENGTH', 'Arm Thickness'),
-    autoSlider('ARM_NODE_SCALE', 'Arm Node Scale'),
+	autoSlider('ARM_SKEW', 'Arm Skew'),  
+	toggle('HAS_ELBOW', 'Has Elbows'),
     toggle('ARM_HAS_HAND', 'Arm Has Hand'),
-    toggle('HAS_HAND', 'Has Hands'),
-    toggle('HAS_ELBOW', 'Has Elbows'),
-    autoSlider('ELBOW_RANGE', 'Elbow Range'),
+    toggle('HAS_HAND', 'Has Hand'),    
     autoSlider('HAND_WIDTH', 'Hand Width'),
     autoSlider('HAND_LENGTH', 'Hand Length'),
     autoSlider('HAND_FINGER', 'Fingers'),
 
     // Advanced
     autoSlider('ARM_LENGTH', 'Arm Length (raw)', true),
-    autoSlider('ARM_SKEW', 'Arm Skew', true),
+    
     autoSlider('ARM_STRETCH', 'Arm Stretch (unused)', true),
-    autoSlider('ARM_STRETCH2', 'Arm Stretch 2 (unused)', true),
-    autoSlider('ARM_FLEXIBILITY', 'Arm Flexibility', true),
-    autoSlider('ARM_FLEX_BIAS', 'Arm Flex Bias', true)
+    autoSlider('ARM_STRETCH2', 'Arm Stretch 2 (unused)', true),	
+
+	autoSlider('ELBOW_RANGE', 'Elbow Range',true)	
   ];
 
-  // ==== FEET ====
-  CONTROLS.feet = [
-    autoSlider('FOOT_SIZE', 'Foot Size'),
-    autoSlider('FOOT_CLOWN', 'Clown Foot'),
-    autoSlider('FOOT_THICKNESS', 'Foot Thickness'),
-    autoSlider('FOOT_TOE', 'Foot Toe'),
-    toggle('FOOT_IS_CIRCLE', 'Circle Foot'),
-    toggle('FOOT_IS_HOOF', 'Hoof'),
-    enumGene('FOOT_BACKWARDS', 'Foot Direction', ['Forward', 'Backward', 'Forward', 'Alt']),
-
-    // Advanced
-    toggle('HAS_FOOT', 'Has Foot (global)', undefined, undefined, true)
+  // ==== TAIL_JOINT ====
+  CONTROLS.tail_joint = [
+    // Tail position (moved from tail)
+    enumGene('TAIL_TAG', 'Tail Socket', ['Tail', 'Neck/Head', 'Hand', 'Leg']),
+    enumGene('TAIL_JOINT_TYPE', 'Tail Joint', ['Normal', 'Rotate', 'Normal', 'Normal']),
+    autoSlider('TAIL_ANGLE', 'Tail Angle'),
+    toggle('TAIL_BOTTOM', 'Tail Bottom'),
+    autoSlider('TAIL_SPEED', 'Tail Speed'),
+    autoSlider('TAIL_FLEXIBILITY', 'Tail Flexibility'),
+    autoSlider('TAIL_STIFF', 'Tail Stiff'),
+	toggle('TAIL_WAG', 'Tail Wag')
+  
   ];
 
   // ==== TAIL ====
   CONTROLS.tail = [
     enumGene('TAIL_EXISTS', 'Tail Exists', ['Single', 'None', 'Single', 'Double']),
-    enumGene('TAIL_SHAPE', 'Tail Shape', ['Tritail', 'Normal', 'Short', 'Chromosome']),
+    enumGene('TAIL_SHAPE', 'Tail Shape', ['Triangle', 'Rectangle', 'Square', 'Chromosome']),
     combined('tailBaseLength', 'Tail Length',
       { min: 0.05, max: 1.4, step: 0.005,
         hint: 'TAIL_SHORT x TAIL_SIZE',
@@ -724,14 +745,49 @@
 
     // Advanced
     autoSlider('TAIL_SHORT', 'Tail Short (raw)', true),
-    autoSlider('TAIL_SIZE', 'Tail Size', true),
-    autoSlider('TAIL_FLEXIBILITY', 'Tail Flexibility', true),
-    autoSlider('TAIL_STIFF', 'Tail Stiff', true)
+    autoSlider('TAIL_SIZE', 'Tail Size', true)
+  ];
+
+  // ==== NECK_JOINT ====
+  CONTROLS.neck_joint = [
+    enumGene('NECK_TAG', 'Neck/Head Socket', ['Neck/Head', 'Tail', 'Leg', 'Hand']),	
+    enumGene('NECK_JOINT_TYPE', 'Neck/Head Joint',['Rotate', 'Normal', 'Piston', 'Normal']),
+    // Neck angle (moved from neck)
+    combined('neckAngle', 'Neck Angle',
+      { min: 0, max: 120, step: 1,
+        hint: 'NECK_ANGLE + NECK_COCK',
+        autoRange: function () {
+          var naR = getRange('NECK_ANGLE'), ncR = getRange('NECK_COCK');
+          return [naR[0] + ncR[0], naR[1] + ncR[1]];
+        },
+        target:  function (ctx) { return ctx.ph.neckAngle; },
+        resolve: function (ctx, target) {
+          var naR = getRange('NECK_ANGLE');
+          var needed = target - ctx.gt.f('NECK_COCK');
+          if (needed >= naR[0] && needed <= naR[1]) {
+            return { gene: 'NECK_ANGLE', value: needed };
+          }
+          var clamped = Math.max(naR[0], Math.min(naR[1], needed));
+          return [
+            { gene: 'NECK_ANGLE', value: clamped },
+            { gene: 'NECK_COCK', value: target - clamped }
+          ];
+        }
+      }),
+	      autoSlider('NECK_SLOUCH', 'Neck Slouch'),
+    autoSlider('NECK_ONTOP', 'Neck on Top'),
+    autoSlider('NECK_SPEED', 'Neck Speed'),
+
+    autoSlider('NECK_FLEXIBILITY', 'Neck Flexibility'),
+    autoSlider('NECK_FLEX_BIAS', 'Neck Flex Bias'),	
+    toggle('NECK_STIFF', 'Neck Stiff'),	
+	autoSlider('NECK_ANGLE', 'Neck Angle', true),
+    autoSlider('NECK_COCK', 'Neck Cock', true)
   ];
 
   // ==== NECK & HEAD ====
   CONTROLS.neck = [
-    enumGene('NECK_TYPE', 'Neck Type', ['Neck', 'Neck', 'Headless', 'Head only']),
+    enumGene('NECK_TYPE', 'Neck Type', ['Neck and Head', 'Neck and Head', 'Head Only', 'Headless']),
     combined('neckLength', 'Neck Length',
       { min: 0, max: 3, step: 0.01,
         hint: 'NECK_LENGTH x bodyMaxDim/2 + NECK_GIRAFFE',
@@ -762,57 +818,115 @@
         }
       }),
     autoSlider('NECK_THICKNESS', 'Neck Thickness'),
-    combined('headArea', 'Head Size',
-      { min: 0.05, max: 3, step: 0.01,
-        hint: '(HEAD_SIZE + HEAD_THICK_SKULL) x 0.33 x bones x HEAD_GIANT x HEAD_SHRUNK',
-        autoRange: function () {
-          var hsR = getRange('HEAD_SIZE'), htR = getRange('HEAD_THICK_SKULL');
-          var bLo = getRange('BONES')[0] + getRange('BONES2')[0] + 1;
-          var bHi = getRange('BONES')[1] + getRange('BONES2')[1] + 1;
-          var hgR = getRange('HEAD_GIANT'), hsrR = getRange('HEAD_SHRUNK');
-          return [
-            (hsR[0]+htR[0]) * 0.33 * bLo * hgR[0] * hsrR[0],
-            (hsR[1]+htR[1]) * 0.33 * bHi * hgR[1] * hsrR[1]
-          ];
-        },
-        target:  function (ctx) { return ctx.ph.headArea; },
-        resolve: function (ctx, target) {
-          var bones = ctx.gt.f('BONES') + ctx.gt.f('BONES2') + 1.0;
-          var f = 0.33 * bones * ctx.gt.f('HEAD_GIANT') * ctx.gt.f('HEAD_SHRUNK');
-          if (f <= 0) return null;
-          var thick = ctx.gt.f('HEAD_THICK_SKULL');
-          var hsR = getRange('HEAD_SIZE');
-          var needed = target / f - thick;
-          if (needed >= hsR[0] && needed <= hsR[1]) {
-            return { gene: 'HEAD_SIZE', value: needed };
-          }
-          // Primary saturated; adjust HEAD_GIANT and HEAD_SHRUNK
-          var clamped = Math.max(hsR[0], Math.min(hsR[1], needed));
-          var snapped = C.snapGeneValue('HEAD_SIZE', clamped);
-          var headSum = (snapped ? snapped.v : clamped) + thick;
-          if (headSum <= 0) return [{ gene: 'HEAD_SIZE', value: clamped }];
-          var neededF = target / headSum;
-          return [
-            { gene: 'HEAD_SIZE', value: clamped },
-            { gene: 'HEAD_GIANT', value: neededF / (0.33 * bones * ctx.gt.f('HEAD_SHRUNK')) },
-            { gene: 'HEAD_SHRUNK', value: ctx.gt.f('HEAD_SHRUNK') }
-          ];
+combined('headArea', 'Head Size',
+  { min: 0.05, max: 2.00, step: 0.01,
+    hint: '(HEAD_SIZE + HEAD_THICK_SKULL) x 0.33 x bones x HEAD_GIANT x HEAD_SHRUNK',
+    autoRange: function () {
+      var hsR = getRange('HEAD_SIZE'), htR = getRange('HEAD_THICK_SKULL');
+      var bLo = getRange('BONES')[0] + getRange('BONES2')[0] + 1;
+      var bHi = getRange('BONES')[1] + getRange('BONES2')[1] + 1;
+      var hgR = getRange('HEAD_GIANT'), hsrR = getRange('HEAD_SHRUNK');
+      return [
+        (hsR[0]+htR[0]) * 0.33 * bLo * hgR[0] * hsrR[0],
+        (hsR[1]+htR[1]) * 0.33 * bHi * hgR[1] * hsrR[1]
+      ];
+    },
+    target:  function (ctx) { return ctx.ph.headArea; },
+    resolve: function (ctx, target) {
+      var bones = ctx.gt.f('BONES') + ctx.gt.f('BONES2') + 1.0;
+      var base  = 0.33 * bones;
+      if (base <= 0) return null;
+
+      var hsR  = getRange('HEAD_SIZE');
+      var htR  = getRange('HEAD_THICK_SKULL');
+      var hgR  = getRange('HEAD_GIANT');
+      var hsrR = getRange('HEAD_SHRUNK');
+
+      var thick  = ctx.gt.f('HEAD_THICK_SKULL');
+      var giant  = ctx.gt.f('HEAD_GIANT');
+      var shrunk = ctx.gt.f('HEAD_SHRUNK');
+
+      var denom = base * giant * shrunk;
+      if (denom <= 0) return null;
+
+      var results = [];
+      var touched = {};
+      function set(gene, value) {
+        if (!(gene in touched) && value !== ctx.gt.f(gene)) {
+          touched[gene] = true;
+          results.push({ gene: gene, value: value });
         }
-      }),
+      }
+
+      // ---- Step 1: solve (HEAD_SIZE + HEAD_THICK_SKULL) ----
+      var sNeeded  = target / denom;
+      var sLo = hsR[0] + htR[0];
+      var sHi = hsR[1] + htR[1];
+      var sClamped = Math.max(sLo, Math.min(sHi, sNeeded));
+      var sumSaturated = (sClamped !== sNeeded);
+
+      // Prefer moving HEAD_SIZE alone (keep HEAD_THICK_SKULL fixed) ...
+      var newSize = sClamped - thick;
+      var outSize, outThick;
+      if (newSize >= hsR[0] && newSize <= hsR[1]) {
+        var snap = C.snapGeneValue('HEAD_SIZE', newSize);
+        outSize  = snap ? snap.v : newSize;
+        outThick = thick;
+      } else {
+        // ... otherwise clamp HEAD_SIZE and cover the rest with HEAD_THICK_SKULL
+        outSize = Math.max(hsR[0], Math.min(hsR[1], newSize));
+        var snap2 = C.snapGeneValue('HEAD_SIZE', outSize);
+        if (snap2) outSize = snap2.v;
+        outThick = Math.max(htR[0], Math.min(htR[1], sClamped - outSize));
+      }
+      set('HEAD_SIZE', outSize);
+      set('HEAD_THICK_SKULL', outThick);
+
+      var headSum = outSize + outThick;
+      if (headSum <= 0) return results;
+
+      // Sum range covered the target → done.
+      if (!sumSaturated) {
+        return results.length === 1 ? results[0] : results;
+      }
+
+      // ---- Step 2: adjust HEAD_GIANT (HEAD_SHRUNK held) ----
+      var neededF  = target / (base * headSum);   // required GIANT * SHRUNK
+      var newGiant = shrunk > 0 ? neededF / shrunk : Infinity;
+
+      if (isFinite(newGiant) && newGiant >= hgR[0] && newGiant <= hgR[1]) {
+        set('HEAD_GIANT', newGiant);
+        return results.length === 1 ? results[0] : results;
+      }
+
+      // ---- Step 3: HEAD_GIANT saturated → adjust HEAD_SHRUNK ----
+      var clampedGiant = isFinite(newGiant)
+        ? Math.max(hgR[0], Math.min(hgR[1], newGiant))
+        : giant;
+      if (clampedGiant <= 0) clampedGiant = giant;
+      set('HEAD_GIANT', clampedGiant);
+
+      var newShrunk = neededF / clampedGiant;
+      set('HEAD_SHRUNK', Math.max(hsrR[0], Math.min(hsrR[1], newShrunk)));
+
+      return results;
+    }
+  }),
     autoSlider('HEAD_ASPECT', 'Head Aspect'),
     autoSlider('HEAD_SQUARE', 'Head Square'),
-    enumGene('HEAD_HAS_BACK', 'Head Back', ['Yes (11)', 'No', 'No', 'Yes']),
+    autoSlider('HEAD_X_GROWTH', 'Head X Growth'),
+    autoSlider('HEAD_Y_GROWTH', 'Head Y Growth'),	
+    enumGene('HEAD_HAS_BACK', 'Head Has Back', ['Yes!', 'No', 'No', 'Yes']),
+	toggle('HEAD_JOINTED', 'Head Jointed'),
 
     // Advanced
     autoSlider('NECK_LENGTH', 'Neck Length (raw)', true),
-    autoSlider('NECK_GIRAFFE', 'Giraffe', true),
+    autoSlider('NECK_GIRAFFE', 'Neck Giraffe', true),
     autoSlider('HEAD_SIZE', 'Head Size (raw)', true),
     autoSlider('HEAD_THICK_SKULL', 'Thick Skull', true),
-    autoSlider('HEAD_X_GROWTH', 'Head X Growth', true),
-    autoSlider('HEAD_Y_GROWTH', 'Head Y Growth', true),
+
     autoSlider('HEAD_GIANT', 'Head Giant', true),
     autoSlider('HEAD_SHRUNK', 'Head Shrunk', true),
-    toggle('HEAD_JOINTED', 'Head Jointed', undefined, undefined, true),
     toggle('HEAD_CHIMERA', 'Head Chimera', undefined, undefined, true)
   ];
 
@@ -821,6 +935,14 @@
     enumGene('EYE_STYLE', 'Eye Style', ['Style 1', 'Style 2', 'Style 1', 'None']),
     enumGene('BUGEYE', 'Bugeye', ['Normal', 'Out', 'Normal', 'In']),
     autoSlider('EYEBOX_SIZE', 'Eye Box Size'),
+    autoSlider('EYEBOX_X', 'Eye Box X'),
+    autoSlider('EYEBOX_Y', 'Eye Box Y'),
+    colorEnum('RACCOON_EYE', 'Raccoon Eye', [
+      co('None', null),
+      coDyn('Spot', function(ctx) { return ctx.colors ? ctx.colors.hex.SPOT : '#d6cbbc'; }),
+      coDyn('Alt', function(ctx) { return ctx.colors ? ctx.colors.hex.ALT : '#110b03'; }),
+      co('None', null)
+    ]),	
     autoSlider('EYE_SIZE', 'Eye Size'),
     autoSlider('PUPIL_SIZE', 'Pupil Size'),
     toggle('HAS_PUPIL', 'Has Pupil'),
@@ -830,12 +952,10 @@
       co('Green', '#6bd6a6'),
       co('Cyan', '#6bb6d6')
     ]),
-    colorEnum('RACCOON_EYE', 'Raccoon Eye', [
-      co('None', null),
-      coDyn('Spot', function(ctx) { return ctx.colors ? ctx.colors.hex.SPOT : '#d6cbbc'; }),
-      coDyn('Alt', function(ctx) { return ctx.colors ? ctx.colors.hex.ALT : '#110b03'; }),
-      co('None', null)
-    ]),
+
+    autoSlider('BROW_SIZE', 'Brow Size'),
+    autoSlider('BROW_SLANT', 'Brow Slant'),
+	
 
     // Ears
     enumGene('EAR_STYLE', 'Ear Style', ['Up', 'Down', 'None', 'None']),
@@ -848,14 +968,21 @@
       coDyn('Alt', function(ctx) { return ctx.colors ? ctx.colors.hex.ALT : '#110b03'; }),
       coDyn('Spot', function(ctx) { return ctx.colors ? ctx.colors.hex.SPOT : '#d6cbbc'; })
     ]),
+    autoSlider('EAR_X', 'Ear X'),
+    autoSlider('EAR_SLANT', 'Ear Slant'),
+    autoSlider('EAR_FLOP', 'Ear Flop'),
+    autoSlider('EAR_INTERIOR', 'Ear Interior'),
 
     // Mouth / teeth
-    enumGene('TEETH_SHAPE', 'Teeth Shape', ['None', 'Flat', 'Fangs', 'Carnivore']),
-    toggle('HAS_MOUTH', 'Has Mouth'),
+	toggle('HAS_MOUTH', 'Has Mouth'),
+    enumGene('TEETH_SHAPE', 'Teeth Shape', ['None', 'Flat', 'Fangs', 'Carnivore']),    
     autoSlider('MOUTH_Y', 'Mouth Y'),
     autoSlider('MOUTH_SIZE', 'Mouth Size'),
     autoSlider('JAW', 'Jaw'),
+    toggle('TEETH_UPPER', 'Teeth Upper'),
+    toggle('TEETH_UPPER2', 'Teeth Upper 2'),	
     autoSlider('TONGUE', 'Tongue'),
+    enumGene('TONGUE_SEGS', 'Tongue Segments', ['0', '1', '2', '0'],),	
 
     // Nose
     enumGene('NOSE_STYLE', 'Nose Style', ['Rect', 'Triangle', 'Circle', 'None']),
@@ -868,20 +995,9 @@
       coDyn('Alt', function(ctx) { return ctx.colors ? ctx.colors.hex.ALT : '#110b03'; }),
       coDyn('Base', function(ctx) { return ctx.colors ? ctx.colors.hex.BASE : '#d6922c'; })
     ]),
-
+    autoSlider('NOSE_Y', 'Nose Y'),
     // Advanced
-    autoSlider('EYEBOX_X', 'Eye Box X', true),
-    autoSlider('EYEBOX_Y', 'Eye Box Y', true),
-    autoSlider('BROW_SIZE', 'Brow Size', true),
-    autoSlider('BROW_SLANT', 'Brow Slant', true),
-    autoSlider('EAR_X', 'Ear X', true),
-    autoSlider('EAR_SLANT', 'Ear Slant', true),
-    autoSlider('EAR_FLOP', 'Ear Flop', true),
-    autoSlider('EAR_INTERIOR', 'Ear Interior', true),
-    autoSlider('NOSE_Y', 'Nose Y', true),
-    toggle('TEETH_UPPER', 'Teeth Upper', undefined, undefined, true),
-    toggle('TEETH_UPPER2', 'Teeth Upper 2', undefined, undefined, true),
-    enumGene('TONGUE_SEGS', 'Tongue Segments', ['0', '1', '2', '0'], true)
+
   ];
 
   // ==== COLORS ====
@@ -892,54 +1008,21 @@
     skinPicker('skin', 'Pick Skin Color'),
 
     // Base color group — these genes combine to determine the coat BASE color
+	/*
     group('baseColor', 'Base Color (genes)', [
-      colorEnum('BASE_RED', 'Red', [
-        co('None', '#d6922c'),
-        co('Red', '#e83a57'),
-        co('Magenta', '#db30a2'),
-        co('Crimson', '#c93c59')
-      ]),
-      colorEnum('BASE_GREEN', 'Green', [
-        co('None', '#d6922c'),
-        co('Yellow-Green', '#b0a207'),
-        co('Green', '#36e345'),
-        co('Dark Green', '#1c570b')
-      ]),
-      colorEnum('BASE_BROWN', 'Brown', [
-        co('Default', '#d6922c'),
-        co('Warm Brown', '#7a3f00'),
-        co('Dark Brown', '#47310f'),
-        co('Default', '#d6922c')
-      ]),
-      autoSlider('BASE_CREAM', 'Cream'),
-      toggle('GREEN_KNOCKOUT', 'Green Knockout')
+
     ], {
       collapsed: true,
       swatch: function(ctx) { return ctx.colors ? ctx.colors.hex.BASE : '#d6922c'; }
     }),
+	*/
     toggle('BASE_BLACK', 'Base Black'),
     toggle('AGOUTI', 'Agouti'),
     toggle('WHITE', 'White Coat'),
     toggle('WHITE_IS_LETHAL', 'White is Lethal'),
     toggle('SPOT_YELLOW', 'Spot Yellow'),
-    colorEnum('ALT_BLUE', 'Alt Blue', [
-      co('Black', '#110b03'),
-      co('Black', '#110b03'),
-      co('Blue', '#30a2db'),
-      co('Green', '#36e345')
-    ]),
-    colorEnum('SKIN_HUE', 'Skin Hue', [
-      co('0', '#c3c6c9'),
-      co('1', '#ffa799'),
-      co('2', '#8f3636'),
-      co('3', '#82d7ff')
-    ]),
-    colorEnum('SKIN_HUE2', 'Skin Hue 2', [
-      co('0', '#c3c6c9'),
-      co('1', '#ffa799'),
-      co('2', '#8f3636'),
-      co('3', '#82d7ff')
-    ]),
+
+
     colorEnum('HOOF_COLOR', 'Hoof Color', [
       co('Brown', '#47310f'),
       co('Brown', '#47310f'),
@@ -948,7 +1031,7 @@
     ]),
     colorEnum('SKIN_HEAD', 'Skin Head', [
       co('None', null),
-      coDyn('Ears', function(ctx) { return ctx.colors ? ctx.colors.hex.SKIN : '#c3c6c9'; }),
+      coDyn('Face', function(ctx) { return ctx.colors ? ctx.colors.hex.SKIN : '#c3c6c9'; }),
       co('None', null),
       coDyn('Full', function(ctx) { return ctx.colors ? ctx.colors.hex.SKIN : '#c3c6c9'; })
     ]),
@@ -965,7 +1048,45 @@
       coDyn('Alt', function(ctx) { return ctx.colors ? ctx.colors.hex.ALT : '#110b03'; })
     ]),
     toggle('SWAP_BASE_SPOT', 'Swap Base / Spot'),
-    toggle('SWAP_ALT_SPOT', 'Swap Alt / Spot')
+    toggle('SWAP_ALT_SPOT', 'Swap Alt / Spot'),
+      colorEnum('BASE_RED', 'Red', [
+        co('None', '#d6922c'),
+        co('Red', '#e83a57'),
+        co('Magenta', '#db30a2'),
+        co('Crimson', '#c93c59')
+      ],true),
+      colorEnum('BASE_GREEN', 'Green', [
+        co('None', '#d6922c'),
+        co('Yellow-Green', '#b0a207'),
+        co('Green', '#36e345'),
+        co('Dark Green', '#1c570b')
+      ],true),
+      colorEnum('BASE_BROWN', 'Brown', [
+        co('Default', '#d6922c'),
+        co('Warm Brown', '#7a3f00'),
+        co('Dark Brown', '#47310f'),
+        co('Default', '#d6922c')
+      ],true),
+      autoSlider('BASE_CREAM', 'Cream',true),
+      toggle('GREEN_KNOCKOUT', 'Green Knockout',undefined,undefined,true),
+    colorEnum('ALT_BLUE', 'Alt Blue', [
+      co('Black', '#110b03'),
+      co('Black', '#110b03'),
+      co('Blue', '#30a2db'),
+      co('Green', '#36e345')
+    ],true),
+	    colorEnum('SKIN_HUE', 'Skin Hue', [
+      co('0', '#c3c6c9'),
+      co('1', '#ffa799'),
+      co('2', '#8f3636'),
+      co('3', '#82d7ff')
+    ],true),
+    colorEnum('SKIN_HUE2', 'Skin Hue 2', [
+      co('0', '#c3c6c9'),
+      co('1', '#ffa799'),
+      co('2', '#8f3636'),
+      co('3', '#82d7ff')
+    ],true),
   ];
 
   // ==== PATTERNS ====
@@ -989,7 +1110,11 @@
     autoSlider('ANTLER_POM', 'Antler Pom'),
     enumGene('ANTLER_MOD', 'Antler Mod', ['3', '2', '1', '3']),
     autoSlider('ANTLER_REC', 'Antler Rec'),
+	autoSlider('ANTLER_T1', 'Antler T1'),
     autoSlider('ANTLER_REC2', 'Antler Rec 2'),
+
+    autoSlider('ANTLER_T2', 'Antler T2', ),
+	
     toggle('ANTLER_FLIP', 'Antler Flip'),
     autoSlider('ANTLER_ANGLE', 'Antler Angle'),
     autoSlider('ANTLER_ANGLE2', 'Antler Angle 2'),
@@ -1010,6 +1135,7 @@
     ]),
     toggle('POM_USECOLOR', 'Pom Use Color'),
 
+
     // Hat
     toggle('HAT_EXISTS', 'Has Hat'),
     autoSlider('HAT_SIZE', 'Hat Size'),
@@ -1022,40 +1148,38 @@
     toggle('HAT_FLIP', 'Hat Flip'),
 
     // Advanced
-    autoSlider('ANTLER_T1', 'Antler T1', true),
-    autoSlider('ANTLER_T2', 'Antler T2', true),
-    autoSlider('HAT_BACK_SCALE', 'Hat Back Scale', true),
-    autoSlider('HAT_FRONT_SCALE', 'Hat Front Scale', true),
-    autoSlider('HAT_BACK_ANGLE', 'Hat Back Angle', true),
-    autoSlider('HAT_FRONT_ANGLE', 'Hat Front Angle', true),
-    autoSlider('HAT_ANGLE_RAND', 'Hat Angle Rand', true),
-    autoSlider('HAT_T', 'Hat T', true)
+    autoSlider('HAT_BACK_SCALE', 'Hat Back Scale'),
+    autoSlider('HAT_FRONT_SCALE', 'Hat Front Scale'),
+    autoSlider('HAT_BACK_ANGLE', 'Hat Back Angle'),
+    autoSlider('HAT_FRONT_ANGLE', 'Hat Front Angle'),
+    autoSlider('HAT_ANGLE_RAND', 'Hat Angle Rand'),
+    autoSlider('HAT_T', 'Hat T')
   ];
 
   // ==== BEHAVIOR ====
   CONTROLS.behavior = [
+
     autoSlider('SPEED_FACTOR', 'Speed Factor'),
     autoSlider('LITTER_SIZE', 'Litter Size'),
     toggle('OMNIVORE', 'Omnivore'),
     toggle('HIGH_INTELLECT', 'High Intellect'),
-    toggle('RAMPAGE', 'Rampage'),
-    toggle('SPINAL_LOCO', 'Spinal Loco'),
-    toggle('BRAIN_SPASTIC', 'Brain Spastic'),
-    toggle('NARCOLEPSY', 'Narcolepsy'),
-    toggle('LIMP', 'Limp'),
-    autoSlider('STIFF_JOINTS', 'Stiff Joints'),
+    autoSlider('OLD_AGE', 'Old Age'),
 
-    // Advanced — physics, health, misc
-    autoSlider('BREAK_FORCE', 'Break Force', true),
-    autoSlider('OLD_AGE', 'Old Age', true),
-    toggle('FLU_IMMUNITY', 'Flu Immunity', undefined, undefined, true),
-    toggle('TAIL_WAG', 'Tail Wag', undefined, undefined, true),
-    toggle('LEG_AND_ARM_LIMP', 'Leg & Arm Limp', undefined, undefined, true),
-    toggle('NECK_STIFF', 'Neck Stiff', undefined, undefined, true),
-    autoSlider('NECK_FLEXIBILITY', 'Neck Flexibility', true),
-    autoSlider('NECK_FLEX_BIAS', 'Neck Flex Bias', true),
+	toggle('LIMP', 'Limp'),
+    toggle('LEG_AND_ARM_LIMP', 'Leg & Arm Limp'),
+    autoSlider('STIFF_JOINTS', 'Stiff Joints'),
+	autoSlider('MUSCLE_USE', 'Muscle Use'),	
+    toggle('BRAIN_SPASTIC', 'Brain Spastic'),
+    toggle('NARCOLEPSY', 'Narcolepsy'),        
+	toggle('FLU_IMMUNITY', 'Flu Immunity'),
+    autoSlider('BREAK_FORCE', 'Break Force'),
+
+	toggle('SPINAL_LOCO', 'Spinal Loco'),
+	toggle('LOCO_SYNC', 'Loco Sync'),
 
     // Advanced — locomotion signals
+	toggle('RAMPAGE', 'Rampage',true),
+    
     autoSlider('L_LEG_SIGNAL', 'Leg Signal', true),
     autoSlider('L_LEG_FTOB_REACT', 'Leg FtoB React', true),
     autoSlider('L_LEG_FTOB_EVENT', 'Leg FtoB Event', true),
@@ -1076,22 +1200,24 @@
     autoSlider('L_NECK_FTOB_EVENT', 'Neck FtoB Event', true),
     autoSlider('L_NECK_BTOF_REACT', 'Neck BtoF React', true),
     autoSlider('L_NECK_BTOF_EVENT', 'Neck BtoF Event', true),
-    toggle('LOCO_SYNC', 'Loco Sync', undefined, undefined, true)
+
   ];
 
   var SECTIONS = [
-    { key: 'posture',  label: 'Posture' },
     { key: 'body',     label: 'Body' },
-    { key: 'legs',     label: 'Legs' },
-    { key: 'arms',     label: 'Arms & Hands' },
-    { key: 'feet',     label: 'Feet' },
-    { key: 'tail',     label: 'Tail' },
-    { key: 'neck',     label: 'Neck & Head' },
+	{ key: 'leg_joint',     label: 'Leg Socket' },
+    { key: 'legs',     label: 'Leg & Foot Part' },
+	{ key: 'arm_joint',     label: 'Arm Socket' },
+    { key: 'arms',     label: 'Arm & Hand Part' },    
+	{ key: 'tail_joint',     label: 'Tail Socket' },
+    { key: 'tail',     label: 'Tail Part' },
+	{ key: 'neck_joint',     label: 'Neck Socket' },
+    { key: 'neck',     label: 'Neck & Head part' },
     { key: 'face',     label: 'Face' },
     { key: 'colors',   label: 'Colors' },
     { key: 'patterns', label: 'Patterns' },
     { key: 'antlers',  label: 'Antlers & Hat' },
-    { key: 'behavior', label: 'Behavior' }
+    { key: 'behavior', label: 'Health & Behavior' }
   ];
 
   function findSpec(id) {
@@ -1177,14 +1303,26 @@
   };
 
   // ---------- apply preconditions & annotations to all controls ----------
+  // Preconditions are no longer used to block/dim controls. Instead they are
+  // merged into the annotation row so the user can see the caveat but still
+  // edit the gene freely.
   function applyMeta(specs) {
     for (var i = 0; i < specs.length; i++) {
-      var s = specs[i];
-      if (s.gene) {
-        if (PRECONDITIONS[s.gene]) s.disabledWhen = PRECONDITIONS[s.gene];
-        if (ANNOTATIONS[s.gene]) s.annotation = ANNOTATIONS[s.gene];
-      }
-      if (s.children) applyMeta(s.children);
+      (function (s) {
+        if (s.gene) {
+          var pre = PRECONDITIONS[s.gene];
+          var ann = ANNOTATIONS[s.gene];
+          if (pre || ann) {
+            s.annotation = function (ctx) {
+              var parts = [];
+              if (pre) { var p = pre(ctx); if (p) parts.push(p); }
+              if (ann) { var a = ann(ctx); if (a) parts.push(a); }
+              return parts.length ? parts.join(' · ') : null;
+            };
+          }
+        }
+        if (s.children) applyMeta(s.children);
+      })(specs[i]);
     }
   }
   Object.keys(CONTROLS).forEach(function(key) { applyMeta(CONTROLS[key]); });

@@ -14,12 +14,6 @@
   var previewZoom = 4;
   var previewBg = null;
 
-  // ---- tooltip element ----
-  var tooltipEl = document.createElement('div');
-  tooltipEl.className = 'gene-tooltip';
-  tooltipEl.style.display = 'none';
-  document.body.appendChild(tooltipEl);
-
   // ---- DOM ----
   var editorPanel = document.getElementById('editorPanel');
   var canvas      = document.getElementById('preview');
@@ -27,6 +21,7 @@
   var tagsEl      = document.getElementById('tagsPanel');
   var rawEl       = document.getElementById('rawGenome');
   var rawStatus   = document.getElementById('rawStatus');
+  var sectionNav  = document.getElementById('sectionNav');
 
   // ---- parsing / state ----
   function refreshState() {
@@ -104,30 +99,6 @@
     }
     return colorDef;
   }
-
-  // ---- tooltip functions ----
-  function showTooltip(spec, e) {
-    if (!spec.gene) return;
-    var gene = D.genes[D.byName[spec.gene]];
-    if (!gene) return;
-    var pair = gt.strands(spec.gene);
-    tooltipEl.innerHTML = '<div class="gene-name">' + spec.gene + '</div>' +
-      '<div>Dominance: ' + gene.m + (gene.m >= 100 ? ' (dominant)' : ' (blended)') + '</div>' +
-      '<div>Alleles: [' + pair[0] + ', ' + pair[1] + ']</div>' +
-      '<div class="gene-values">g[] = [' + gene.g.join(', ') + ']</div>' +
-      '<div>Scale: ' + gene.s + '</div>';
-    tooltipEl.style.display = 'block';
-    positionTooltip(e);
-  }
-  function positionTooltip(e) {
-    var x = e.clientX + 12, y = e.clientY + 12;
-    var rect = tooltipEl.getBoundingClientRect();
-    if (x + 280 > window.innerWidth) x = e.clientX - 280 - 12;
-    if (y + 100 > window.innerHeight) y = e.clientY - 100 - 12;
-    tooltipEl.style.left = x + 'px';
-    tooltipEl.style.top = y + 'px';
-  }
-  function hideTooltip() { tooltipEl.style.display = 'none'; }
 
   // ---- export PNG ----
   function exportPNG() {
@@ -262,7 +233,6 @@
       inputWrap.appendChild(input);
 
     } else if (spec.type === 'colorDropdown') {
-      // Color dropdown with swatch
       var wrap = document.createElement('div');
       wrap.className = 'color-select-wrap';
 
@@ -287,11 +257,9 @@
       inputWrap.appendChild(wrap);
 
     } else if (spec.type === 'colorPicker') {
-      // Color picker with palette grid and HTML color input
       var pickerWrap = document.createElement('div');
       pickerWrap.className = 'color-picker-wrap';
 
-      // Palette grid
       var paletteDiv = document.createElement('div');
       paletteDiv.className = 'color-palette';
       var pal = spec.palette || [];
@@ -311,7 +279,6 @@
       }
       pickerWrap.appendChild(paletteDiv);
 
-      // HTML color input for any color
       input = document.createElement('input');
       input.type = 'color';
       input.className = 'color-any';
@@ -323,7 +290,6 @@
 
       inputWrap.appendChild(pickerWrap);
 
-      // Current color swatch (shown in value area)
       swatch = document.createElement('span');
       swatch.className = 'color-swatch current-color';
       row.appendChild(swatch);
@@ -352,7 +318,6 @@
       row.appendChild(swatch);
 
     } else if (spec.type === 'group') {
-      // Group is handled separately by buildGroup, return null
       return null;
     }
 
@@ -363,18 +328,22 @@
       row.appendChild(hint);
     }
 
-    // Tooltip on hover
-    (function(s) {
-      row.addEventListener('mouseenter', function (e) { showTooltip(s, e); });
-      row.addEventListener('mousemove', positionTooltip);
-      row.addEventListener('mouseleave', hideTooltip);
-    })(spec);
+    // Annotation row (used for both context hints and "issue" annotations).
+    var annotationEl = null;
+    if (spec.annotation) {
+      annotationEl = document.createElement('div');
+      annotationEl.className = 'control-annotation';
+      annotationEl.appendChild(document.createElement('span'));
+      row.appendChild(annotationEl);
+    }
 
-    controlRefs[spec.id] = { el: row, spec: spec, input: input, valueEl: valueEl, swatch: swatch };
+    controlRefs[spec.id] = {
+      el: row, spec: spec, input: input, valueEl: valueEl,
+      swatch: swatch, annotationEl: annotationEl
+    };
     return row;
   }
 
-  // Build a group control (contains child controls with a visual wrapper)
   function buildGroup(spec) {
     var groupEl = document.createElement('details');
     groupEl.className = 'control-group';
@@ -417,7 +386,6 @@
     return groupEl;
   }
 
-  // Collect all gene names from a list of control specs (recursively)
   function collectGenes(specs) {
     var genes = {};
     for (var i = 0; i < specs.length; i++) {
@@ -455,27 +423,23 @@
       var arr = S.CONTROLS[sdef.key] || [];
       if (!arr.length) continue;
 
-      // Split into main and advanced
       var mainSpecs = [];
       var advSpecs = [];
       for (var k = 0; k < arr.length; k++) {
-        if (arr[k].advanced) {
-          advSpecs.push(arr[k]);
-        } else {
-          mainSpecs.push(arr[k]);
-        }
+        if (arr[k].advanced) advSpecs.push(arr[k]);
+        else mainSpecs.push(arr[k]);
       }
 
       var details = document.createElement('details');
       details.className = 'section';
       details.open = true;
+      details.setAttribute('data-section-key', sdef.key);
       var summary = document.createElement('summary');
 
       var labelSpan = document.createElement('span');
       labelSpan.textContent = sdef.label;
       summary.appendChild(labelSpan);
 
-      // Per-section randomize button (right-aligned)
       (function(key) {
         var rndBtn = document.createElement('button');
         rndBtn.className = 'section-rnd ghost';
@@ -493,7 +457,6 @@
       var body = document.createElement('div');
       body.className = 'controls';
 
-      // Build main controls
       for (var m = 0; m < mainSpecs.length; m++) {
         var mspec = mainSpecs[m];
         if (mspec.type === 'group') {
@@ -505,7 +468,6 @@
         }
       }
 
-      // Build advanced subsection if there are advanced controls
       if (advSpecs.length > 0) {
         var advDetails = document.createElement('details');
         advDetails.className = 'advanced-section';
@@ -524,6 +486,33 @@
 
       details.appendChild(body);
       editorPanel.appendChild(details);
+    }
+  }
+
+  // ---- section navigation ----
+  function buildSectionNav() {
+    if (!sectionNav) return;
+    sectionNav.innerHTML = '';
+    var sections = S.SECTIONS;
+    for (var i = 0; i < sections.length; i++) {
+      (function (sdef) {
+        var arr = S.CONTROLS[sdef.key] || [];
+        if (!arr.length) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nav-btn';
+        btn.textContent = sdef.label;
+        btn.title = 'Jump to ' + sdef.label;
+        btn.addEventListener('click', function () {
+          var el = editorPanel.querySelector('details.section[data-section-key="' + sdef.key + '"]');
+          if (!el) return;
+          el.open = true;
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          el.classList.add('nav-flash');
+          setTimeout(function () { el.classList.remove('nav-flash'); }, 900);
+        });
+        sectionNav.appendChild(btn);
+      })(sections[i]);
     }
   }
 
@@ -577,7 +566,6 @@
             break;
           }
         }
-        // Update swatch color
         if (ref.swatch && foundOpt) {
           var swatchColor = resolveSwatchColor(foundOpt.color, ctx);
           if (swatchColor) {
@@ -606,7 +594,6 @@
           ref.swatch.style.display = 'inline-block';
         }
         if (ref.valueEl) ref.valueEl.textContent = skinHex;
-        // Highlight active swatch in grid
         var skinSwatches = ref.el.querySelectorAll('.skin-swatch');
         for (var ss = 0; ss < skinSwatches.length; ss++) {
           skinSwatches[ss].classList.toggle('skin-active', skinSwatches[ss].style.backgroundColor === skinHex ||
@@ -614,7 +601,6 @@
         }
       }
 
-      // Handle group swatch sync
       if (ref.isGroup && ref.swatch && spec.swatch) {
         var groupSwatchColor = resolveSwatchColor(spec.swatch, ctx);
         if (groupSwatchColor) {
@@ -625,35 +611,26 @@
         }
       }
 
-      // Precondition dimming
-      if (spec.disabledWhen) {
-        var reason = spec.disabledWhen(ctx);
-        ref.el.classList.toggle('control-disabled', !!reason);
-        ref.el.setAttribute('data-reason', reason || '');
-      }
-
-      // Allele annotation badge
-      if (spec.annotation) {
-        var note = spec.annotation(ctx);
-        var badge = ref.el.querySelector('.annotation-badge');
+      // Annotation row (context notes + precondition hints)
+      if (spec.annotation && ref.annotationEl) {
+        var note = null;
+        try { note = spec.annotation(ctx); } catch (e) { note = null; }
         if (note) {
-          if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'annotation-badge';
-            var lbl = ref.el.querySelector('.control-label');
-            if (lbl) lbl.appendChild(badge);
+          var span = ref.annotationEl.firstChild;
+          if (!span) {
+            span = document.createElement('span');
+            ref.annotationEl.appendChild(span);
           }
-          badge.textContent = note;
-          badge.style.display = '';
-        } else if (badge) {
-          badge.style.display = 'none';
+          span.textContent = note;
+          ref.annotationEl.classList.add('visible');
+        } else {
+          ref.annotationEl.classList.remove('visible');
         }
       }
     }
     updating = false;
   }
 
-  // Helper for matching CSS rgb() to hex
   function hexToRgb(hex) {
     if (!hex || hex.charAt(0) !== '#') return '';
     var r = parseInt(hex.slice(1,3),16);
@@ -736,7 +713,6 @@
     var applyRaw = document.getElementById('btnApplyRaw');
     if (applyRaw) applyRaw.addEventListener('click', applyRawText);
 
-    // Paste DNA
     var paste = document.getElementById('btnPaste');
     if (paste) paste.addEventListener('click', function () {
       if (navigator.clipboard && navigator.clipboard.readText) {
@@ -752,7 +728,6 @@
       }
     });
 
-    // Expand / Collapse All
     var expandAll = document.getElementById('btnExpandAll');
     var collapseAll = document.getElementById('btnCollapseAll');
     if (expandAll) expandAll.addEventListener('click', function () {
@@ -762,17 +737,35 @@
       editorPanel.querySelectorAll('details.section').forEach(function (d) { d.open = false; });
     });
 
-    // Export PNG
     var exp = document.getElementById('btnExport');
     if (exp) exp.addEventListener('click', exportPNG);
 
-    // Search / Filter
     var searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.addEventListener('input', function () {
-      filterControls(this.value);
-    });
+    var clearSearch = document.getElementById('btnClearSearch');
+    function updateSearchClear() {
+      if (!searchInput) return;
+      var wrap = searchInput.parentElement;
+      if (wrap) wrap.classList.toggle('has-value', searchInput.value.length > 0);
+      if (clearSearch) clearSearch.style.display = searchInput.value.length ? '' : 'none';
+    }
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        filterControls(this.value);
+        updateSearchClear();
+      });
+      // Show the button if the field already has a value (e.g. autofill / bfcache).
+      updateSearchClear();
+    }
+    if (clearSearch) {
+      clearSearch.addEventListener('click', function () {
+        if (!searchInput) return;
+        searchInput.value = '';
+        filterControls('');
+        updateSearchClear();
+        searchInput.focus();
+      });
+    }
 
-    // Background color buttons
     var bgBtns = document.querySelectorAll('.bg-btn');
     bgBtns.forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -785,7 +778,6 @@
       });
     });
 
-    // Zoom buttons
     var zoomBtns = document.querySelectorAll('.zoom-btn');
     zoomBtns.forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -811,6 +803,7 @@
 
     refreshState();
     buildSections();
+    buildSectionNav();
     if (rawEl) rawEl.value = lines.join('\n');
     renderPreview();
     renderTags();

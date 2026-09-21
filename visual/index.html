@@ -16,6 +16,15 @@ body{font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--
 header{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-weight:600;display:flex;align-items:center;gap:12px}
 header .spacer{flex:1}
 header button{font-size:12px;padding:4px 10px}
+
+/* Section navigation bar */
+.section-nav{display:flex;gap:2px;padding:6px 12px;background:var(--panel);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:thin}
+.section-nav::-webkit-scrollbar{height:6px}
+.section-nav::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--dim);font-size:11px;padding:3px 10px;border-radius:3px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit}
+.nav-btn:hover{background:var(--panel3);color:var(--text)}
+.nav-btn:active{background:var(--accent2);color:#fff}
+
 main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 520px;min-height:0}
 .editor-panel{overflow-y:auto;padding-bottom:120px}
 .side-panel{background:var(--panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
@@ -30,6 +39,8 @@ details.section>summary::-webkit-details-marker{display:none}
 details.section>summary::before{content:"▸";color:var(--dim);display:inline-block;transition:transform .12s}
 details.section[open]>summary::before{transform:rotate(90deg)}
 details.section>summary:hover{background:var(--panel3)}
+details.section.nav-flash>summary{background:var(--accent2);color:#fff}
+details.section.nav-flash>summary::before{color:#fff}
 .section-rnd{margin-left:auto;font-size:10px;padding:2px 8px;flex-shrink:0;background:var(--panel);border:1px solid var(--border);color:var(--dim);border-radius:3px}
 .section-rnd:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
 details.section>summary>span{flex:1;margin-left:8px}
@@ -43,6 +54,12 @@ details.section>summary>span{flex:1;margin-left:8px}
 .control-input input[type=checkbox]{accent-color:var(--accent)}
 .control-input select{flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font:inherit;font-size:12px}
 .control-hint{font-size:10px;color:var(--dim);grid-column:2 / span 2;padding:0 0 2px;font-style:italic}
+
+/* Annotation / requirement row */
+.control-annotation{grid-column:2 / span 2;padding:0 0 3px;display:none}
+.control-annotation.visible{display:block}
+.control-annotation>span{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;background:#4a3520;color:#f0c070;white-space:normal;line-height:1.35}
+
 .badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:var(--accent2);color:#fff;margin-left:6px;vertical-align:middle;letter-spacing:.5px}
 /* Advanced section */
 .advanced-section{margin:8px 16px 4px;border:1px solid var(--border);border-radius:4px;background:var(--panel)}
@@ -71,15 +88,16 @@ details.section>summary>span{flex:1;margin-left:8px}
 /* Search input */
 .search-input{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 8px;width:140px;font-size:12px}
 .search-input:focus{outline:none;border-color:var(--accent)}
+.search-wrap{position:relative;display:inline-flex;align-items:center}
+.search-wrap .search-input{padding-right:24px;width:160px}
+.search-clear{display:none;position:absolute;right:4px;top:50%;transform:translateY(-50%);width:16px;height:16px;padding:0;border:0;border-radius:50%;background:var(--panel3);color:var(--dim);font-size:13px;line-height:14px;text-align:center;cursor:pointer;font-family:inherit}
+.search-clear:hover{background:var(--accent2);color:#fff}
+.search-wrap.has-value .search-clear{display:block}
 .control.hidden,.control-group.hidden{display:none}
 .section.no-matches>.controls{display:none}
 .section.no-matches>summary::after{content:' (no matches)';color:var(--dim);font-weight:400}
 /* Export button */
 .export-wrap{padding:0;text-align:center}
-/* Tooltip */
-.gene-tooltip{position:fixed;z-index:1000;background:var(--panel3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:11px;line-height:1.4;max-width:280px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.gene-tooltip .gene-name{font-weight:600;color:var(--accent)}
-.gene-tooltip .gene-values{font-family:monospace;color:var(--dim)}
 /* Color picker */
 .color-picker-wrap{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .color-palette{display:flex;flex-wrap:wrap;gap:2px;max-width:200px}
@@ -101,12 +119,6 @@ details.section>summary>span{flex:1;margin-left:8px}
 .bg-btn:hover,.bg-btn.active{border-color:var(--accent)}
 .zoom-btn{font-size:10px;padding:1px 6px;background:var(--panel2);border:1px solid var(--border);color:var(--dim);border-radius:2px;cursor:pointer}
 .zoom-btn:hover,.zoom-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-/* Precondition dimming */
-.control-disabled{opacity:0.3;position:relative}
-.control-disabled .control-input{pointer-events:none}
-.control-disabled[data-reason]::after{content:attr(data-reason);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--dim);font-style:italic;pointer-events:none}
-/* Allele annotations */
-.annotation-badge{font-size:9px;padding:1px 5px;border-radius:3px;background:#4a3520;color:#f0c070;margin-left:4px;font-weight:400;white-space:nowrap}
 textarea{width:100%;background:#101014;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:8px;font:11px/1.5 ui-monospace,Consolas,monospace;resize:vertical;min-height:200px}
 button{background:var(--accent2);color:#fff;border:0;border-radius:3px;padding:5px 12px;cursor:pointer;font:inherit;font-size:12px}
 button:hover{background:var(--accent)}
@@ -123,7 +135,10 @@ button.ghost:hover{background:var(--panel3)}
 <div class="app">
   <header>
     <span>🐴 Visual Genome Editor</span>
-    <input type="text" id="searchInput" placeholder="Filter genes..." class="search-input">
+        <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Filter genes..." class="search-input"/>
+      <button type="button" id="btnClearSearch" class="search-clear" title="Clear filter" aria-label="Clear filter">×</button>
+    </div>
     <span class="spacer"></span>
     <button id="btnExpandAll" class="ghost">Expand All</button>
     <button id="btnCollapseAll" class="ghost">Collapse All</button>
@@ -132,6 +147,7 @@ button.ghost:hover{background:var(--panel3)}
     <button id="btnCopy">Copy DNA</button>
     <button id="btnPaste" class="ghost">Paste DNA</button>
   </header>
+  <nav class="section-nav" id="sectionNav" aria-label="Section navigation"></nav>
   <main>
     <div class="editor-panel" id="editorPanel"></div>
     <aside class="side-panel">
