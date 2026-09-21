@@ -1,0 +1,140 @@
+/* css/bulk.css — the Bulk workspace (plan section 5.5, phase 6): a 2-pane layout, operations
+   list on the left, operation-specific parameters on the right. No toolbar row — the mockup
+   doesn't need one, so js/workspaces/bulk.js fills the pane body directly. */
+
+.bk-root {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    background: var(--bg-1);
+}
+
+/* ---- operations list ---- */
+.bk-ops {
+    flex: 0 0 260px;
+    max-width: 300px;
+    overflow-y: auto;
+    padding: var(--sp-3);
+    border-right: 1px solid var(--border-soft);
+    background: var(--bg-2);
+}
+.bk-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-2);
+    text-transform: uppercase;
+    margin: var(--sp-4) var(--sp-2) var(--sp-2);
+}
+.bk-group-title:first-child { margin-top: var(--sp-2); }
+.bk-op {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px var(--sp-3);
+    margin-bottom: 2px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    cursor: pointer;
+    font-size: var(--font-base);
+}
+.bk-op:hover { background: var(--bg-3); color: var(--text-0); }
+.bk-op.active { background: var(--bg-4); border-color: var(--border); color: var(--text-0); font-weight: 600; }
+
+/* ---- parameters panel ---- */
+.bk-params {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+}
+.bk-empty { margin: auto; color: var(--text-2); text-align: center; padding: var(--sp-6); }
+
+.bk-op-header { padding-bottom: var(--sp-3); border-bottom: 1px solid var(--border-soft); }
+.bk-op-title { font-size: 16px; font-weight: 600; color: var(--text-0); }
+.bk-op-desc { font-size: 12px; color: var(--text-1); margin-top: var(--sp-1); }
+
+.bk-section { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bk-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-2); text-transform: uppercase; margin-bottom: var(--sp-1); }
+
+.bk-check-row, .bk-radio-row, .bk-radio-line {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 3px 0;
+    font-size: var(--font-base);
+}
+/* Round-4 feedback F3: .bk-check-label is flex:1 so the trailing count/input lands on a tidy
+   right-aligned column -- but .bk-params fills the pane, so at 1920 that stretched a 60px label
+   to 1533px and threw the count ~1.5k px away from what it counts. Capping the row keeps the
+   alignment and the association. .bk-radio-line was always fine (no flex:1 label), which is why
+   the Population dropdown looked right. */
+.bk-check-row { max-width: 360px; }
+.bk-check-row.bk-onelocation { max-width: 460px; }
+.bk-check-label { flex: 0 0 auto; min-width: 140px; }
+.bk-check-count {
+    min-width: 2.5em;
+    text-align: right;
+    color: var(--text-1);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+}
+.bk-onelocation select { margin-left: var(--sp-2); flex: 1; max-width: 220px; }
+.bk-warn-note {
+    margin-top: var(--sp-2);
+    padding: 6px var(--sp-3);
+    background: var(--warn-tint);
+    border: 1px solid var(--warn-tint-border);
+    border-radius: var(--radius-sm);
+    color: var(--warn);
+    font-size: 11px;
+}
+
+.bk-radio-line select, .bk-inline-select {
+    margin-left: 26px;
+    max-width: 260px;
+}
+.bk-pools {
+    margin-left: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    max-width: 420px;
+}
+.bk-pool-textarea {
+    min-height: 70px;
+    font-family: monospace;
+    font-size: 11px;
+    resize: vertical;
+    padding: var(--sp-2);
+}
+
+.bk-footer {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+}
+.bk-affected { font-weight: 600; color: var(--text-0); }
+.bk-btn-row { display: flex; gap: var(--sp-3); }
+.bk-preview {
+    max-height: 140px;
+    overflow-y: auto;
+    background: var(--bg-2);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-2) var(--sp-3);
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--text-1);
+}
+.bk-preview-line { padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bk-preview-more { color: var(--text-2); font-style: italic; }

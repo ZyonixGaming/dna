@@ -1,0 +1,352 @@
+/* css/genome.css — 🧬 Genome workspace (plan section 5.4, phase 4). */
+
+.workspace-pane[data-workspace="genome"] { flex-direction: column; }
+
+.gn-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* ---- subject bar ---- */
+.gn-subjectbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-4);
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.gn-subject-label, .gn-compare-label { color: var(--text-1); white-space: nowrap; }
+.gn-subject-select { min-width: 220px; padding: 4px 8px; }
+.gn-compare-select { min-width: 180px; padding: 4px 8px; }
+.gn-write-badge {
+    font-size: 11px;
+    color: var(--ok);
+    white-space: nowrap;
+    padding: 2px 8px;
+    border: 1px solid var(--ok);
+    border-radius: 999px;
+}
+.gn-spacer { flex: 1; }
+.gn-chip { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--text-1); white-space: nowrap; }
+
+/* ---- 3-pane body ---- */
+.gn-body {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+}
+@media (max-width: 1499px) {
+    .gn-body { grid-template-columns: 220px 1fr 280px; }
+}
+
+/* ---- left panel ---- */
+.gn-left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-soft);
+    background: var(--bg-1);
+    padding: var(--panel-pad);
+    gap: var(--sp-4);
+}
+.gn-left-section { display: flex; flex-direction: column; gap: var(--sp-2); }
+.gn-section-title {
+    font-size: calc(var(--font-base) - 1px);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+}
+.gn-raw-text {
+    min-height: 160px;
+    width: 100%;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: calc(var(--font-base) - 1px);
+    padding: var(--sp-2);
+}
+.gn-raw-actions { display: flex; gap: var(--sp-2); }
+.gn-warnings {
+    font-size: calc(var(--font-base) - 1px);
+    color: var(--warn);
+    background: var(--warn-tint);
+    border: 1px solid var(--warn-tint-border);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-2);
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre-line;
+}
+/* ---- preview: the same renderer the World workspace uses for map horses ---- */
+.gn-preview-box {
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-2);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.gn-preview-canvas { display: block; image-rendering: pixelated; }
+.gn-preview-bg { display: flex; gap: var(--sp-2); }
+.gn-bg-swatch {
+    flex: 1;
+    height: 18px;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--sw, transparent);
+}
+/* "Default" reads as a swatch of the panel itself rather than as an empty slot. */
+.gn-bg-swatch.gn-bg-none {
+    background:
+        linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 4px 4px / 8px 8px,
+        var(--bg-2);
+}
+.gn-bg-swatch:hover { border-color: var(--text-2); }
+.gn-bg-swatch.is-active { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+
+.gn-helixnav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.gn-helixnav button {
+    padding: 3px 0;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    cursor: pointer;
+    font-size: 11px;
+}
+.gn-helixnav button:hover { background: var(--bg-4); color: var(--text-0); }
+.gn-diversity { flex-direction: row; flex-wrap: wrap; }
+.gn-diversity button { flex: 1; }
+
+/* ---- center: gene table ---- */
+.gn-center { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--bg-1); }
+.gn-table-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+}
+.gn-search { width: 220px; padding: 4px 8px; }
+.gn-genecount { color: var(--text-2); white-space: nowrap; }
+.gn-table-scroll { flex: 1; min-height: 0; overflow: auto; }
+/* Round-4 feedback F4: `width:100%` with auto table layout spread three narrow columns across
+   the whole centre pane (H:P alone took 194px of a 1292px pane at 1920). Capping the table
+   reproduces the 1280-width proportions the columns already read well at, without switching
+   layout algorithms; .gn-hp shrinks to its content via the width:1% trick. */
+.gn-table { width: 100%; max-width: 780px; border-collapse: collapse; font-size: calc(var(--font-base) - 1px); }
+.gn-table.has-compare { max-width: 900px; }
+.gn-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--bg-2);
+    text-align: left;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-1);
+}
+.gn-helix-header td {
+    position: sticky;
+    top: 25px;
+    z-index: 2;
+    background: var(--bg-3);
+    color: var(--text-1);
+    font-weight: 600;
+    padding: 3px 8px;
+    border-bottom: 1px solid var(--border-soft);
+    border-top: 1px solid var(--border-soft);
+}
+.gn-row td { padding: 2px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+.gn-row:hover { background: var(--bg-2); }
+.gn-row.gn-diff { background: var(--warn-tint); }
+.gn-row.gn-hidden { display: none; }
+.gn-hp { width: 1%; color: var(--text-2); white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+/* F5: the current allele pair, one colour per base. A native <option> can't hold markup, so the
+   pair stays as plain text inside the value <select> (it is the only thing distinguishing two
+   combos that share a value, e.g. "0  GG" vs "0  GA") and is repeated here in colour. */
+.gn-pair { width: 1%; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.08em; }
+.gn-base-A { color: var(--base-a); }
+.gn-base-C { color: var(--base-c); }
+.gn-base-G { color: var(--base-g); }
+.gn-base-T { color: var(--base-t); }
+.gn-desc { white-space: nowrap; cursor: pointer; }
+/* Round-2 feedback C3: marks a gene whose byte stores the recessive allele on strand 1
+   (double-click to flip back to dominant-first). */
+.gn-desc.gn-inverted { color: var(--warn); }
+.gn-desc.gn-inverted::after { content: ' ⇄'; }
+.gn-value-select { width: 100%; padding: 2px 4px; font-size: inherit; }
+.gn-compare-value { color: var(--text-2); text-align: right; padding-right: var(--sp-3); }
+.gn-row.gn-diff .gn-compare-value { color: var(--warn); }
+
+/* ---- right dock ---- */
+.gn-dock {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    background: var(--bg-2);
+    padding: var(--panel-pad);
+    gap: var(--sp-5);
+}
+.gn-dock-section { display: flex; flex-direction: column; gap: var(--sp-2); min-height: 0; }
+.gn-dock-title {
+    font-size: calc(var(--font-base) - 1px);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: var(--sp-1);
+}
+
+.gn-modgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.gn-mod-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 2px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 10px;
+}
+.gn-mod-btn:hover:not(:disabled) { background: var(--bg-4); }
+.gn-mod-btn .gn-mod-icon { font-size: 16px; }
+.gn-mod-btn.active { color: var(--text-0); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.gn-mod-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.gn-preset-filter { padding: 3px 6px; width: 100%; }
+.gn-preset-list { flex: 1; min-height: 80px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; }
+.gn-preset-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 3px 4px;
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+}
+.gn-preset-row:hover { background: var(--bg-3); }
+.gn-preset-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gn-preset-dot { width: 14px; text-align: center; color: var(--ok); }
+.gn-preset-dot.invalid { color: var(--text-2); }
+.gn-preset-compare-btn {
+    background: none;
+    border: none;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 0 3px;
+}
+.gn-preset-compare-btn:hover { color: var(--text-0); }
+.gn-presets-empty { color: var(--text-2); padding: var(--sp-3); }
+
+/* ---- DNA Library: categories and entries (plan section 16) ---------------------------
+   The drop indicator is a border on the TOP edge of whatever the pointer is over, so the
+   line the user sees is literally where the dragged row will land. `border-top` rather
+   than an ::after pseudo-element because the row is the drag target: a pseudo-element
+   would sit under the pointer and fire its own dragleave. */
+.gn-library-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.gn-library-actions .btn { flex: 1; font-size: 11px; padding: 4px 6px; white-space: nowrap; }
+.gn-lib-shared {
+    float: right;
+    font-weight: 400;
+    font-size: 9px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 3px;
+    padding: 0 4px;
+    cursor: help;
+}
+
+.gn-cat-list {
+    list-style: none;
+    margin: var(--sp-2) 0 var(--sp-2);
+    padding: 0;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.gn-cat-item {
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    margin-bottom: var(--sp-2);
+    background: var(--bg-1);
+}
+.gn-cat-item.dragging { opacity: 0.45; }
+.gn-cat-item.drop-before { border-top: 2px solid var(--accent); }
+.gn-cat-item.drop-into { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.gn-cat-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 4px 5px;
+}
+.gn-cat-item.selected > .gn-cat-header { background: var(--bg-2); }
+.gn-cat-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 600;
+}
+.gn-cat-name:hover { color: var(--accent); }
+.gn-cat-count { color: var(--text-2); font-weight: 400; }
+.gn-drag-handle {
+    cursor: grab;
+    color: var(--text-2);
+    letter-spacing: -2px;
+    user-select: none;
+}
+.gn-drag-handle:active { cursor: grabbing; }
+.gn-row-actions { display: flex; gap: 1px; flex: 0 0 auto; }
+.gn-row-actions button {
+    background: none;
+    border: none;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 0 2px;
+    font-size: 11px;
+    line-height: 1;
+}
+.gn-row-actions button:hover { color: var(--text-0); }
+.gn-row-actions button[data-act="del-cat"]:hover,
+.gn-row-actions button[data-act="del-entry"]:hover { color: var(--bad); }
+
+.gn-entry-list { list-style: none; margin: 0; padding: 0 0 3px 0; }
+.gn-entry-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 2px 5px 2px 14px;
+    cursor: pointer;
+}
+.gn-entry-item:hover { background: var(--bg-2); }
+.gn-entry-item.dragging { opacity: 0.45; }
+.gn-entry-item.drop-before { border-top: 2px solid var(--accent); }
+.gn-entry-item.is-compare { color: var(--accent); }
+.gn-entry-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gn-entry-empty, .gn-library-empty { color: var(--text-2); padding: 3px 5px 5px 14px; }
+
+@media (max-width: 1279px) {
+    .gn-body { grid-template-columns: 1fr; grid-auto-rows: minmax(240px, auto); overflow-y: auto; }
+    .gn-left, .gn-center, .gn-dock { border: none; border-bottom: 1px solid var(--border-soft); overflow: visible; }
+}

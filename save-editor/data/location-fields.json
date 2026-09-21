@@ -1,0 +1,74 @@
+{
+  "_comment": [
+    "Per-location fields."
+  ],
+  "locations": {
+
+    "13": {
+      "_note": [
+        "Race Track."
+      ],
+      "fields": [        
+        { "offset": 4, "anchor": "tail", "type": "u32", "label": "Race Count", "min": 0, "max": 1000000, "note": "Race Count", "confirmed": true },
+        { "offset": 8, "anchor": "tail", "type": "u32", "label": "Betting tier", "min": 0, "max": 3, "note": "0= 1-20, 1 = 5-100, 2 = 25-500 (VIP), 3 = 100-10000(elite)", "confirmed": true }     
+      ]
+    },
+    "14": {
+      "_note": "Paddock.",
+      "fields": [        
+        { "offset": 4, "type": "u32", "label": "Dung count", "min": 1, "max": 255, "note": "Default 3. Will increase gradually.", "confirmed": true },
+        { "offset": 8, "type": "u32", "label": "Shovelling count", "min": 0, "max": 65535, "note": "Number of time you shovelled dung.", "confirmed": true },        
+        { "offset": 28, "type": "u32", "label": "Prize money", "min": 0, "max": 1000000, "note": "Default 2500.", "confirmed": true }
+      ]
+    },
+    "18": {
+      "_note": "Clide's Rides.",
+      "fields": [
+        { "offset": 0, "type": "u32", "label": "Cars generated", "min": 0, "max": 8, "note": "Running total of cars the lot has spawned. 2 cars can spawn at a time, up to a total of 8. The 8th car is Porche which can move on its own.", "confirmed": true }
+      ]
+    },
+    "20": {
+      "_note": "Lasso-Mart.",
+      "fields": [
+        { "offset": 4, "type": "u32", "label": "Lassos Sold", "min": 0, "max": 255, "note": "Lassos Sold.", "confirmed": true },
+        { "offset": 8, "type": "u32", "label": "Shovels Sold", "min": 0, "max": 255, "note": "Shovels Sold.", "confirmed": true }
+      ]
+    },
+    "21": {
+      "_note": "Tent.",
+      "fields": [
+        { "offset": 0, "type": "bool", "label": "First Quest Completed", "note": "Check = completed.", "confirmed": true },        
+        { "offset": 8, "type": "u32", "label": "2nd Quest phase", "min": 0, "max": 4, "note": "0 to 4. 0 = Quest Active, 1 = Completed,Award Pending, >1 = Completed", "confirmed": true }
+      ]
+    },
+    "23": {
+      "_note": "The Circus.",
+      "fields": [
+        { "offset": 4, "type": "bool", "label": "Diving available", "note": "Checked = the lock for this event is still active", "confirmed": true },
+        { "offset": 8, "type": "bool", "label": "Strong Horse available", "note": "Checked = the lock for this event is still active", "confirmed": true },
+        { "offset": 12, "type": "bool", "label": "Trampoline available", "note": "Checked = the lock for this event is still active.", "confirmed": true },
+        { "offset": 16, "type": "bool", "label": "Acrobat available", "note": "Checked = the lock for this event is still active", "confirmed": true }
+      ]
+    },
+    "27": {
+      "_note": "Power Plant..",
+      "fields": [
+        { "offset": 0, "type": "bool", "label": "Powered", "note": "1 = connected power source (obj+0x270).", "confirmed": true }        
+      ]
+    },
+    "29": {
+      "_note": "Sumo Ring.",
+      "fields": [
+        { "offset": 0, "type": "u32", "label": "Match Number", "min": 1, "max": 65535, "note": "1 =first match, 8 = world champion, >8 = new world champion.", "confirmed": true },
+        { "offset": 4, "type": "u32", "label": "Prize Money", "min": 0, "max": 65535, "note": "Prize money if you win the next match.", "confirmed": true }      ]
+    },
+    "31": {
+      "_note": "Bio-Hacker / Normal Suburban House. Name will change when you drop DNA into vat.",
+      "fields": [
+        { "offset": 0, "type": "u32", "label": "Interaction phase", "min": 0, "max": 3, "note": "0,1 = Neighbor, 2,3 = Vat Opens (Note that you need to change the bush position separately).", "confirmed": true },
+        { "offset": 4, "type": "u32", "label": "Bush position", "min": 0, "max": 65535, "note": "0 = left of screen, 262 = covering vat, 441 = off-screen", "confirmed": true },
+        { "offset": 24, "type": "u32", "label": "Vat entries", "readOnly": true, "note": "Equals the amount of data collected. Max 960 (240 genes x 4 G,A,T,C bases).", "confirmed": true }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1365 @@
+{
+ "_comment": "Location record templates.",
+ "_generatedFrom": "SteamLibrary\\steamapps\\common\\Horsey Game\\save",
+ "templates": {
+  "0": {
+   "index": 0,
+   "name": "My House",
+   "body": "/////wAAAAA6PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9Oj06PTo9KTotOi06LTotOi06LTotOi06LTotOi06LTotOi06LTotOi06LTotOi06LToAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAQAAAA==",
+   "tailLength": 276,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 276,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 41,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": {
+    "count": 4,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAACgAXCgAAAAAAAAAAAAAAAAAAAAAAAADgQM3MjEAAADA/AABQPwMAAAAAAAAAAAAAAAoAFwoAAAAAAAAAAAAAAAAAAAAAAAAA4EAAAKhAAAAwPwAAUD8DAAAAAAAAAAAAAAAKABcKAAAAAAAAAAAAAAAAAA4AAAEAAPhAzcyMQAAAMD8AAFA/AwAAAAAAAAAAAAAACgAXCgAAAAAAAAAAAAAAAAAAAAAAAAD4QAAAqEAAADA/AABQPw==",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "My House",
+    "instances": 79
+   }
+  },
+  "1": {
+   "index": 1,
+   "name": "Willaby Ranch",
+   "body": "AAAAAAEAAAAJCQkaChESCgkSEhIJCQkJEgkUGwkJEgkJCgkJCQkJEgkSCQkMCRsaEhsJCQkJEQkJCQkJGQkJCRMaEwkJCQkSCQkRCRIKCgkJCgwSDBsUEhIJCRIJCQkcCQsJCgkSERERGwkJCQkbEgkJCQkJCQoUGwkJCQkRDAkJCRIJGRIbCRIJEhEJCQkJCRsLCRERCgkREgsbCSIkCgkaCQoiChISCREZCwsSCREZGxISGyIKCgkbEREKEhEhEhEKHAkUFAkKEhISEgkJCQkkGwoLCREJCQkSEgkJCQkJEgkJEhIJGwkSEgkJCQkJCQkJCQkKChIJCQkbExISCQkJGxoJCQkJEgkKCREJCREJCwkRCQkkCQkSCQkJGRoiCQkJCQkJEgkJCQkbCQkJERkLCwkJCQkSCgkJGQkUEgkJCRISEiEhEhEJCQkJCQkZCgoZCgkSCQkJIQoUCgkJCQkJCQoJCgsLEhEJCQkbCQkJCREJJBISCQkJDBIRCQkJCQkJCRIkJBQkJAsbJCISJBwkJCQSJCIbJCQkJCQkJCQkJCQkJCQkEgkJCQkKCQkJCQkJExIKGwkSCQkSEgkJCQkJCQkRCQkJCQkJCQkJCQkJEgkJCQkJEQkJCQkRCQoRCQkJCQkJCREAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 791,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 791,
+     "ownerState": 2
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 9,
+   "crowd": 1,
+   "crowdBytes": "CQkJGgoREgoJEhISCQkJCRIJFBsJCRIJCQoJCQkJCRIJEgkJDAkbGhIbCQkJCREJCQkJCRkJCQkTGhMJCQkJEgkJEQkSCgoJCQoMEgwbFBISCQkSCQkJHAkLCQoJEhERERsJCQkJGxIJCQkJCQkKFBsJCQkJEQwJCQkSCRkSGwkSCRIRCQkJCQkbCwkREQoJERILGwkiJAoJGgkKIgoSEgkRGQsLEgkRGRsSEhsiCgoJGxERChIRIRIRChwJFBQJChISEhIJCQkJJBsKCwkRCQkJEhIJCQkJCRIJCRISCRsJEhIJCQkJCQkJCQkJCgoSE2mQo/////9LAAAAHgAABQAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Dale",
+     "fixed": "AAEAAAAB//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Willaby Ranch",
+    "instances": 79
+   }
+  },
+  "2": {
+   "index": 2,
+   "name": "Circle-D Corral",
+   "body": "AAAAAAEAAAAJCQkKGhIaCQkSEgkJCQkJEgkSGwkJEgkJCQkJCQkJCQkSCQkkCRsaChEJCQkJERsJCQkZCQkJEhEZCgkKCQkSCQkSCRIKCQkJESESHBsiEhEJCRIJCQkcChkJCQkSCRIUDAkJCQkbEgkJCQoJCQkSGwkJCQkSJAkJCQkJGRIbCQohEgoJCQkJCRsLCQkLCyQLCRkJCREJCgkTCRIKChoRCQoRERkRChMZGxISCRIJCQkSIxEKEgoRGgoKFAkREgkSEhISEgkJCRESCxIJCRIJCQkSEgkJCQkJEgkJEhIJGwkSEgkJCQkJCQkJDAkKChIJGQkbGRETCQkLGRMJCQoJEgkRCQkJCSMJGRERCQkkEgkSCQkJGwsRCgkLGQkJEQoJCQkLCQkJCgkTCwkJCRkSCQkJCQkkGwkJCRoSERMJEgkJCQkJCQkJChEJCgkaCwkJCQkRGQoJCREJCQkJCQkbCgkJCQkRCQkJCRERJBISCQkJEREJCQkJCQkKCRIkJCIkJBEZJCQiJBwkJCQaJCQbJCQkJCQkJCQkJCQkJCQkCQkJCQkKCQkJCREJGxIiGwkJCQkSEhEJCQkJCQkaCQoJCQkLCQkJCQkJEgkJCQkJCQkJEQkJCQoJCQkJCQkJCQoAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 10,
+   "crowd": 1,
+   "crowdBytes": "CQkJChoSGgkJEhIJCQkJCRIJEhsJCRIJCQkJCQkJCQkJEgkJJAkbGgoRCQkJCREbCQkJGQkJCRIRGQoJCgkJEgkJEgkSCgkJCREhEhwbIhIRCQkSCQkJHAoZCQkJEgkSFAwJCQkJGxIJCQkKCQkJEhsJCQkJEiQJCQkJCRkSGwkKIRIKCQkJCQkbCwkJCwskCwkZCQkRCQoJEwkSCgoaEQkKEREZEQoTGRsSEgkSCQkJEiMRChIKERoKChQJERIJEhISEhIJCQkREgsSCQkSCQkJEhIJCQkJCRIJCRISCRsJEhIJCQkJCQkJCQwJCgoSzgMFFQAAAABQAAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Armano",
+     "fixed": "AAIAAAAC//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Circle-D Corral",
+    "instances": 100
+   }
+  },
+  "3": {
+   "index": 3,
+   "name": "Bob's Farm",
+   "body": "AAAAAAEAAAAJCQkSGhESCwkSEhEJCQkJEgkiGwkJEiIJGgkJCQkJEQkSCQkKChsiCQoJCQkJCgkJCQkJCQkJCRkREgkJCQkSCQkRCRISEQkJCSESGRsSEhIJCRsJCQkjEQkJEQkSEQoUIwkJCQkbEgkJCRIJCQokIwkJCQoKIQkJCQkJCxIaCREJEhIJCQkZCRsLCQkTERoZCRsbCREkCgkSCREKERISCQobGwsJERobCRISGxQZCRIcEREJCQoiGQoKFAkKFAkSEhISCgkJCREcGQkZCwoJCQkSEgkJCQkJEgkJEhIJGQkSEgkLCQkJCQkJEhEJChIJCQkSGhIKCQkLGRsJCRkJEgkJCQoMCQkKCgkRCgkkCSESCQkJGgsaEgkJEgkJEgkJCQkJCQkJCQoZCwkJEQkSCQkJCwkiCwkJEQoSJAwZEhIJCQkJCQkJCRILCgkSCQoJCxEJCQkJCQkKCQkJCQkbEgkJCQkaCQkJCQkJDBISCQkJCQoSCQkJCQsJCRIkJBIcJBETJBIkJCQkJCMTJCQbJCQkJCQkJCQkJCQkJCQkCgoJCQkJCQkJCQkJExIUGwkSCQkSEhEJCQkJCQkaCREJCQoJCQkJCQkJEgkJCgkKCQkJEQkJCQkJCQkJCQkJCQkAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 3
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 9,
+   "crowd": 1,
+   "crowdBytes": "CQkJEhoREgsJEhIRCQkJCRIJIhsJCRIiCRoJCQkJCREJEgkJCgobIgkKCQkJCQoJCQkJCQkJCQkZERIJCQkJEgkJEQkSEhEJCQkhEhkbEhISCQkbCQkJIxEJCREJEhEKFCMJCQkJGxIJCQkSCQkKJCMJCQkKCiEJCQkJCQsSGgkRCRISCQkJGQkbCwkJExEaGQkbGwkRJAoJEgkRChESEgkKGxsLCREaGwkSEhsUGQkSHBERCQkKIhkKChQJChQJEhISEgoJCQkRHBkJGQsKCQkJEhIJCQkJCRIJCRISCRkJEhIJCwkJCQkJCRIRCQoSUjPmGgAAAABVAAAAHgAAAwAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Bob",
+     "fixed": "AAMAAAAD//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Bob's Farm",
+    "instances": 79
+   }
+  },
+  "4": {
+   "index": 4,
+   "name": "Mabel's Stables",
+   "body": "AAAAAAEAAAAJCQkSCRESCQkSEhIJCQkJEgkSGwkJEhEJCQkJCQkJCQkSCQkJChIhEhEJCQkJCRsJCQkZCwkJCRISEgkKCQkSEQkKCRIRCgkJCiQSJBsUEhIJCRoJCQkkEQsKEQkSCgkSGwkJCQkbEgkJCREJCREiGQkJCRERJAkJCQkJGxITCRMUERISCQkZCRsZCQkbGgsJChobCQkMCgoSCRIKExIJCRIbCRsKERkJGRISGiQLCgkkCgkKEhEJCwoJJAkMEgkSEhISEgkJCQkkGREZChkJCRESEgkJCQkJEgkJEhIJCwkSEgkZCQkJCQkJEREUEhIJGwkLGxELCQkZGRIJCRkJEgkJCQkMCQoJGwkJEQkjEQkSCQkbChkRGQkRCwkJCgsJCQkJCQkJCRsKGQkJCQsSCQkJCQkUCQkJCQkSFBwJEhkJCQkJCQkJCRILEgkSCRIJIREbCwkJCQkJCQkJCQkbEhEJCQkTCQkJCRkJJBISCQkJCQkSCQkJCQkJCRIkJBIkJBsRJBIiJCQkJCMTJCQbJCQkJCQkJCQkJCQkJCQkChEJCQkJCQkJCQkJEhIKGwkSCQkREhEJCQoKCQkKEhsJCQkLCQkJCQkJEgkJCQkKCQkJCQkaCQkJCQkJIQkJCQoAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJEgkREgkJEhISCQkJCRIJEhsJCRIRCQkJCQkJCQkJEgkJCQoSIRIRCQkJCQkbCQkJGQsJCQkSEhIJCgkJEhEJCgkSEQoJCQokEiQbFBISCQkaCQkJJBELChEJEgoJEhsJCQkJGxIJCQkRCQkRIhkJCQkSGyQJCQkJCRsSEwkTFBESEgkJGQkbGQkJGxoLCQoaGwkJDAoKEgkSChMSCQkSGwkbChEZCRkSEhokCwoJJAoJChIRCQsKCSQJDBIJEhISEhIJCQkJJBkRGQoZCQkREhIJCQkJCRIJCRISCQsJEhIJGQkJCQkJCRERFBISG+YkYAAAAABaAAAAHgAABQACAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Mabel",
+     "fixed": "AAQAAAAE//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Mabel's Stables",
+    "instances": 100
+   }
+  },
+  "5": {
+   "index": 5,
+   "name": "Surebreed Steeples",
+   "body": "AAAAAAEAAAAJCQkTGxEaCwkSEgkJCQkJEgkSGwkJEhEJCQkJCQkJEQkSCQkkCQkkEgkJCQkJERkJCQkZCQkJEhsJEQkSCQkSCwkSCRISEQkJCSQSIRsiEhIJCRIKCQkiCQkRCQkSEgkUGwkJCQkbEgkJCRIJCRIiGwkJCRESJAkJCQkJGRIaCRoSGQoJCQkbCRsLCQkLExMJERMaCSEUEgkTCRILCxIRCQkZExoJEQoZCRoSGyIRCwkKGhEKEhEkCxEKEwkaEgkSEhISEQkJCQkSGREZGxoJCRESEgkJCQkJEgkJEhIJCQkSEgkZCQkJCQkJIgokChIJGQkSCxIKCQkJCRMKCQkJEgkJCQkJCRkKGQkRCQkkCSESCQkKGgscCwkZCQkJCQkJCQkLCQkJCRsJCQkJCQkSCQkJCQkhCgkJCgsSIRELEgkJCQkJCQkJCREZCgkTGQkJDAkRGQkJCQkJEQkJCQkLCgkJCQkKCQkJCREJJBISCRkKCQoRCQkJCQkKCRIkJCQkJAoKJBQkJBwkJCQTJCIbJCQkJCQkJCQkJCQkJCQkChEJCQkJCQkJCQoJGxIcGwkJCQkREhIJCQkRCQkTCRoJCQkZCQkJCQkJEgkJCQoRCgkJCgkLCQkJCgkJJAkJEQoAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 1
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 7,
+   "crowd": 1,
+   "crowdBytes": "CQkJExsRGgsJEhIJCQkJCRIJEhsJCRIRCQkJCQkJCREJEgkJJAkJJBIJCQkJCREZCQkJGQkJCRIbCREJEgkJEgsJEgkSEhEJCQkkEiEbIhISCQkSCgkJIgkJEQkJEhIJFBsJCQkJGxIJCQkSCQkSIhsJCQkREiQJCQkJCRkSGgkaEhkKCQkJGwkbCwkJCxMTCRETGgkhFBIJEwkSCwsSEQkJGRMaCREKGQkaEhsiEQsJChoRChIRJAsRChMJGhIJEhISEhEJCQkJEhkRGRsaCQkREhIJCQkJCRIJCRISCQkJEhIJGQkJCQkJCSIKJAoSBiyc8v////9fAAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Max",
+     "fixed": "AAUAAAAF//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Surebreed Steeples",
+    "instances": 79
+   }
+  },
+  "6": {
+   "index": 6,
+   "name": "Hacienda Picante",
+   "body": "AAAAAAEAAAAJCQkbGxISCQkSEhIJCQkJEgkSGwkJEhERCgkJCQkJEQkSCQkkEhELChIJCQkJCgkJCQkZCQkJEREREQkJCQkSCQkSERIMCQkJESESCxsSEhIJCRsKCQkSEQkJEQkSEREUDAkJCQkbEgkJCREJCRIkJAkJCREKJAkJCQkJGRIaCQsKGRERCQkJCRsbCQkaGRkTChoLCQwiCQoRCQoSCREKCQkbCRMJEhIJCxMSGhIREgkcDAkSEgobEgkRGgkUEgkSEhISEgkMCREkGxEJCQsJCRkSEgkJCQkJEgkJEhIJCQkSEgkLCQkJCQkJDAoRERIJCQkbExISCQkZCxkJCQkJEgkJCQkJEQoJGgkJCgkkCQkSCQkJChkiEQkJCQkJCgkJCQkJCQkJGgsKGgkJEQkSEQkJCQkJCgkJEQkSGxsMEhEJCQkJCQkZCRMTEQkSGQoJCQkiCREJCQkJCRIJCgkLCgoJCQkZCQkJCQsJJBISCQkLCxIRCQkJCQkJCRIkJBIcJBISJBQkJBwkJCQSHBIbJCQkJCQkJCQkJCQkJCQkCQkJCQkJCQkJCQkRGhIkGwkSCQkJEgkJCQkJCQkKCRkJCQkLCQkJCQkJEgkJCQkJCQkJEgkTCQkJCQkJEQkJCQkAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 20,
+   "crowd": 1,
+   "crowdBytes": "CQkJGxsSEgkJEhISCQkJCRIJEhsJCRIREQoJCQkJCREJEgkJJBIRCwoSCQkJCQoJCQkJGQkJCREREREJCQkJEgkJEhESDAkJCREhEgsbEhISCQkbCgkJEhEJCREJEhERFAwJCQkJGxIJCQkRCQkSJCQJCQkRCiQJCQkJCRkSGgkLChkREQkJCQkbGwkJGhkZEwoaCwkMIgkKEQkKEgkRCgkJGwkTCRISCQsTEhoSERIJHAwJEhIKGxIJERoJFBIJEhISEhIJDAkRJBsRCQkLCQkZEhIJCQkJCRIJCRISCQkJEhIJCwkJCQkJCQwKERES/EUlYQAAAABkAAAAHgAAAQAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Lupita",
+     "fixed": "AAYAAAAG//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Hacienda Picante",
+    "instances": 100
+   }
+  },
+  "7": {
+   "index": 7,
+   "name": "Paradise Pastures",
+   "body": "AAAAAAEAAAAJCQkSCQkTCQkSEgoJCQkJEgkKGwkJEgkJEQkJCQkJCQkSCQkUCgoaChEJCQkJCgkJCQkJCQkJEQsZGgkSCQkSCQkKGRIJHAkJCQwSGRsSEhIJCRIJCQkSCQkKCQkSCgoKCwkJCQkbEgkJCQkJCQoiHAkJCQkRJAkJCQkJGxIbCQoRChIJCQkLCRsbCQoLExwKCRkbCSQJChkSCRIhCRsZCREJCxkSCRoKCRIaESIbCgkTEQoJEgoJEgoKEgkZEgkSEhISEgkJCQkkCwoJCwkJCQkSEgkJCQkJEgkJEhIJGQkSEgkZCQkJCQkJFAkSChIJGQkKEhISCQkZCwsJCQkJEgkJCQkJCgsJCwkJCQkkCQwSCQkJChEcCQkJCQkJEhEJCQkJCwkJCRoTIgkJGRESGQkJCwkRCQkJEQkSIgoMEgkJCQkJCQkJCQobEQkSGQkJIwkMCwkJCQkJCREJCQkZCQkJCQkbEQkJCQoJJBISCQkJCRIKCQkJCQsJCRIkJBQkJAkTJCQkJBwkJCQSJBIbJCQkJCQkJCQkJCQkJCQkERIJCQkJCQkJCREJGxIKGwkJCQkREgkJCQkJCQkbCRkJCQkLCQkJCQkJEgkJCQkRCQkJEQkKCQkJCgkJDAkJERIAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJEgkJEwkJEhIKCQkJCRIJChsJCRIJCREJCQkJCQkJEgkJFAoKGgoRCQkJCQoJCQkJCQkJCRELGRoJEgkJEgkJChkSCRwJCQkMEhkbEhISCQkSCQkJEgkJCgkJEgoKCgsJCQkJGxIJCQkJCQkKIhwJCQkJESQJCQkJCRsSGwkKEQoSCQkJCwkbGwkKCxMcCgkZGwkkCQoZEgkSIQkbGQkRCQsZEgkaCgkSGhEiGwoJExEKCRIKCRIKChIJGRIJEhISEhIJCQkJJAsKCQsJCQkJEhIJCQkJCRIJCRISCRkJEhIJGQkJCQkJCRQJEgoSkQWGFgAAAABpAAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Dot",
+     "fixed": "AAcAAAAH//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Paradise Pastures",
+    "instances": 100
+   }
+  },
+  "8": {
+   "index": 8,
+   "name": "Parsley's Hideaway",
+   "body": "AAAAAAEAAAAJCQkSCwoSCQkSEgoJCQkJEgkMGwkJEhEKGgkJCQkJCgkSCQkkCgsbEhEJCQkJEQkJCQkJCQkJEgsSDAkSCQkSEQkSCRIRCwkJCiESGxsSEhIJCRoJCQkSEgsJEQkSEgoRDAkJCQkbEgkJCQkJCQokHAkJCQsSJAkJCQkJGxITCQoJCREKCQkZCRsZCQkZCiEbCQsTCSERCQkSCRIhGxoJCRIbCRsJCQoRCRoSGxQREREcCxIREQkTGhEKGwkaEgkSEhISEgkJCQocCwoTCRkJCQkSEgkJCQkJEgkJEhIJCwkSEgkZCQkJCQkJIhIRCRIJCgkaExISCQkZCQoJCQkJEgkJCQkJCQsSCQoJCQkcCgwSCQkZCgoLEQkJCQkJEQkJCQkLCQkJGRkKIgkJCwkSCQkKCQkhGQkJCQoSCRQJEhkJCQkKCQkJEQoJEQkSEREJCwkKCQoJCQoJCQkJCQkbEhEJCQkLCQoJCQoJIxISCRsJCRIRCQkJCQkRCRIkJCQcJBIRJBIUJBwkJCQTGxIbJCQkJCQkJCQkJCQkJCQkCREJCQkJCQkJCREJGxIUGwkKCQkSEgoJCQkRCQkZCgsJCQsJCQkJCQkJEgkJCgkRCQkRCQkJCQkJEQkJCQkJCREAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJEgsKEgkJEhIKCQkJCRIJDBsJCRIRChoJCQkJCQoJEgkJJAoLGxIRCQkJCREJCQkJCQkJCRILEgwJEgkJEhEJEgkSEQsJCQohEhsbEhISCQkaCQkJEhILCREJEhIKEQwJCQkJGxIJCQkJCQkKJBwJCQkLEiQJCQkJCRsSEwkKCQkRCgkJGQkbGQkJGQohGwkLEwkhEQkJEgkSIRsaCQkSGwkbCQkKEQkaEhsUERERHAsSEREJExoRChsJGhIJEhISEhIJCQkKHAsKEwkZCQkJEhIJCQkJCRIJCRISCQsJEhIJGQkJCQkJCSISEQkSvisSNAAAAABuAAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Parsley",
+     "fixed": "AAgAAAAI//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Parsley's Hideaway",
+    "instances": 39
+   }
+  },
+  "9": {
+   "index": 9,
+   "name": "Unlucky's Equestrium",
+   "body": "AAAAAAEAAAAJCQkSEwoaEgkSEhEJCQkJEgkSGwkJEgkRCgkJCQkJCgkSCQkSCRsRChMJCQkJEQsJCQkJCQkJCxsTIwkRCQkSCgkSCRISCgkJCSQSGRsSEgkJCRMJCQkaChkRCgkSEQkRJAkJCQkbEgkJCQkJCQkkGwkJCQsJDAkJCQoJGxITCRIRERIJCQkJCRsJCQoKGxkZCgsKCSIkCQkTCQoaEwkaCQoRCRkSCRkRGxISExQREQoaExEKEgocCgoREwkiEgkKEhISEgkJCQoTGQoJCRkJCRESEgkJCQkJEgkJEhIJGwkSEgkbCQkJCQkJDAkhCRIJCQkSExIRCwkLCwoJCQkJEgkJCQkJCRkJCREJCQkcEiESCQkJCwkKEgkJEQkJChEJCQkZGQkJCwobIQkJEQoSCQkJCQkJCQkJCQoSChoJEhEKCQkJCQkZCRELEQkTCwoJCQkZCxkJCQkJCQkJCQkZEgoJCQkLCQoJCRMJJBISCQkZCRISCQkJCQkJCRIkJCIcJBsTJCIUJBskJCQSJBIbJCQkJCQkJCQkJCQkJCQkCREJCQkKCQkJCQkKExIiGwkSCQkREhEJCQkJCQkbChoJCQkJCQkJCQkJEgkJChEJEwkJCQoZCQkJCQkJCQkJCQkAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJEhMKGhIJEhIRCQkJCRIJEhsJCRIJEQoJCQkJCQoJEgkJEgkbEQoTCQkJCRELCQkJCQkJCQsbEyMJEQkJEgoJEgkSEgoJCQkkEhkbEhIJCQkTCQkJGgoZEQoJEhEJESQJCQkJGxIJCQkJCQkJJBsJCQkLCQwJCQkKCRsSEwkSERESCQkJCQkbCQkKChsZGQoLCgkiJAkJEwkKGhMJGgkKEQkZEgkZERsSEhMUEREKGhMRChIKHAoKERMJIhIJChISEhIJCQkKExkKCQkZCQkREhIJCQkJCRIJCRISCRsJEhIJGwkJCQkJCQwJIQkSVYK06P////9vAAAAHgAAAwAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Unlucky",
+     "fixed": "AAkAAAAJ//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Unlucky's Equestrium",
+    "instances": 34
+   }
+  },
+  "10": {
+   "index": 10,
+   "name": "Glen's Estate",
+   "body": "AAAAAAEAAAAJCQkZCRITEgkSEhIJCQkJEgkRGwkJEhsJGgkJCQkJCgkSCQkUCRsjEhIJCQkJEgsJCQkJCQkJCgoLFAkRCQkSCQkSCRIREgkJEiQSIxsSEgoJCRMJCQkcCQkSCgkSEgoJJAkJCQkbEgkJCQoJCREiGwkJCRsRJAkJCQkJGxIbCQkKEhIJCQkbCRsLCQkaEhMZChITCSQREQkaCREUEhMTCQkJGwsJCgoZExIaGyQJExITEgkREgkSChEKGgkREgkSEhISEgkJCQokCREJCQoJCQkSEgkJCQkJEgkJEhIJCwkSEgkJCQkJCQkJCQkSERIJCQkTGhISEQkJGwkKCQkJEgkJCQkJCSIKGQkJCREkCQkSCQkKGRoaEQkJCwkJCQkJCQkJCQkJCRMbGwkJGgkSCQkJCQkKGQkJChESGhMjEhsJCQkJCQkLCQkLCgkSCQoJIQkJEgkJCREKCQoJCQkbEgkJCQkZCQoJCQsJJBISCQkJDBEKCQkJCRkLCRIkJBQkJAsJJCIiJCQkJBwTJBIbJCQkJCQkJCQkJCQkJCQkEhIJCQkRCQkJCQkJExISGwkKCQkREhEJCQkJCQkaEQkJCQobCQkJCQkJEgkJCQkRCQkJEQkJCQwJCQkJCQkJCREAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJGQkSExIJEhISCQkJCRIJERsJCRIbCRoJCQkJCQoJEgkJFAkbIxISCQkJCRILCQkJCQkJCQoKCxQJEQkJEgkJEgkSERIJCRIkEiMbEhIKCQkTCQkJHAkJEgoJEhIKCSQJCQkJGxIJCQkKCQkRIhsJCQkbESQJCQkJCRsSGwkJChISCQkJGwkbCwkJGhITGQoSEwkkEREJGgkRFBITEwkJCRsLCQoKGRMSGhskCRMSExIJERIJEgoRChoJERIJEhISEhIJCQkKJAkRCQkKCQkJEhIJCQkJCRIJCRISCQsJEhIJCQkJCQkJCQkJEhESJ84bkf////9wAAAAHgAAAQAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Glen",
+     "fixed": "AAoAAAAK//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Glen's Estate",
+    "instances": 34
+   }
+  },
+  "11": {
+   "index": 11,
+   "name": "Heart Throb's Grange",
+   "body": "AAAAAAEAAAAJCQkaEhISEQkSEhIJCQkJEgkLGwkJEgwJCQkJCQkJCgkSCQkhERMUEhoJCQkJCQkJCQkJCQkJEhkbEgkRCQkSCQkSCxIMGQkJCiQSIRsSEgoJCRIJCQkiCRkJCgkSCQkKDAkJCQkbEgkJCREJCQokHAkJCRkSJAkJCQkJGxIbCQsSEwkKCQkRCRsJCQkSCRMKChMJCQkkEhkSCREMGxIJCQkLERsSChMZChkSCxIaGhEjGhIJCQoiGgkKFAkkEgkSEhISEgkJCREUGxEJCQoJCQoSEgkJCQkJEgkJEhIJGwkSEgkJCQkJCQkJJAkSChIJEQkJCRISEQkLGREJCQoJEgkJCQoJCQkKCwkKCQkkCQkSCQkJGxEMCwkJGQkJEgkJCQkZGQkJCQkSIwkJCgkSCQkJCwkiGQkJChkSDBsbEgkJCgkJCQkJCQkJEgkSEQoJGwkhCRIKCQkJEQkJCQkZEgoJCQkSCQkJCQsJIxISCQkJCQkRCQkJCQkJCRIkJBQjJBsSJCQkJBskJBwSHCIbJCQkJCQkJCQkJCQkJCQkCgoJCQkJCQkJCQkJEhIkEwkJCQkKEgkJCQkKCQkZChsJCQkJCQkJCQkJEgkJEgkRCgkJCQkJCQkJCQkJCQkhCQkAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJGhISEhEJEhISCQkJCRIJCxsJCRIMCQkJCQkJCQoJEgkJIRETFBIaCQkJCQkJCQkJCQkJCRIZGxIJEQkJEgkJEgsSDBkJCQokEiEbEhIKCQkSCQkJIgkZCQoJEgkJCgwJCQkJGxIJCQkRCQkKJBwJCQkZEiQJCQkJCRsSGwkLEhMJCgkJEQkbCQkJEgkTCgoTCQkJJBIZEgkRDBsSCQkJCxEbEgoTGQoZEgsSGhoRIxoSCQkKIhoJChQJJBIJEhISEhIJCQkRFBsRCQkKCQkKEhIJCQkJCRIJCRISCRsJEhIJCQkJCQkJCSQJEgoSW4ZGagAAAABxAAAAHgAAAQAAAP8AABAAAAAAAAAAAAAAAAD9/33/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Heart Throb",
+     "fixed": "AAsAAAAL//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Heart Throb's Grange",
+    "instances": 32
+   }
+  },
+  "12": {
+   "index": 12,
+   "name": "Knight's Horsery",
+   "body": "AAAAAAEAAAAJCQkbCwoSGgkSEhIJCQkJEgkLGwkJEhMJGQkJCQkJCQkSCQkJChsRCQoJCQkJChsJCQkJCQkJChsRHAkKCQkSGQkSCRIRCQkJESQSGRsSEhIJCRIJCQkUEQkJCgkSCQkSJAkJCQkbEgkJCQoJCQoUCwkJCQkSJAkJCQkJGRIaCRkiCwoRCQkZCQsJCQkaEiIZERETCSQiCQkSCRIhCRoKCQoJERkSCQkJChISCxQLEhEhIwkJChESExISGwkkEgkSEhISEQkJCQkbCQkJGRkJCRESEgkJCQkJEgkJEhIJGwkSEgkbCQkJCQkJEQkhEhIJCQkbChIRCQkJCQkJCgsJEgkJCQwJEQoJCgkJEQkkCgkSCQkRCQsZCgkJEwkJEgkJCREZCQkJCRsSIgkJCRkSCQkJCQkJGgkJCgoSEiQMEhkKCQkRCQkJCREJEgkSCQkJIQkJCgkJCQkJCQkJERkbEhIJCQkaCQkJCRsJJBISCQkLCQkRCQkJCQkbCRIkJCQkJBsJJBQkJCMkJCQSIyQbJCQkJCQkJCQkJCQkJCQkCQoJCQkJCQkJCQoJGhIJGwkKCQkJEgoJCQoRCQkJCQkJCQkLCQkJCQkJEgkJEQkJCQkRCRIRCREJDAkJCQkJCgkAAAAAAAAAAAAAAAA=",
+   "tailLength": 496,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": true,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 496,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJGwsKEhoJEhISCQkJCRIJCxsJCRITCRkJCQkJCQkJEgkJCQobEQkKCQkJCQobCQkJCQkJCQobERwJCgkJEhkJEgkSEQkJCREkEhkbEhISCQkSCQkJFBEJCQoJEgkJEiQJCQkJGxIJCQkKCQkKFAsJCQkJEiQJCQkJCRkSGgkZIgsKEQkJGQkLCQkJGhIiGREREwkkIgkJEgkSIQkaCgkKCREZEgkJCQoSEgsUCxIRISMJCQoREhMSEhsJJBIJEhISEhEJCQkJGwkJCRkZCQkREhIJCQkJCRIJCRISCRsJEhIJGwkJCQkJCREJIRISYtCx0/////9yAAAAHgAABAAAAP8AABCAdEtBeFIYQQAAAAD9/33/AAAAAAAAAADPpLI/tLH6QA==",
+   "crowdRecords": [
+    {
+     "name": "Knight",
+     "fixed": "AAwAAAAM//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Knight's Horsery",
+    "instances": 20
+   }
+  },
+  "13": {
+   "index": 13,
+   "name": "Race Track",
+   "body": "/////wAAAAADAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAQAAAAkJCRoTEhoRCRISEQkJCQkSCRIbCQkSCgkZCQkJCQkJCRIJCSQJGSIJEwkJCQkSGQkJCQsJCQkTGRsSCRIJCRIJCREJEhILCQkKJBIcGxISEQkJEgkJCSIJCQkJCRISEgwLCQkJCRsSCQkJEgkJEiIbCQkJERIhCQkJCQkJEhsJCQkbCgoJCQsJCiEJCRoJERMJGQoJFCQRChMJEhISEhEJEhoLCgkKCgsJGhMJEgkSERIjCQkSCSIRCREUCQoSCRISEhIKCQkJCSILCgoREwkJCRISCQkJCQkSCQkSEgkbCRISCRkJCQkJCQkhChQJEo847aT/////cwAAAB4AAAEABwD/AAAAAAAAAAAAAAAAAAAAEJhWVAAAAAAAAAAAAAAAAAAAAAABAAAACQkJGhsSGgkJEhISCQkJCRIJEhsJCRIaCQkJCQkJCREJEgkJIhERExERCQkJCRILCQkJCQkJCQkKEQkJEQkJEhsJCgkSChMJCREkEiMbIhISCQkSCgkJIgoJCREJEwkRCRkJCQkJGxIJCQkJCQkSIhwJCQkJEiEJCQkRCRkSEgkZJAkJCgkJGwkbGQkJChIkGgkZGwkZFBIZEgkKIRIbEgkJGRkbEQobCwsbEgkiCRMRFCERERIJEQsSChsJGxIJEhISEgoJCQkJGhsKCgkRCQkREhIJCQkJCRIJCRISCQsJEhIJGQkJCQkJCQwRIhISU5tBjf////90AAAAHgAAAQAFAP8AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAJCQkaEhIaEwkSEhIJCQkJEgkRGwkJEgkKCQkJCQkJEQkSCQkSERIKERsJCQkJEgkJCQkZCQkJChoJIwkRCQkSCQkKCRIJCQkJEgwSHBsSEgoJCRIKCQkaCgkJCQkSEQkRJAkJCQkbEgkJCQkJCQkSGwkJCRkSJAkJCRoJGRISCREKGQoRCQkJCRsZCRIaEQwLEgoaCRQKEQoSCQoiGhISCRILCRMKCgsJCxISGSQZEgkjEwkJChITChESJAkUEwkSEhISEgkJCQkiCxEKCRoJCRESEgkJCQkJEgkJEhIJCQkSEgkJCQkJCQkJIhEiChLXmEfO/////3UAAAAeAAABAAAA/wAAAAAAAAAAAAAAAAAAABU22TMAAAAAAAAAAAAAAAAAAAAA",
+   "tailLength": 929,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 3,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 929,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 5,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Race Track",
+    "instances": 105
+   }
+  },
+  "14": {
+   "index": 14,
+   "name": "Paddock",
+   "body": "AAAAAAEAAAAJCQkSCxIbCQkSEhIJCQkJEgkJGwkJEiMJCQkJCQkJCgkSCQkiChISCREJCQkJCQkJCQkLCQkJGRobCgkJCQkSCQkSCxIKGgkJCiQSCRsSEhIJCRIJCQkUCQkJCgkSEQkKGwkJCQkbEgkJCQkJCQkkGwkJCRoSIQkJCQkJGRIbCRIMGhEJCQkJCRsZCQkKGyEKERsaCSQMCQkaCQoRChISEREKCgsREQkLCxIRCSIJERETIRISEhEkGxEJEgkkEgkKEhISEgkJCQkUCwoJGQsJCQkSEgkJCQkJEgkJEhIJCwkSEgkZCQkJCQkJChESEhIAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxAkAAAAAAAA=",
+   "tailLength": 280,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 40,
+     "ownerState": 4294967295
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 280,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 280,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 1,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Paddock",
+    "instances": 105
+   }
+  },
+  "15": {
+   "index": 15,
+   "name": "Cave",
+   "body": "AAAAAAEAAAAJCQkbERISCQkSEgkJCQkJEgkTGwkJEgsJEQkJCQkJCgkSCQkkCRkMEhMJCQkJCQsJCQkLCQkJERMSCwkRCQkSCQkRCRISIwkJCSQSCxsiEhIJCRIKCQkkEQsKEgkSCQoUJAkJCQkbEgkJCQkJCQokGwkJCQkRJAkJCQkJCRISCRIkGxEJCQkJCRsJCQkaGgoLChMbCSQhEgkSCQkZCRMKChEaGxoKEhMLGRMSEhQRCwkZFAkSChEiChERGwkjEgkSEhISCgkJCQkkGQoJCRsJCQkSEgkJCQkJEgkJEhIJCwkSEgkLCQkJCQkJIgohEhIAAAAA",
+   "tailLength": 248,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 248,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 1,
+   "crowd": 1,
+   "crowdBytes": "CQkJGxESEgkJEhIJCQkJCRIJExsJCRILCREJCQkJCQoJEgkJJAkZDBITCQkJCQkLCQkJCwkJCRETEgsJEQkJEgkJEQkSEiMJCQkkEgsbIhISCQkSCgkJJBELChIJEgkKFCQJCQkJGxIJCQkJCQkKJBsJCQkJESQJCQkJCQkSEgkSJBsRCQkJCQkbCQkJGhoKCwoTGwkkIRIJEgkJGQkTCgoRGhsaChITCxkTEhIUEQsJGRQJEgoRIgoRERsJIxIJEhISEgoJCQkJJBkKCQkbCQkJEhIJCQkJCRIJCRISCQsJEhIJCwkJCQkJCSIKIRISGmsQk/////93AAAAHgAAAQAAAP8AABAAAAAAAAAAAAAAAAAAAAD/AgAAAAEAAAAhAAAACQAAAB8AAAAAAAAAAAAAAAAAAAA=",
+   "crowdRecords": [
+    {
+     "name": "Eddy Bentfoot",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": {
+    "count": 6,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAACgQXCgAAAAAAAAAAACNYVr8SLnk/AABQQAAAAkEAACA/AACYPwMAAAAAAAAAAAAAAAoEFwoAAAAAAAAAAAC/Hn0/hKRNPgAAiEAAAAZBAAAgPwAAmD8DAAAAAAAAAAAAAAAKBBcKAAAAAAAAAAAAAAAAAAAAAAAAAKJAAAALQQAAID8AAJg/AwAAAAEAAAABAAAACQkJEhESGgkJEhISCQkJCRIJChsJCRIjCgkJCQkJCQoJEgkJEQkTCgoRCQkJCREZCQkJCwkJCQoZExsJCgkJEhEJEQkSCgkJCREkEgwbEhIKCQkSCQkJIgoZCREJEhESESQJCQkJGxIJCQkRCQkRFBkJCQkZEgwJCQkLCQkSEwkRCRIJEQkJGQkbJAkREwohEgkTEwkiJAkKGwkREhsSEQkRCxoJCgkRCQkTEhoUCxEKGSMJERIJGRMSEhIJGgoJChISEhIJCQkJIgsSCRkLCQkJEhIJCQkJCRIJCRISCRkJEhIJCQkJCQkJCRIJJAoSCgYXFAAAAAAAAAAAAAAAAAAAAAAAAADuQAAAEUEAAJA/AAAQPwMAAAAAAAAAAQAAABISCRMbEhIJCRkJGQkJCQkSCQkJCQkJCQkSCQkJCQkSCQkJCRIaGxIRCQkJCQkSCQkJEhkJCQkRExohCQkJCRIJCQkJCQwLCQkJJBIbIwkSGQkJCQkJCRIJEhMKCQkJCQkkCQkJCRIJCQkJCQkJCRISCQkJCRsJCQkJGwkMEiQJCwkJCgoJCQkJGwkJEiQkJCQkCQkkJCQkHCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQSCSMSEQkJEgkJCRIUCSEZCRIJCQkJCSEJCSQSCRIJGwkJCQsJCQkJCQkSCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQoGFxQAAAAAAAAAAAAAAAAAAAAAAAAAHEAAAOhAAACQPwAAED8DAAAAAAAAAAEAAAAJGwkbEhsSCQkJGQoJCRIJEgkSCQkJEQoSCwkJCQkJEgkSCQkSEQoUEQkSCQkJCQkJCQkJCwkJEgsRIgkJEgkSCQkJCgkRGgkJCgkSGhIkEgkJCwkJEgkbCQkREQkJCQkJGQkJEhIJCQkJCREJCRsbCgkJCQkbCRISCQkJCRIkCQsJCRISCQkbCQkJCRIkJCQkJAkJJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkGxEJCQkJCQkJCQkJEwkUEgkSCQkSCQkJCQkJCQkJCRIkCQoLEgkJCQkJEgkJCQkJCQkJCQkJCQkJCQkJCQkJCQkKBhcUAAAAAAAAAAAAAAAAAAAAAAAAAAVBAAAaQQAAkD8AABA/",
+    "withDna": 3,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Cave",
+    "instances": 79
+   }
+  },
+  "16": {
+   "index": 16,
+   "name": "CRISPR Lab",
+   "body": "AAAAAAEAAAAJCQkaCRISCgkSEhIJCQkJEgkhGwkJEhoJCQkJCQkJCQkSCQkiCgskEQsJCQkJChkJCQkLCQkJGhIaFAkSCQkSCwkSCRIREQkJCiQSIxsiEhIJCRoJCQkTChkSEgkSEQokGQkJCQkbEgkJCQkJCQkkIwkJCRESJAkJCQkJGxISCRIKCwoKCQkSCRsbCQkJGxQJCRobCSIiCQsSCREUCxIRCRELGxoJEgoJGRISGxIKGxEcGQkRCgkJGgkRIgkaEgkKEhISEgkJCQkTCRIZCRMJCQkSEgkJCQkJEgkJEhIJGwkSEgkJCQkJCQkJJBIKCRIBAAAAAAAAAAAAAAABAAAA/////w==",
+   "tailLength": 264,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 264,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 6,
+   "crowd": 1,
+   "crowdBytes": "CQkJGgkSEgoJEhISCQkJCRIJIRsJCRIaCQkJCQkJCQkJEgkJIgoLJBELCQkJCQoZCQkJCwkJCRoSGhQJEgkJEgsJEgkSEREJCQokEiMbIhISCQkaCQkJEwoZEhIJEhEKJBkJCQkJGxIJCQkJCQkJJCMJCQkREiQJCQkJCRsSEgkSCgsKCgkJEgkbGwkJCRsUCQkaGwkiIgkLEgkRFAsSEQkRCxsaCRIKCRkSEhsSChsRHBkJEQoJCRoJESIJGhIJChISEhIJCQkJEwkSGQkTCQkJEhIJCQkJCRIJCRISCRsJEhIJCQkJCQkJCSQSCgkSSQYBAwAAAAB4AAAAHgAABAADAP8AABAAAAAAAAAAAAAAAAB1Qtv/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Dr. Crispin",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "CRISPR Lab",
+    "instances": 79
+   }
+  },
+  "17": {
+   "index": 17,
+   "name": "Sue's Glues",
+   "body": "AAAAAAEAAAAJCQkSEhESGwkSEhIJCQkJEgkLGwkJEhsJCwkJCQkJEQkSCQkiCRMkChIJCQkJCgkJCQkZCQkJChkKGwkRCQkSCQkSCRISEQkJEiQSDBsSEhIJCSQKCQkaCQkREgkSChIJCwkJCQkbEgkJCQkJCQokCQkJCQsSJAkJCQkJGRITCRILCxESCQkJCRsLCREREiQLERsaCSIUChkLCRITChIRCRIJCxoREhMRCRISEhQLEhEcEwoKCQkZChESEwkSEgkKEhISEgkJCQkUGRIJCwkJCQkSEgkJCQkJEgkJEhIJGwkSEgkJCQkJCQkJIhIhERI=",
+   "tailLength": 244,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 244,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 1,
+   "crowd": 1,
+   "crowdBytes": "CQkJEhIREhsJEhISCQkJCRIJCxsJCRIbCQsJCQkJCREJEgkJIgkTJAoSCQkJCQoJCQkJGQkJCQoZChsJEQkJEgkJEgkSEhEJCRIkEgwbEhISCQkkCgkJGgkJERIJEgoSCQsJCQkJGxIJCQkJCQkKJAkJCQkLEiQJCQkJCRkSEwkSCwsREgkJCQkbCwkRERIkCxEbGgkiFAoZCwkSEwoSEQkSCQsaERITEQkSEhIUCxIRHBMKCgkJGQoREhMJEhIJChISEhIJCQkJFBkSCQsJCQkJEhIJCQkJCRIJCRISCRsJEhIJCQkJCQkJCSISIRES5rkI4v////95AAAAHgAABAAAAP8AABAAAAAAAAAAAAAAAAAAAAD/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Sue",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Sue's Glues",
+    "instances": 79
+   }
+  },
+  "18": {
+   "index": 18,
+   "name": "Clide's Rides",
+   "body": "AAAAAAEAAAAJCQkSCRIaEQkSEgkJCQkJEgkjGwkJEhoJCQkJCQkJCQkSCQkKCRkhEQkJCQkJEQkJCQkLCwkJCQkSEgkJCQkSCQkSGRISCgkJEiQSGxsSEhIJCRIJCQkjEQkJEgkSCREhCQkJCQkbEgkJCQkJCQkUGwkJCQoRJAkJCRoJCRISCRERGQkJCQkLCRsLCQkLEhITCxkTCSQkEQkSCRERGRoLCRIaCwsSEhEZCxISCyIJEgokCxEKChIREwoRHAkcIgkSEhISCgkJCREcCwkJCRIJCQkSEgkJCQkJEgkJEhIJCQkSEgkLCQkJCQkJIRIJCRICAAAA",
+   "tailLength": 248,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 248,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 3,
+   "crowd": 1,
+   "crowdBytes": "CQkJEgkSGhEJEhIJCQkJCRIJIxsJCRIaCQkJCQkJCQkJEgkJCgkZIREJCQkJCREJCQkJCwsJCQkJEhIJCQkJEgkJEhkSEgoJCRIkEhsbEhISCQkSCQkJIxEJCRIJEgkRIQkJCQkJGxIJCQkJCQkJFBsJCQkKESQJCQkaCQkSEgkRERkJCQkJCwkbCwkJCxISEwsZEwkkJBEJEgkRERkaCwkSGgsLEhIRGQsSEgsiCRIKJAsRCgoSERMKERwJHCIJEhISEgoJCQkRHAsJCQkSCQkJEhIJCQkJCRIJCRISCQkJEhIJCwkJCQkJCSESCQkSTrDCGwAAAAB6AAAAHgAABAALAP8AABAAAAAAAAAAAAAAAADDxsn/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Clide",
+     "fixed": "AAUAAAAF//////////8AAAAA"
+    }
+   ],
+   "interior": {
+    "count": 2,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAAAhcXAAAAAAAAAAAAAAsAAABoAAADAACwQAAAAEAAAJA/AACIPwMAAAAAAAAAAAAAAAIYFwAAAAAAAAAAAAAAAAAAAAAAAAAA2EAAAABAAACQPwAAiD8=",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Clide's Rides",
+    "instances": 79
+   }
+  },
+  "20": {
+   "index": 20,
+   "name": "Lasso-Mart",
+   "body": "AAAAAAEAAAAJCQkbGhITCgkSEhEJCQkJEgkSGwkJEhQJCgkJCQkJEQkSCQkJChkUCQkJCQkJCgkJCQkJCQkJEhIJEwkRCQkSCQkSGRIJEQkJCiQSGRsSEhIJCRIKCQkcCQkJCQkSCREKGQkJCQkbEgkJCQoJCQkkIwkJCQkRJAkJCREJCxIaCRMJCgkKCQkLCRoLCQkTCQoKCwobCSQSCRMRCQkKEhIRCQoZCRMRCREbEQoSGSIRCQoaCwkRChIZERERIwkiEgkSEhISEQkJCQkUCRIZCgsJCQoSEgkJCQkJEgkJEhIJCQkSEgkJCQkJCQkJJAoJChIAAAAAAQAAAAEAAAA=",
+   "tailLength": 256,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 256,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 1,
+   "crowd": 1,
+   "crowdBytes": "CQkJGxoSEwoJEhIRCQkJCRIJEhsJCRIUCQoJCQkJCREJEgkJCQoZFAkJCQkJCQoJCQkJCQkJCRISCRMJEQkJEgkJEhkSCREJCQokEhkbEhISCQkSCgkJHAkJCQkJEgkRChkJCQkJGxIJCQkKCQkJJCMJCQkJESQJCQkRCQsSGgkTCQoJCgkJCwkaCwkJEwkKCgsKGwkkEgkTEQkJChISEQkKGQkTEQkRGxEKEhkiEQkKGgsJEQoSGRERESMJIhIJEhISEhEJCQkJFAkSGQoLCQkKEhIJCQkJCRIJCRISCQkJEhIJCQkJCQkJCSQKCQoSmWHSPQAAAAB9AAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAABHMQ//AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Shopkeep",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Lasso-Mart",
+    "instances": 79
+   }
+  },
+  "21": {
+   "index": 21,
+   "name": "Tent",
+   "body": "AAAAAAEAAAAJCQkSEhISCQkSEhIJCQkJEgkJGwkJEgkJCQkJCQkJCgkSCQkJChEcEQkJCQkJCRkJCQkJCQkJEhsTIwkJCQkSCQkSERIRCQkJCiQSCxsSEhIJCSQJCQkUCRsJEQkSCQoSIwkJCQkbEgkJCQkJCQokIwkJCQkSJAkJCQoJCxIbCRoKGgoRCQkJCRsJCQkLESMaERsaCRQMCQkTCQojCQobCRESCRkRCRELCRISGxIbExIKGxEKEQoLCRIJJAkjEwkSEhISEgkMCQoUGREJERMJCRkSEgkJCQkJEgkJEhIJGwkSEgkbCQkJCQkJEhEMEhIAAAAAAAAAAAAAAAAAAAAA",
+   "tailLength": 260,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 260,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 260,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 1,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Tent",
+    "instances": 79
+   }
+  },
+  "22": {
+   "index": 22,
+   "name": "Bubber's Hutch",
+   "body": "AAAAAAEAAAAJCQkTEhISCQkSEgkJCQkJEgkKGwkJEhoKGwkJCQkJCgkSCQkMERERCgsJCQkJCgkJCQkZCQkJCQkSDAkSCQkSCgkKCRIJCQkJESQSIRsSEhIJCRQJCQkaEQsRCgkaEQkkDAkJCQkbEgkJCQoJCREUGwkJCQkSJAkJCQsJCRISCRohGhEJCQkLCRshCQoaERQKEhELCQkkERESCQoKCRMKCRELExIKEREJCxISExIJCQkcEgkJCQkcExISHAkaEgkSEhISEgkJCQkUGxEJEhEJCQkSEgkJCQkJEgkJEhIJCQkSEgkZCQkJCQkJEREUCRIGAAAAQnViYmVyBQAAAER1c3R5EAAAAERhbmNpbmcgQ2F2b3J0ZXIKAAAAU2lsdmVyYm9sdDgAAADihaREdXN0eeKFjywg4oSsRGFuY2luZyBDYXZvcnRlcuKFjywgb3Ig4oSXU2lsdmVyYm9sdOKFjwAAAAD/////AAAAAAAAAAA=",
+   "tailLength": 373,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 345,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 357,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 359,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 363,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 367,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 371,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 373,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 379,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 381,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 382,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 383,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 384,
+     "ownerState": 4294967295
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 389,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 391,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 393,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 395,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 397,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 428,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 4,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Bubber's Hutch",
+    "instances": 79
+   }
+  },
+  "23": {
+   "index": 23,
+   "name": "The Circus",
+   "body": "AAAAAAEAAAAJCQkaEQoTCQkSEgoJCQkJEgkLGwkJEgsJGQkJCQkJCQkSCQkhCQkcEQsJCQkJEgkJCQkZCQkJChkaCQkKCQkSEQkSCRIiCQkJCSESGxsiEgoJCRQJCQkiERkJEgkaCRIUCQkJCQkbEgkJCQoJCQkSGwkJCQkSJAkJCRsJGxIaCREJCxEKCQkZCRsLCQkaCgsJERsKCQwhEhoSCRIMGhILCREJCxMSERIbCRISCyILEwkZIREJEQkhEgkSGgkhCgkJEhISEgkMCQkSCRIJCRoJCRkSEgkJCQkJEgkJEhIJGQkSEgkbCQkJCQkJIRIJERIAAAAAAQAAAAEAAAABAAAAAQAAAA==",
+   "tailLength": 264,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 264,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 1,
+   "crowd": 1,
+   "crowdBytes": "CQkJGhEKEwkJEhIKCQkJCRIJCxsJCRILCRkJCQkJCQkJEgkJIQkJHBELCQkJCRIJCQkJGQkJCQoZGgkJCgkJEhEJEgkSIgkJCQkhEhsbIhIKCQkUCQkJIhEZCRIJGgkSFAkJCQkJGxIJCQkKCQkJEhsJCQkJEiQJCQkbCRsSGgkRCQsRCgkJGQkbCwkJGgoLCREbCgkMIRIaEgkSDBoSCwkRCQsTEhESGwkSEgsiCxMJGSERCREJIRIJEhoJIQoJCRISEhIJDAkJEgkSCQkaCQkZEhIJCQkJCRIJCRISCRkJEhIJGwkJCQkJCSESCRES0Q8MmP////+DAAAAHgAAAgABAP8AABAAAAAAAAAAAAAAAAAAAAD/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Ringmaster",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "The Circus",
+    "instances": 79
+   }
+  },
+  "24": {
+   "index": 24,
+   "name": "The Secret Zoo",
+   "body": "/////wAAAAA=",
+   "tailLength": 4,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 4,
+     "ownerState": 4294967295
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 244,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 17,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "The Secret Zoo",
+    "instances": 7
+   }
+  },
+  "25": {
+   "index": 25,
+   "name": "O'er Yonder Acres",
+   "body": "AAAAAAEAAAAJCQkaGhIaCQkSEhEJCQkJEgkRGwkJEgsRCQkJCQkJCgkSCQkhCQoKCREJCQkJEhkJCQkJCQkJCQkZGwkRCQkSCQkSCRIKEwkJCiQSGxsiEhIJCRMJCQkaCQsRCQkSEgkKGQkJCQkaEgkJCREJCQoiGwkJCQoRJAkJCRkJCRIbCQoKGQkKCQkJCRsLCQkbExETEgsJCSQhEQkKCQoiGxIJCRITCQsRCgoJCRISExQbCQkaCxIRCQkiGRIRJAkUGgkSEhISEgkJCQkUGQkbCxsJCQkSEgkJCQkJEgkJEhIJGQkSEgkLCQkJCQkJEhEKERIAAAAAAAAAAA==",
+   "tailLength": 252,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 252,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 252,
+     "ownerState": 9
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 17,
+   "crowd": 1,
+   "crowdBytes": "CQkJGhoSGgkJEhIRCQkJCRIJERsJCRILEQkJCQkJCQoJEgkJIQkKCgkRCQkJCRIZCQkJCQkJCQkJGRsJEQkJEgkJEgkSChMJCQokEhsbIhISCQkTCQkJGgkLEQkJEhIJChkJCQkJGhIJCQkRCQkKIhsJCQkKESQJCQkZCQkSGwkKChkJCgkJCQkbCwkJGxMRExILCQkkIREJCgkKIhsSCQkSEwkLEQoKCQkSEhMUGwkJGgsSEQkJIhkSESQJFBoJEhISEhIJCQkJFBkJGwsbCQkJEhIJCQkJCRIJCRISCRkJEhIJCwkJCQkJCRIRChES+FAjGgAAAACEAAAAHgAABQAAAP8AABAAAAAAAAAAAAAAAAAAAAD/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Bitsy",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "O'er Yonder Acres",
+    "instances": 79
+   }
+  },
+  "26": {
+   "index": 26,
+   "name": "Saloon",
+   "body": "/////wAAAAAAAAAAAAAAAA==",
+   "tailLength": 12,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 12,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 3,
+   "maxCrowd": 17,
+   "crowd": 3,
+   "crowdBytes": "CQkJEwkSEhEJEhISCQkJCRIJERsJCRILCREJCQkJCRIJEgkJIQkJCwoRCQkJCQkJCQkJCQkJCQkZEREJCgkJEgoJEgkSERkJCQokEgkbFBISCQkSEQkJIhEZEQoJEhESCRsJCQkJGxIJCQkJCQkJJCMJCQkJEiQJCQkJCRsSEgkbChIJEgkJCwkbGwkJExMSGQkSGgkRIhEJGgkKEgsaCQkKGwsbERIRGQkSEhESGRIRJCMJCRIRJBkKCRIJIxIJEhISEhEJIQkKIgkJCREbCQkLEhIJCQkJCRIJCRISCRsJEhIJGwkJCQkJCRQSEgoSSrp1BAAAAACFAAAAHgAAAQACAP8A/xAAAAAAAAAAAAAAAAD/r0D/AAAAAAAAAABMfCFA7irUQAkJCRMZEhIhCRISEgkJCQkSCRIbCQkSEgkTCQkJCQkJCRIJCQoJGgkKCQkJCQkJGwkJCQkJCQkREhMjCQkJCRIJCREZEhEKCQkRJBIjGxISEgkJEgkJCSQKCwkKCRIKCRIJCQkJCRsSCQkJEQkJEiQbCQkJCREkCQkJEQkZEhsJCRILEhEJCQkJGxsJCRITChoSCxsJJCEKERIJChobCQkJCRkLCxERGwkLEhIRIgkKCRQZChIREREZChETCRITCRESEhISCQkJESIJCgkKEgkJCRISCQkJCQkSCQkSEgkLCRISCQsJCQkJCQkREgoSEldKAJD/////hgAAAB4AAAUABQD/AP8RAAAAAAAAAAAAAAAA/69A/wAAAAAAAAAA8KcIQczMTEAJCQkbCRIaCgkSEhIJCQkJEgkKGwkJEhkJCQkJCQkJEQkSCQkhERMTEhIJCQkJEQsJCQkZCQkJCQoKHAkRCQkSCQkKChIJIQkJCgwSIxsSEhIJCRoJCQkkCRsJCgkSEQkSCQkJCQkTEgkJCQkJCREkGwkJCQkJJAkJCQkJCRIbCQkKGxESCQkJCRscCQkbChETCRsTCQoUCQkTCREZCxIJCQkKCRsKERMJGxISGiQJGgoTEQoJEQkbGwkSHAkjEgkSEhISEgkJCQokGwkRCQsJCQoSEgkJCQkJEgkJEhIJGQkSEgkJCQkJCQkJFAkiChKZpyNeAAAAAIcAAAAeAAABAAUA/wD/EQAAAAAAAAAAAAAAAP+vQP8AAAAAAAAAAJpJV0FaVTdA",
+   "crowdRecords": [
+    {
+     "name": "Yad",
+     "fixed": "AAcAAAD///////////8AAAAA"
+    },
+    {
+     "name": "Lud",
+     "fixed": "AAcAAAD///////////8AAAAA"
+    },
+    {
+     "name": "Pod",
+     "fixed": "AAcAAAD///////////8AAAAA"
+    }
+   ],
+   "interior": {
+    "count": 2,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAACgMXCgAAAAAAAAAAAAAAAAAAAAAAAAAgQQAAqEAAAHA/AACQPwMAAAAAAAAAAAAAAAoDFwoAAAAAAAAAAAAAAAAAAAAAAAAAcEEAAKhAAABwPwAAkD8=",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Saloon",
+    "instances": 79
+   }
+  },
+  "27": {
+   "index": 27,
+   "name": "Power Plant",
+   "body": "AAAAAAEAAAAJCQkKExITCQkSEhIJCQkJEgkKGwkJEgkJCQkJCQkJCgkSCQkiChIRChMJCQkJCRsJCQkLGQkJERsaGQkRCQkSCgkJCxIRCQkJCiQSIRsSEhIJCRIJCQkSEgsSCgkSEgoKIwkJCQkbEgkJCREJCREUGQkJCRMSJAkJCQsJGRIbCRIJGQkRCQkZCRsLCQkRGhwZCQoTCSEhEREJCRESCRMSCgkJCwsRCgoJCxMSEyILGhEjJBIJEREMGwoKJAkjEwkSEhISEgkJCREUGQoJCQoJCQkSEgkJCQkJEgkJEhIJCwkSEgkJCQkJCQkJIgoiERIAAAAAAAAAAA==",
+   "tailLength": 252,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 252,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 2,
+   "crowd": 1,
+   "crowdBytes": "CQkJChMSEwkJEhISCQkJCRIJChsJCRIJCQkJCQkJCQoJEgkJIgoSEQoTCQkJCQkbCQkJCxkJCREbGhkJEQkJEgoJCQsSEQkJCQokEiEbEhISCQkSCQkJEhILEgoJEhIKCiMJCQkJGxIJCQkRCQkRFBkJCQkTEiQJCQkLCRkSGwkSCRkJEQkJGQkbCwkJERocGQkKEwkhIRERCQkREgkTEgoJCQsLEQoKCQsTEhMiCxoRIyQSCRERDBsKCiQJIxMJEhISEhIJCQkRFBkKCQkKCQkJEhIJCQkJCRIJCRISCQsJEhIJCQkJCQkJCSIKIhESjgDgPwAAAACIAAAAHgAABAAAAP8AABAAAAAAAAAAAAAAAAAAAAD/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Nuclear Physicist",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Power Plant",
+    "instances": 79
+   }
+  },
+  "28": {
+   "index": 28,
+   "name": "Sweetie's House",
+   "body": "AAAAAAEAAAAJCQkaERIaGQkSEhIJCQkJEgkJGwkJEiERCwkJCQkJEQkSCQkJCQkTCgoJCQkJCQkJCQkJCQkJGRITGQkRCQkSCQkSERIRGwkJEiQSGxsUEhIJCRMRCQkiCQkJCQkSEQkRDAkJCQkbEgkJCREJCREUIwkJCQkSDAkJCQkJCxITCRoZCwoKCQkLCRkjCQkJCxELGhEbCQskCQkTCREUEhoSCRERERkSEQoJCxMSCRQbEgoRFBEJEREhEwoREwkcJAkREhISCgkJCQkTGxEJCRoJCQkSEgkJCQkJEgkJEhIJCwkSEgkLCQkJCQkJEQkSEhIAAAAAAAAAAA==",
+   "tailLength": 252,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 252,
+     "ownerState": 0
+    },
+    {
+     "ownerFlag": 1,
+     "tailLength": 252,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 2,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": {
+    "count": 1,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAAChEXFAAAAAAAAAAAAAAAAAAAAAAAAICWQQAAiEAAAEA/AACYPw==",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Sweetie's House",
+    "instances": 79
+   }
+  },
+  "29": {
+   "index": 29,
+   "name": "Sumo Ring",
+   "body": "/////wAAAAABAAAAyAAAAAAAAAAAAAAA",
+   "tailLength": 20,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 20,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 2,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Sumo Ring",
+    "instances": 83
+   }
+  },
+  "30": {
+   "index": 30,
+   "name": "Junk Shop (debug)",
+   "body": "/////wAAAAA=",
+   "tailLength": 4,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 4,
+     "ownerState": 1061158912
+    },
+    {
+     "ownerFlag": 0,
+     "tailLength": 4,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 0,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": {
+    "count": 50,
+    "hdr": 41,
+    "bytes": "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",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Junk Shop (debug)",
+    "instances": 8
+   }
+  },
+  "31": {
+   "index": 31,
+   "name": "Normal Suburban House",
+   "body": "AAAAAAEAAAAJCQkbGxISCQkSEhIJCQkJEgkRGwkJEhkJEQkJCQkJCQkSCQkhCRoLEhMJCQkJEQsJCQkJCQkJGQobJAkRCQkSCQkKCRIJGwkJEiESGRsSEhIJCRIJCQkUEgkKEgkSCgoSGwkJCQkbEgkJCQkJCREkGwkJCQkSJAkJCQkJGRITCQkiEQoRCQkbCQsLCQkRExMRCRsJCQwUCgoTCRITGhISEQkJCRkSEhIRGQoaCyQbGREhGxERCgkKEgkSGwkLEgkREhISEQkhCREbGxIKGRkJCQkSEgkJCQkJEgkJEhIJCwkSEgkLCQkJCQkJEgkUERIAAAAABgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+   "tailLength": 4116,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 4116,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 1,
+   "maxCrowd": 1,
+   "crowd": 1,
+   "crowdBytes": "CQkJGxsSEgkJEhISCQkJCRIJERsJCRIZCREJCQkJCQkJEgkJIQkaCxITCQkJCRELCQkJCQkJCRkKGyQJEQkJEgkJCgkSCRsJCRIhEhkbEhISCQkSCQkJFBIJChIJEgoKEhsJCQkJGxIJCQkJCQkRJBsJCQkJEiQJCQkJCRkSEwkJIhEKEQkJGwkLCwkJERMTEQkbCQkMFAoKEwkSExoSEhEJCQkZEhISERkKGgskGxkRIRsREQoJChIJEhsJCxIJERISEhEJIQkRGxsSChkZCQkJEhIJCQkJCRIJCRISCQsJEhIJCwkJCQkJCRIJFBESUJtZCgAAAACLAAAAHgAAAwAAAP8AABAAAAAAAAAAAAAAAAAAAAD/AAAAAAAAAAAAAAAAAAAAAA==",
+   "crowdRecords": [
+    {
+     "name": "Normal Neighbor",
+     "fixed": "AAAAAAAA//////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Normal Suburban House",
+    "instances": 79
+   }
+  },
+  "36": {
+   "index": 36,
+   "name": "The Jockey Club",
+   "body": "/////wAAAAA=",
+   "tailLength": 4,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 4,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 2,
+   "maxCrowd": 6,
+   "crowd": 2,
+   "crowdBytes": "EhsJGRkSExIJEhIKCQkJCRIJERsJCRIcCRkJCQkJCREJEgkJChEKGxIZCQkJCRIZCQkJCRkJCRMLGyEJEQkJEgkJERESChkJCREkEiEbJBISCQkiCQkJIhEJCRIJExIJFBwJCQkJGxIJCQkKCQkJEhsJCQkJCiQJCQkJCQkSEgkLIxEKCQkJCQkbGQkJGgoRCQkbEwkSDAkREQkSGxkbGQkJCgkbCRIJEgkSEhEiCxMKIyIJCRIJEQoKERwJCRIJEhISEhIJCQkKJBsRChESCQkJEhIJCQkJCRIJCRISCRsJEhIJCwkJCQkJCSERCRESEm0QIAAAAACMAAAAHgAAAgAAAP8AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACl+SpAxhSBQBIbCRIREhMSCRISEQkJCQkSCSQbCQkSCgkZCQkJCQkJCRIJCQkKERMRCQkJCQkKGQkJCRsJCQkaCQsMCQkJCRIJCREKEgwZCQkRJBIJGyQSEgkJJAkJCRQJGQkJCRIRCQkhCQkJCRsSCQkJCQkJCSIbCQkJCRIkCQkJCQkLEhsJCgoTEhEJCQsJGwkJCQobIQkJCwkJEiISCRoJEhQLEgoJEQkJGgkKCRIJCwoaEgsSERoTEREJChwTCQkcCQsSCQoSEhIKCQkJCSQJEgsJGwkJCRISCQkJCQkSCQkSEgkJCRISCRkJCQkJCQkREhEKEhS/fvP/////jQAAAB4AAAEABQD/AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEpiVQOtkgUA=",
+   "crowdRecords": [
+    {
+     "name": "Zolo",
+     "fixed": "AAcAAAD///////////8AAAAA"
+    },
+    {
+     "name": "Hiro",
+     "fixed": "AAcAAAD///////////8AAAAA"
+    }
+   ],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "The Jockey Club",
+    "instances": 82
+   }
+  },
+  "37": {
+   "index": 37,
+   "name": "Old Abandoned Track",
+   "body": "/////wAAAAA=",
+   "tailLength": 4,
+   "ownerState": 4294967295,
+   "hasOwner": false,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": true,
+   "attestedForms": [
+    {
+     "ownerFlag": 0,
+     "tailLength": 4,
+     "ownerState": 4294967295
+    }
+   ],
+   "minCrowd": 0,
+   "maxCrowd": 1,
+   "crowd": 0,
+   "crowdBytes": "",
+   "crowdRecords": [],
+   "interior": null,
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "Old Abandoned Track",
+    "instances": 93
+   }
+  },
+  "38": {
+   "index": 38,
+   "name": "",
+   "body": "AAAAAAEAAAAJCQkKEREaCQkSEhIJCQkJEgkKGwkJEhMJGQkJCQkJCQkSCQkRERokEhoJCQkJERkJCQkLCQkJCRoKDAkJCQkSGQkSCxIRCwkJESQSIRsSEhIJCSQJCQkkEQkJCQkSCgkRGwkJCQkbEgkJCQoJCQkkHAkJCREKJAkJCQkJGRISCRMJCRISCQkJCRsbCQkZCRQKCwsTCQwTChESCRIcCxITCQkJCRsRChMJGxoSCxIJCRERIwkJCQoUCgkKGgkUEgkSEhISEgkJCQkkGQoJCRkJCQkSEgkJCQkJEgkJEhIJCQkSEgkLCQkJCQkJIhIkCRI=",
+   "tailLength": 244,
+   "ownerState": 0,
+   "hasOwner": true,
+   "hasChampion": false,
+   "bookies": 0,
+   "unstaffed": false,
+   "attestedForms": [
+    {
+     "ownerFlag": 1,
+     "tailLength": 244,
+     "ownerState": 0
+    }
+   ],
+   "minCrowd": 2,
+   "maxCrowd": 2,
+   "crowd": 2,
+   "crowdBytes": "CQkJChERGgkJEhISCQkJCRIJChsJCRITCRkJCQkJCQkJEgkJEREaJBIaCQkJCREZCQkJCwkJCQkaCgwJCQkJEhkJEgsSEQsJCREkEiEbEhISCQkkCQkJJBEJCQkJEgoJERsJCQkJGxIJCQkKCQkJJBwJCQkRCiQJCQkJCRkSEgkTCQkSEgkJCQkbGwkJGQkUCgsLEwkMEwoREgkSHAsSEwkJCQkbEQoTCRsaEgsSCQkRESMJCQkKFAoJChoJFBIJEhISEhIJCQkJJBkKCQkZCQkJEhIJCQkJCRIJCRISCQkJEhIJCwkJCQkJCSISJAkSHRZ/WQAAAACRAAAAHgAAAgANAP8AABAAAAAAAAAAAAAAAABHMQ//AQAAAAkAAAAfAAAAAAAAAAAAAAAAAAAADCQSEhISEhsJCQkJEgwJCRISCQkJCRIUCQkKCRIMJBISEgkJGxIbEhsJIwoJEhIJEgkJCRkJEiQSCRwJEhIJEgkbCRsJEgsJCRIJGwkSGxISCQkLEgkJHAkSGwkJCgkaChkJCRsSGQkJCQkJCQkSCRISCQkbEgkJCQkSCQkSJBkkIRsJCQkJEgkJJBIKCSQJCQkSCSQSIiESJAwkCSQkDAkkGxsSGyQkJBskJCQkJAsJEgkJEhESFAkJEhQJHBwJCQoJEhsJCQkJGwoJCgkTCQkJGxIJCSQJCRIJCQkJCgkJCQkRGQkbCQkJCQkJCQkJZ6Al+v////+SAAAAHgAACQAMAP8AAAUAAAAAAAAAAAcAAABDdXN0b20wAAAAAAAAAAAAAAAAF7gyQVYbiEA=",
+   "crowdRecords": [
+    {
+     "name": "Mike",
+     "fixed": "AAcAAAAH//////////8AAAAA"
+    },
+    {
+     "name": "Clarence",
+     "fixed": "AAEAAAD///////////8AAAAA"
+    }
+   ],
+   "interior": {
+    "count": 1,
+    "hdr": 41,
+    "bytes": "AwAAAAAAAAAAAAAACggXAAAAAAAAAAAAAAAAAAAAAAAAAACIQQAAuEAAAIA/AAAgPw==",
+    "withDna": 0,
+    "source": {
+     "file": "locs-template.dat",
+     "version": 12
+    }
+   },
+   "source": {
+    "file": "locs-template.dat",
+    "version": 12,
+    "name": "",
+    "instances": 6
+   }
+  }
+ }
+}

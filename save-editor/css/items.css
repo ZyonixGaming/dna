@@ -1,0 +1,64 @@
+/* css/items.css — the Items workspace (plan section 17.4).
+   Deliberately borrows the Horses roster's shapes (.hz-search, .hz-prop-row, .hz-empty,
+   .hz-readonly, .hz-props-title): the two workspaces are the same idea one record type over,
+   and giving items their own visual language would suggest a difference that is not there. */
+.it-root { display: flex; flex-direction: column; width: 100%; min-width: 0; }
+
+.it-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+}
+
+.it-body {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    flex: 1;
+    min-height: 0;
+}
+
+.it-list { overflow-y: auto; border-right: 1px solid var(--border-soft); padding-bottom: 60px; }
+.it-inspector { overflow-y: auto; padding: var(--sp-3); }
+
+.it-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 5px var(--sp-3);
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+}
+.it-row:hover { background: var(--bg-2); }
+.it-row.selected { background: var(--bg-3); }
+/* Queued for deletion but still listed, struck through — the same treatment World gives a
+   world item in doc.deletedWorldItems, so "pending until export" reads the same everywhere. */
+.it-row.doomed { opacity: 0.5; text-decoration: line-through; }
+
+.it-icon { width: 1.2em; text-align: center; flex: 0 0 auto; }
+.it-name { flex: 0 0 11em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.it-dna { flex: 0 0 auto; }
+/* Same affordance as the World Objects list's ✕ (section 22.10): visible on hover or when the
+   row is selected, so a list of 178 items is not a wall of delete buttons. */
+.it-del {
+    flex: 0 0 auto; border: none; background: none; cursor: pointer;
+    color: var(--text-2); padding: 0 2px; opacity: 0; font-size: 11px;
+}
+.it-row:hover .it-del, .it-row.selected .it-del { opacity: 0.7; }
+.it-del:hover { opacity: 1; color: var(--bad, #d66); }
+.it-where {
+    flex: 1;
+    color: var(--text-2);
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+}
+
+@media (max-width: 1023px) {
+    .it-body { grid-template-columns: 1fr; grid-auto-rows: minmax(200px, auto); overflow-y: auto; }
+    .it-list { border-right: none; border-bottom: 1px solid var(--border-soft); }
+}

@@ -1,0 +1,348 @@
+/* css/app.css — shell: app bar, rail, docks, status bar, modals, toasts.
+   One window, no page scroll (plan section 5.1). Every pane scrolls independently. */
+* { box-sizing: border-box; }
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg-1);
+    color: var(--text-0);
+    font: var(--font-base) / 1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+button {
+    font: inherit;
+    color: inherit;
+}
+input, select, textarea {
+    font: inherit;
+    color: var(--text-0);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+button, [tabindex] {
+    outline: none;
+}
+button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 6px; }
+
+#shell {
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: var(--h-appbar) 1fr;
+    grid-template-columns: 1fr;
+}
+
+/* ---- app bar ---- */
+#appbar {
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: 0 var(--sp-4);
+    background: var(--bg-0);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    overflow: hidden;
+}
+#appbar .brand { font-weight: 600; flex-shrink: 0; }
+#appbar .doc-info { color: var(--text-1); overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0; }
+#appbar .doc-info .dirty-dot { color: var(--warn); }
+#appbar .spacer { flex: 1; }
+#appbar .btn-group { display: flex; gap: var(--sp-2); flex-shrink: 0; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 5px 10px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+.btn:hover:not(:disabled) { background: var(--bg-4); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent-strong); color: var(--accent-text); font-weight: 600; }
+.btn.primary:hover:not(:disabled) { background: var(--accent-strong); }
+.btn.icon { padding: 5px 8px; }
+
+/* ---- body: rail + workspace ---- */
+#body {
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: var(--w-rail) 1fr;
+    min-height: 0;
+}
+
+#rail {
+    grid-column: 1;
+    background: var(--bg-0);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--sp-3) 0;
+}
+#rail .rail-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--w-rail);
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    border-left: 3px solid transparent;
+    color: var(--text-1);
+    cursor: pointer;
+}
+#rail .rail-btn:hover { background: var(--bg-2); color: var(--text-0); }
+#rail .rail-btn.active { color: var(--text-0); border-left-color: var(--accent); background: var(--bg-2); }
+#rail .rail-spacer { flex: 1; }
+
+#workspace-column {
+    grid-column: 2;
+    display: grid;
+    grid-template-rows: var(--h-toolbar) 1fr var(--h-statusbar);
+    min-height: 0;
+    min-width: 0;
+}
+
+#context-toolbar {
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--sp-4);
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-soft);
+    overflow: hidden;
+    white-space: nowrap;
+}
+.toolbar-content { display: none; align-items: center; width: 100%; height: 100%; }
+.toolbar-content.active { display: flex; }
+
+#workspace-body {
+    grid-row: 2;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+.workspace-pane {
+    position: absolute;
+    inset: 0;
+    display: none;
+    overflow: hidden;
+}
+.workspace-pane.active { display: flex; }
+.workspace-empty {
+    margin: auto;
+    color: var(--text-2);
+    text-align: center;
+    padding: var(--sp-6);
+}
+
+#statusbar {
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--sp-4);
+    background: var(--bg-0);
+    border-top: 1px solid var(--border);
+    color: var(--text-1);
+    font-size: calc(var(--font-base) - 1px);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* ---- problems chip (section 22.9) ---- */
+.status-note { color: var(--text-2); margin-right: var(--sp-3); }
+.problem-chip {
+    border: 1px solid var(--warn, #c90); border-radius: 3px; background: none;
+    color: var(--warn, #c90); font: inherit; cursor: pointer; padding: 0 var(--sp-2);
+}
+.problem-chip:hover { background: var(--bg-1); }
+.problem-chip.fatal { border-color: var(--bad, #d66); color: var(--bad, #d66); }
+.problems-body { min-width: 0; }
+.problems-heading { margin-top: var(--sp-3); font-weight: 600; }
+.problems-heading:first-child { margin-top: 0; }
+.problems-heading.blocker, .problems-heading.crash { color: var(--bad, #d66); }
+.problems-heading.warn { color: var(--warn, #c90); }
+.problems-list { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); }
+.problems-list li { margin-bottom: var(--sp-2); overflow-wrap: anywhere; }
+
+/* ---- changes panel (section 22.8) ---- */
+.dirty-dot.changes-btn {
+    border: none; background: none; cursor: pointer; font: inherit; color: inherit;
+    padding: 0; text-decoration: underline dotted; text-underline-offset: 2px;
+}
+.dirty-dot.changes-btn:hover { text-decoration-style: solid; }
+.changes-body { min-width: 0; }
+.changes-lead { margin: 0 0 var(--sp-3); color: var(--text-1); }
+.changes-redo { margin-top: var(--sp-3); }
+.changes-list { max-height: 50vh; overflow-y: auto; border: 1px solid var(--border-soft); border-radius: 3px; }
+.changes-row {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: 3px var(--sp-3); border-bottom: 1px solid var(--border-soft);
+}
+.changes-row:last-child { border-bottom: none; }
+.changes-row:hover { background: var(--bg-2); }
+.changes-num { color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.changes-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Visible at rest, not on hover: undoing back to a point is the reason this list exists, and
+   a modal is not a place where people go hunting for hover affordances. */
+.changes-undo { flex: 0 0 auto; padding: 1px 6px; opacity: 0.5; }
+.changes-row:hover .changes-undo { opacity: 1; }
+
+/* ---- focus chip (section 22.4) ---- */
+/* The one thing selected anywhere, and the workspaces that can show it. Sits between the two
+   status spans, so it takes the middle of a `space-between` row without either side moving. */
+.focus-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-width: 0;
+    padding: 1px var(--sp-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 3px;
+    background: var(--bg-1);
+}
+.focus-chip .focus-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
+.focus-chip .focus-go {
+    border: none; background: none; cursor: pointer; padding: 0 2px;
+    font-size: calc(var(--font-base) + 1px); line-height: 1; opacity: 0.65;
+}
+.focus-chip .focus-go:hover { opacity: 1; }
+.focus-chip .focus-go.here { opacity: 1; cursor: default; text-shadow: 0 0 6px var(--accent, #6ab04c); }
+.focus-chip .focus-clear { border: none; background: none; cursor: pointer; color: var(--text-2); padding: 0 2px; }
+.focus-chip .focus-clear:hover { color: var(--text-0); }
+
+/* ---- empty-document state ---- */
+/* Absolutely positioned, and ABOVE the workspace panes. #workspace-body is the
+   positioning context and every .workspace-pane is `position:absolute; inset:0` — and
+   js/app.js ends its init with switchWorkspace(), which activates the World pane
+   immediately. So an #empty-state left in normal flow sits UNDER a full-bleed pane and
+   its "Open save" button cannot be clicked at all: the pane is transparent where the
+   canvas has not drawn, so it looks fine and swallows the pointer. Nothing else changes;
+   loadFromBytes() already hides this element the moment a save is open. */
+#empty-state {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-4);
+    background: var(--bg-1);
+    color: var(--text-1);
+}
+
+/* ---- toasts (ui/toast.js) ---- */
+#toast-stack {
+    position: fixed;
+    right: var(--sp-5);
+    bottom: calc(var(--h-statusbar) + 60px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    z-index: 1000;
+    pointer-events: none;
+}
+.toast {
+    pointer-events: auto;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--info);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-1);
+    max-width: 360px;
+    animation: toast-in 150ms ease;
+}
+.toast.ok { border-left-color: var(--ok); }
+.toast.warn { border-left-color: var(--warn); }
+.toast.bad { border-left-color: var(--bad); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---- settings drawer (plan section 5.6) — a right-side drawer, not a workspace ---- */
+#settings-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim-soft);
+    display: none;
+    z-index: 1500;
+}
+#settings-backdrop.show { display: block; }
+/* z-index ABOVE #settings-backdrop's 1500. Both are position:fixed, so the one with a
+   stacking index wins regardless of document order — without this the backdrop covered
+   the drawer and every click inside it hit the backdrop's only listener, which is
+   close(). The drawer looked drawn and was entirely inert. */
+#settings-drawer {
+    position: fixed;
+    z-index: 1501;
+    top: 0; right: 0; bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    background: var(--bg-2);
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-2);
+    display: flex;
+    flex-direction: column;
+}
+.settings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-4); border-bottom: 1px solid var(--border-soft); font-weight: 600;
+}
+.settings-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-soft); }
+.settings-tabs button { padding: 4px 10px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-1); cursor: pointer; font-size: 11px; }
+.settings-tabs button.active { background: var(--accent); border-color: var(--accent-strong); color: var(--accent-text); }
+.settings-body { flex: 1; overflow-y: auto; padding: var(--sp-4); }
+.settings-panel { display: none; }
+.settings-panel.active { display: block; }
+.settings-panel h4 { margin: 0 0 var(--sp-3); font-size: 12px; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.04em; }
+.settings-row { margin-bottom: var(--sp-4); }
+.settings-row label { display: block; font-size: 12px; color: var(--text-1); margin-bottom: var(--sp-2); }
+.settings-note { font-size: 11px; color: var(--text-2); margin-top: var(--sp-2); }
+.diag-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: var(--sp-3); }
+.diag-table td, .diag-table th { padding: 3px 6px; border-bottom: 1px solid var(--border-soft); text-align: left; }
+.radio-row { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); font-size: 12px; }
+
+/* ---- modals (ui/modal.js) — replaces alert()/confirm()/prompt() everywhere (plan M11) ----
+   A CLASS rule, not an ID rule: ui/modal.js's own dynamically-created backdrop has
+   id="modal-backdrop", but static modals declared straight in index.html (e.g. #resizeModal)
+   only carry class="modal-backdrop" with their own distinct id — an ID-selector version of
+   this rule would silently not apply to those and leave them visible-by-default (found during
+   phase 4 review: #resizeModal was exactly this, always rendered inline since nothing hid it). */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    min-width: 320px;
+    max-width: 520px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-3);
+}
+.modal-header { padding: var(--sp-4); border-bottom: 1px solid var(--border-soft); font-weight: 600; }
+.modal.wide { max-width: min(760px, 92vw); }
+.modal-body { padding: var(--sp-4); overflow: auto; color: var(--text-1); }
+.modal-body ul { margin: var(--sp-2) 0; padding-left: var(--sp-5); }
+.modal-footer { padding: var(--sp-4); border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; gap: var(--sp-3); }

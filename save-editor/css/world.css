@@ -1,0 +1,211 @@
+/* css/world.css — World workspace (plan section 5.2). Ported from public/css/map-editor.css,
+   retextured onto tokens.css, with the round-2 layout changes: overlays collapse into a
+   dropdown (was 8 inline checkboxes — ~380px of toolbar), both side panels collapse to a 28px
+   tab strip instead of disappearing outright. */
+/* NOT `display: flex` here — #world-toolbar is the same element as .toolbar-content
+   (id="world-toolbar" class="toolbar-content"), and an ID selector's specificity beats
+   .toolbar-content.active's, so it would stay visible over every other workspace regardless of
+   the .active class. app.css's .toolbar-content / .toolbar-content.active own display; this
+   only adds the World-specific layout on top of whichever display value applies. */
+#world-toolbar {
+    align-items: center;
+    gap: var(--sp-4);
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+#world-toolbar .tgroup {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-3);
+    border-right: 1px solid var(--border-soft);
+    flex-shrink: 0;
+}
+#world-toolbar .tgroup:last-child { border-right: none; }
+#world-toolbar label.glabel { color: var(--text-1); font-size: 11px; margin-right: 2px; }
+/* Round-4 feedback F1: the Bury picker collapsed to a ~22px stub while it had no options; give
+   it a real width so item names are readable without opening the list. */
+#buryItemSelect { min-width: 150px; max-width: 200px; }
+
+.tool-btn {
+    padding: 5px 8px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-0);
+}
+.tool-btn:hover { background: var(--bg-4); }
+.tool-btn.active { background: var(--accent); border-color: var(--accent-strong); color: var(--accent-text); }
+
+#world-pane-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* ---- collapsible side panels: 28px labelled strip when collapsed, never to zero ---- */
+.wpanel {
+    flex: 0 0 auto;
+    display: flex;
+    min-height: 0;
+    position: relative;
+}
+.wpanel.collapsed .wpanel-body { display: none; }
+.wpanel-strip {
+    width: 24px;
+    flex: 0 0 24px;
+    background: var(--bg-0);
+    border: none;
+    color: var(--text-1);
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+.wpanel-strip:hover { background: var(--bg-2); color: var(--text-0); }
+.wpanel-body {
+    width: 220px;
+    background: var(--bg-2);
+    overflow-y: auto;
+    padding: var(--sp-3);
+}
+#world-palette-panel.wpanel { border-right: 1px solid var(--border-soft); }
+#world-palette-panel .wpanel-body { width: 220px; padding-bottom: 60px; }
+#world-inspector-panel.wpanel { border-left: 1px solid var(--border-soft); }
+#world-inspector-panel .wpanel-body { width: 300px; }
+
+.palette-panel h3 { margin: var(--sp-3) 0 var(--sp-2); font-size: 11px; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.04em; }
+.palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: var(--sp-3); }
+.palette-swatch {
+    width: 44px; height: 44px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    image-rendering: pixelated;
+    background-size: cover;
+    position: relative;
+}
+.palette-swatch:hover { border-color: var(--accent); }
+.palette-swatch.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.palette-swatch .label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    /* On the terrain sprite itself, not on a themed surface: a dark plate with white text is
+       correct in both themes (section 23.5). */
+    font-size: 8px; text-align: center; background: rgba(0,0,0,0.6); color: #fff;
+    line-height: 11px; overflow: hidden; white-space: nowrap;
+}
+.growth-controls { padding: var(--sp-2); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); margin-bottom: var(--sp-3); }
+.growth-controls input[type="range"] { width: 100%; }
+.growth-controls .value { font-size: 11px; color: var(--text-1); }
+
+.canvas-wrap {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    background: var(--map-void);
+    cursor: crosshair;
+    min-width: 0;
+}
+#viewportCanvas { display: block; }
+.minimap-wrap {
+    position: absolute; right: var(--sp-3); bottom: var(--sp-3);
+    border: 2px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--minimap-bg); cursor: pointer;
+    box-shadow: var(--shadow-1);
+}
+#minimapCanvas { display: block; image-rendering: pixelated; }
+
+/* ---- overlays dropdown ---- */
+/* Bug B1 (round-2 feedback, confirmed by measurement): #world-toolbar needs overflow-x:auto so
+   its tool row scrolls instead of blowing out the 36px toolbar budget at 1280px (plan section
+   7.1), but that same ancestor overflow clips an `absolute`-positioned panel -- it never became
+   visible, `document.elementFromPoint()` at its centre returned null. Fix (the plan's recommended
+   option (a), same pattern legacy SIMPR uses for its own dropdowns): `position: fixed` escapes
+   ancestor clipping entirely. `top`/`left` are set in JS from the button's
+   getBoundingClientRect() when the panel opens (world.js), not from `top: 100%; left: 0` here. */
+.overlay-dropdown { position: relative; }
+.overlay-dropdown-panel {
+    display: none;
+    position: fixed;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-3);
+    z-index: 50;
+    min-width: 160px;
+    box-shadow: var(--shadow-1);
+}
+.overlay-dropdown.open .overlay-dropdown-panel { display: block; }
+.overlay-dropdown-panel label { display: flex; align-items: center; gap: var(--sp-2); font-size: 11px; padding: 3px 0; cursor: pointer; }
+
+.side-tabs { display: flex; border-bottom: 1px solid var(--border-soft); }
+.side-tabs button { flex: 1; border-radius: 0; background: transparent; border: none; border-bottom: 2px solid transparent; padding: 6px; color: var(--text-1); cursor: pointer; }
+.side-tabs button.active { border-bottom-color: var(--accent); color: var(--text-0); background: var(--bg-3); }
+.side-tab-content { display: none; }
+.side-tab-content.active { display: block; }
+
+.chooser-group { margin-bottom: var(--sp-4); }
+.chooser-group > label.chooser-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: var(--text-1); margin-bottom: 3px; }
+.chooser-group .count { font-size: 10px; color: var(--text-2); }
+.chooser-row { display: flex; gap: var(--sp-2); align-items: center; }
+.chooser-row select { flex: 1; padding: 4px 5px; font-size: 11px; min-width: 0; }
+.chooser-row button.btn { padding: 4px 7px; flex: 0 0 auto; }
+.chooser-filter { font-size: 10px; color: var(--text-1); display: flex; align-items: center; gap: var(--sp-2); margin-top: 3px; }
+
+/* ---- Objects tab (section 22.7) ---- */
+/* One list for every map object, replacing five parallel <select> choosers. */
+.obj-toolbar { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.obj-toolbar .obj-search { flex: 1; min-width: 0; padding: 4px 5px; font-size: 11px; }
+.obj-toolbar select { padding: 4px 5px; font-size: 11px; max-width: 45%; }
+.obj-subbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-2); }
+.obj-subbar .chooser-filter { margin-top: 0; }
+.obj-count { font-size: 10px; color: var(--text-2); }
+.obj-list {
+    max-height: 46vh; overflow-y: auto;
+    border: 1px solid var(--border-soft); border-radius: 3px; background: var(--bg-0);
+}
+.obj-row {
+    display: flex; align-items: center; gap: var(--sp-2);
+    padding: 3px var(--sp-2); font-size: 11px; cursor: pointer;
+    border-bottom: 1px solid var(--border-soft);
+}
+.obj-row:last-child { border-bottom: none; }
+.obj-row:hover { background: var(--bg-2); }
+.obj-row.selected { background: var(--bg-2); box-shadow: inset 2px 0 0 var(--accent, #6ab04c); }
+.obj-row .obj-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.obj-row .obj-at { color: var(--text-2); font-size: 10px; flex: 0 0 auto; }
+.obj-row .obj-del {
+    border: none; background: none; color: var(--text-2); cursor: pointer;
+    padding: 0 2px; flex: 0 0 auto; opacity: 0; font-size: 11px;
+}
+.obj-row:hover .obj-del, .obj-row.selected .obj-del { opacity: 0.7; }
+.obj-row .obj-del:hover { opacity: 1; color: var(--bad, #d66); }
+.obj-empty { padding: var(--sp-3); font-size: 11px; color: var(--text-2); text-align: center; }
+.obj-more { padding: var(--sp-2); font-size: 10px; color: var(--text-2); text-align: center; border-top: 1px solid var(--border-soft); }
+.obj-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+
+.inspector-subsection { margin-top: var(--sp-4); border-top: 1px solid var(--border-soft); padding-top: var(--sp-3); }
+.inspector-subtitle {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+    margin-bottom: var(--sp-2);
+}
+.inspector-readonly { color: var(--text-2); }
+.inspector-field { margin-bottom: var(--sp-3); }
+.inspector-field label { display: block; font-size: 11px; color: var(--text-1); margin-bottom: 3px; }
+.inspector-field input, .inspector-field select { width: 100%; padding: 4px 6px; font-size: 12px; }
+.inspector-field .readonly-value { font-family: monospace; font-size: 12px; color: var(--text-0); padding: 4px 0; }
+.inspector-title { font-size: 13px; color: var(--text-0); margin: 0 0 var(--sp-3); font-weight: 600; }
+.inspector-empty { color: var(--text-2); font-size: 12px; }
+.inspector-actions { margin-top: var(--sp-3); display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.hint { font-size: 10px; color: var(--text-2); margin-top: var(--sp-1); }
+
+.btn.danger { border-color: var(--danger-border); }
+.btn.danger:hover:not(:disabled) { background: #5c2b2b; border-color: var(--bad); }
