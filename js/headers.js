@@ -4,7 +4,7 @@
 
 const HEADER_LINKS = [
     {
-        name: 'Visual Horsey Editor,
+        name: 'Visual Horsey Editor',
         url: 'https://zyonixgaming.github.io/dna/visual/',
         icon: '🐎'
     },    {
