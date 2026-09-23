@@ -38,6 +38,33 @@
   }
 
   var _valueCache = Object.create(null);
+
+  // ---- custom genes.xml ----
+  // Same localStorage key as SIMPR and the integrated save editor, so a modded gene table
+  // uploaded in either applies here too. Applied to the renderer's own gene objects (see
+  // horse-render-custom-genes.md), so the preview, Genome.parse and every slider read the
+  // same values. xmlText null/'' = back to the built-in table.
+  var CUSTOM_GENES_KEY = 'simpr_custom_genes_xml';
+
+  function applyGenesXml(xmlText) {
+    if (typeof D.applyGenes !== 'function') {
+      return { ok: false, changed: 0, errors: ['horse-render.js is too old: no HorseyData.applyGenes'] };
+    }
+    var res = xmlText ? D.applyGenes(D.recordsFromXml(xmlText)) : D.resetGenes();
+    _valueCache = Object.create(null);   // achievable values depend on g / m / s
+    return res;
+  }
+
+  // Runs before editor-specs.js, which sizes sliders and toggles from gene values at load.
+  var customGenes = { active: false, errors: [] };
+  try {
+    var cachedXml = root.localStorage && root.localStorage.getItem(CUSTOM_GENES_KEY);
+    if (cachedXml) {
+      var applied = applyGenesXml(cachedXml);
+      customGenes = { active: applied.ok, errors: applied.errors };
+      if (!applied.ok) console.warn('Custom genes.xml not applied:', applied.errors);
+    }
+  } catch (e) { /* storage blocked: use the built-in table */ }
   function getGeneValues(name) {
     if (_valueCache[name]) return _valueCache[name];
     var gid = D.byName[name];
@@ -182,6 +209,9 @@
     readGenePair: readGenePair,
     makeWildtypeLines: makeWildtypeLines,
     linesFromAlleles: linesFromAlleles,
-    randomizeLines: randomizeLines
+    randomizeLines: randomizeLines,
+    applyGenesXml: applyGenesXml,
+    customGenes: customGenes,
+    CUSTOM_GENES_KEY: CUSTOM_GENES_KEY
   };
 })(typeof window !== 'undefined' ? window : this);

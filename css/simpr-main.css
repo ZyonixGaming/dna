@@ -1564,3 +1564,129 @@ textarea {
     color: #f87171;
     background: rgba(248, 113, 113, 0.12);
 }
+
+
+/* ======================================================================
+   SHARED-MODULE ADDITIONS (2026-09-23)
+   DNA code row, library search, odds-bar Legalize, resizable columns.
+   ====================================================================== */
+
+.dna-code-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    align-items: center;
+}
+.dna-code-input {
+    flex: 1;
+    min-width: 0;
+    background: #0b1218;
+    color: #cbd5e6;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font: 0.68rem monospace;
+}
+.dna-code-input:focus { outline: none; border-color: #48b5b5; }
+.dna-code-btn {
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    background: #334155;
+    border-bottom-color: #475569;
+    white-space: nowrap;
+}
+.dna-code-link {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: #48b5b5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.dna-code-link:hover { text-decoration: underline; }
+
+.library-search { margin: 0 0 8px; }
+.lib-match { background: #48b5b555; color: inherit; border-radius: 2px; padding: 0 1px; }
+.library-empty { list-style: none; padding: 8px; color: #64748b; font-size: 0.75rem; font-style: italic; }
+#saveDnaBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.odds-bar-legalize {
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    background: #4c3a6e;
+    border-bottom-color: #7c5fae;
+    white-space: nowrap;
+}
+.odds-bar-legalize:disabled { opacity: 0.4; cursor: default; }
+
+/* Resizable columns (desktop only). js/splitter.js writes --left-w / --right-w on
+   .app-layout; below 1071px the sidebars keep their responsive widths. */
+.col-splitter { display: none; }
+@media (min-width: 1071px) {
+    .app-layout.resizable .col-splitter {
+        display: block;
+        flex: 0 0 6px;
+        cursor: col-resize;
+        background: #2d3a46;
+        opacity: 0.5;
+        touch-action: none;
+        user-select: none;
+    }
+    .app-layout.resizable .col-splitter:hover,
+    .app-layout.resizable .col-splitter.dragging { opacity: 1; background: #48b5b5; }
+    .app-layout.resizable .left-sidebar { width: var(--left-w, 260px); border-right: none; }
+    .app-layout.resizable .right-sidebar {
+        width: var(--right-w, 350px);
+        min-width: var(--right-w, 350px);
+        max-width: var(--right-w, 350px);
+        border-left: none;
+    }
+}
+body.resizing { cursor: col-resize; user-select: none; }
+
+/* ---- Bases mode (Pair | Bases toggle in the filter bar) ---- */
+.edit-mode { display: inline-flex; border: 1px solid #475569; border-radius: 20px; overflow: hidden; flex-shrink: 0; }
+.edit-mode-btn {
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    background: #0f1720;
+    color: #94a3b8;
+    border: none;
+    border-radius: 0;
+    border-bottom: none;
+}
+.edit-mode-btn + .edit-mode-btn { border-left: 1px solid #475569; }
+.edit-mode-btn.active { background: #2c6e6e; color: #ffffff; }
+
+/* Fixed width: room for the widest label, "C -120" (6 characters; "T 999" fits too),
+   plus the arrow - so both strands line up in every row. */
+.strand-td, .strand-th { width: 1%; white-space: nowrap; }
+.base-select {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 2px 4px;
+    font: bold 0.8rem monospace;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: calc(6ch + 30px);
+}
+/* the chosen base keeps its colour: A yellow, G green, C blue, T red */
+.base-select.sel-A, .base-select option.opt-A { color: #facc15; }
+.base-select.sel-C, .base-select option.opt-C { color: #3b82f6; }
+.base-select.sel-G, .base-select option.opt-G { color: #22c55e; }
+.base-select.sel-T, .base-select option.opt-T { color: #ef4444; }
+.base-select option { background: #0f172a; font-weight: bold; }
+/* the strand whose base wins (lower priority number) */
+.base-select.dominant { border-color: #48b5b5; box-shadow: 0 0 0 1px #48b5b5 inset; }
+.base-select:focus { outline: 2px solid #48b5b5; outline-offset: 1px; }
+.base-value-td { font-size: 0.75rem; color: #e2e8f0; white-space: nowrap; }
+.gene-table .m-col { width: 1%; white-space: nowrap; color: #94a3b8; font-size: 0.72rem; text-align: center; }
+
+/* Phones: the sticky HELIX header already names the helix, so H / P give way to
+   the two pickers. Pair mode is unchanged. */
+@media (max-width: 600px) {
+    body.bases-mode .gene-table .helix-col,
+    body.bases-mode .gene-table .pair-col { display: none; }
+    .base-select { font-size: 0.72rem; padding: 2px 1px; width: calc(6ch + 22px); }
+    .base-value-td { font-size: 0.68rem; }
+}

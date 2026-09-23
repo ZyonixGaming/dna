@@ -1,0 +1,339 @@
+/* ======================================================================
+   Sidebar panels shared by the DNA Library / Pop / Custom Data modules
+   (js/dna-library.js, js/pop-presets.js, js/custom-data.js)
+
+   Extracted from css/simpr-main.css on 2026-09-23; SIMPR still uses
+   its own merged copy.
+
+   CSS custom properties used: none
+   ====================================================================== */
+
+.saved-dna-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+
+.saved-dna-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.category-item {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border: 2px solid transparent;
+}
+
+.category-item.selected {
+    border-color: #3b82f6;
+    background: #1e2a3a;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.category-name {
+    flex: 1;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.drag-handle {
+    cursor: grab;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.entry-list {
+    list-style: none;
+    padding-left: 20px;
+    margin: 6px 0 0;
+}
+
+.entry-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin: 4px 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.entry-item:hover {
+    background: #334155;
+}
+
+.entry-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.entry-actions button {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 2px 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    min-width: auto;
+}
+
+.entry-actions button:hover {
+    color: #f1f5f9;
+}
+
+.library-controls,
+.import-export-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.library-controls button,
+.import-export-btns button {
+    flex: 1;
+    font-size: 0.7rem;
+    padding: 5px 8px;
+}
+
+.toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2c6e6e;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 1000;
+    transition: opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.presets-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+
+.presets-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapsible-header .chevron {
+    display: inline-block;
+    font-size: 0.6rem;
+    transition: transform 0.15s;
+}
+
+.collapsible-header.collapsed .chevron {
+    transform: rotate(-90deg);
+}
+
+.presets-empty {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-style: italic;
+    padding: 4px 2px;
+}
+
+.presets-body {
+    /* the filter box stays fixed here; only .preset-list scrolls */
+}
+
+.preset-list {
+    max-height: 192px;
+    overflow-y: auto;
+}
+
+.preset-filter-wrap {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+
+.preset-filter {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    font-size: 0.68rem;
+    background: #0f1720;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: #e2e8f0;
+    outline: none;
+}
+
+.preset-filter:focus {
+    border-color: #48b5b5;
+}
+
+.preset-filter::placeholder {
+    color: #64748b;
+}
+
+.preset-filter-clear {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    font-size: 0.62rem;
+    background: #334155;
+    border-bottom-color: #475569;
+}
+
+.preset-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin: 3px 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: #cbd5e6;
+}
+
+.preset-row:hover {
+    background: #2d3e52;
+    color: #fff;
+}
+
+.preset-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preset-compare {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    background: #334155;
+    border-bottom-color: #475569;
+    line-height: 1.4;
+}
+
+.preset-dot {
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #22c55e;
+    cursor: help;
+}
+
+.preset-dot.invalid {
+    color: #ef4444;
+}
+
+.preset-dot.empty {
+    visibility: hidden;
+}
+
+.preset-odds {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #334155;
+    border-bottom-color: #475569;
+    line-height: 1.4;
+}
+
+.preset-odds.active {
+    background: #7c4a9e;
+    border-bottom-color: #c084fc;
+    color: #ffffff;
+}
+
+.customdata-section {
+    padding: 12px;
+    border-bottom: 1px solid #2d3a46;
+}
+
+.customdata-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #b9c7d9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.custom-file-row {
+    margin-bottom: 6px;
+}
+
+.custom-file-row label {
+    display: block;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.custom-file-row input[type="file"] {
+    width: 100%;
+    font-size: 0.62rem;
+    color: #94a3b8;
+}
+
+.custom-status {
+    font-size: 0.65rem;
+    color: #64748b;
+    font-style: italic;
+    margin: 6px 0;
+}
+
+.custom-status.active {
+    color: #facc15;
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* fallbacks */

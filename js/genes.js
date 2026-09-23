@@ -391,7 +391,7 @@ async function loadGeneDataFromXml(xmlString="") {
 		priorityOrder: n.split(''),
 		g: g,
         m: m,
-        s: (+gene.getAttribute('s'),10)||1,
+        s: parseInt(gene.getAttribute('s'),10)||1,
 		valueMatrix:  precomputeValueMatrix(g,m)
 	  };
 	  

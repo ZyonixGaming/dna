@@ -4,13 +4,21 @@
 
 const HEADER_LINKS = [
     {
-        name: 'SIMPR Horsey Genome Editor',
+        name: 'Visual Horsey Editor,
+        url: 'https://zyonixgaming.github.io/dna/visual/',
+        icon: '🐎'
+    },    {
+        name: 'SIMPR Genome Editor',
         url: 'https://zyonixgaming.github.io/dna/simpr.html',
         icon: '🧬'
     },    {
         name: 'DNA Shortener',
         url: 'https://zyonixgaming.github.io/dna/',
         icon: '🔗'
+    },    {
+        name: 'Horsey Studio Savegame Editor',
+        url: 'https://zyonixgaming.github.io/dna/save-editor/',
+        icon: '🐴'
     }
 ];
 

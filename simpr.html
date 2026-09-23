@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="./css/simpr-main.css">
 	<link rel="stylesheet" href="./css/horse-render.css">
     <link rel="stylesheet" href="./css/headers.css">
+	<style>
+#dnaShortenerLink,.dna-code-row{display:none!important;}	
+	</style>
 </head>
 <body>
     <!-- Main container with max-width constraint -->
@@ -57,6 +60,17 @@
                             <button id="clearRawBtn" class="clear-btn clear-textarea-btn">✖ Clear</button>
                         </span>
                     </div>
+                    <!-- The genome as a DNA code (the ?dna= format every tool shares).
+                         Paste a code here and press Enter / Load to open it. -->
+                    <div class="dna-code-row">
+                        <input id="dnaCode" class="dna-code-input" spellcheck="false" autocomplete="off" title="DNA code - paste one and press Enter to load it">
+                        <button id="btnLoadCode" class="dna-code-btn" title="Load the code in the box">Load</button>
+                    </div>
+                    <div class="dna-code-row">
+                        <button id="btnCopyCode" class="dna-code-btn">Copy code</button>
+                        <button id="btnCopyLink" class="dna-code-btn">Copy link</button>
+                        <a id="lnkVisual" class="dna-code-link" href="./visual/index.html" target="_blank" rel="noopener" title="Open this genome in the Visual Genome Editor">🐴 Visual Editor</a>
+                    </div>
 
                     <!-- Only shown while compare mode is on. Editing it re-reads
                          the reference genome; the ⚖️ buttons on presets and on
@@ -77,6 +91,8 @@
       <div class="horse-stage" style="min-height:150px";>
         <canvas id="horseCanvas" width="10" height="10"></canvas>
       </div>
+      <!-- background swatches (js/preview-bg.js); one row, extras drop out when narrow -->
+      <div id="previewBg"></div>
       <div id="horseStatus" class="horse-status" hidden></div>
       <div id="horseDims" class="horse-dims"></div>
     </div>
@@ -94,15 +110,24 @@
                 </div>
             </div>
 
+            <div class="col-splitter" id="splitLeft" title="Drag to resize · double-click to reset"></div>
+
             <!-- MAIN TABLE AREA -->
             <div class="main-content" id="mainContent">
                 <div class="filter-cell">
                     <label>🔍 Search: </label>
                     <input type="text" id="filterInput" class="filter-input" placeholder="" value="">
                     <button id="clearFilterBtn" class="clear-filter-btn">✖</button>
+                    <!-- Pair: pick a pair by value. Bases: pick each strand's base, listed in
+                         the gene's priority order (the CRISPR way). Opens in Pair mode. -->
+                    <div class="edit-mode" role="group" aria-label="Edit mode">
+                        <button id="modePairBtn" class="edit-mode-btn active" title="Pick an allele pair by its value">Pair</button>
+                        <button id="modeBasesBtn" class="edit-mode-btn" title="Pick each strand's base directly, in priority order (1 = most dominant)">Bases</button>
+                    </div>
                 </div>
                 <div class="odds-bar" id="oddsBar" style="display:none;">
                     <span class="odds-bar-label" id="oddsBarLabel"></span>
+                    <button class="odds-bar-legalize" id="oddsLegalize" title="Change every impossible gene to one this population allows">🩹 Legalize</button>
                     <button class="odds-bar-exit" id="oddsBarExit" title="Exit odds mode">✖</button>
                 </div>
                 <div class="compare-bar" id="compareBar" style="display:none;">
@@ -118,7 +143,9 @@
                 </div>
             </div>
 
-            <!-- RIGHT SIDEBAR: Bookmarks + DNA Library -->
+            <div class="col-splitter" id="splitRight" title="Drag to resize · double-click to reset"></div>
+
+            <!-- RIGHT SIDEBAR: Modifications, Pop, DNA Library, Custom Data -->
             <div class="right-sidebar">
                 <div class="mods-section">
                     <h3>🛠 MODIFICATIONS</h3>
@@ -127,7 +154,7 @@
 
                 <div class="presets-section">
                     <h3 class="collapsible-header" id="presetsToggle">
-                        <span class="chevron">▼</span> 🧪 PRESETS
+                        <span class="chevron">▼</span> 🧪 POP
                     </h3>
                     <div class="presets-body" id="presetsBody">
                         <div class="preset-filter-wrap">
@@ -145,6 +172,10 @@
                     <div class="library-controls">
                         <button id="addCategoryBtn"><span>➕</span> Add Category</button>
                         <button id="saveDnaBtn"><span>💾</span> <span id="saveBtnText">Save DNA</span></button>
+                    </div>
+                    <div class="preset-filter-wrap library-search">
+                        <input type="text" id="librarySearch" class="preset-filter" placeholder="Search DNA…">
+                        <button id="librarySearchClear" class="preset-filter-clear" title="Clear search">✖</button>
                     </div>
                     <ul class="category-list" id="categoryList"></ul>
                     <div class="import-export-btns">
@@ -188,9 +219,16 @@
     <script src="./js/genes.js"></script>
     <script src="./js/headers.js"></script>
     <script src="./js/pop.js"></script>
+    <!-- Shared modules (also used by visual/index.html; see common-modules.md) -->
+    <script src="./js/genome-text.js"></script>
+    <script src="./js/splitter.js"></script>
+    <script src="./js/preview-bg.js"></script>
+    <script src="./js/dna-library.js"></script>
+    <script src="./js/pop-presets.js"></script>
+    <script src="./js/custom-data.js"></script>
     <!-- crispr.js + simpr.js + simpr-pop.js + compact.js + mobile.js, merged
-         and de-duplicated. Edit js/simpr-main.js, then regenerate with:
-             npx terser js/simpr-main.js -c -m -o js/simpr-main-min.js -->
+         and de-duplicated. Edit js/simpr-main.js, then regenerate with
+         build-simpr.cmd (next to this file). -->
     <script src="./js/simpr-main-min.js"></script>
 	<script src="./js/horse-render.js"></script>
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>

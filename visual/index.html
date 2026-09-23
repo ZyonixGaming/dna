@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Visual Genome Editor</title>
+<link rel="icon" type="image/x-icon" href="../horse.ico">
+<!-- shared with the other tools; the inline <style> below comes after, so it wins ties -->
+<link rel="stylesheet" href="../css/headers.css">
+<link rel="stylesheet" href="../css/sidebar-panels.css">
 <style>
 :root{
   --bg:#1a1a1c; --panel:#242428; --panel2:#2a2a2e; --panel3:#303034;
@@ -13,9 +18,13 @@
 html,body{margin:0;height:100%}
 body{font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh}
-header{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);font-weight:600;display:flex;align-items:center;gap:12px}
-header .spacer{flex:1}
-header button{font-size:12px;padding:4px 10px}
+/* Header: css/headers.css's .header-bar + tool switcher, retinted to this page */
+.app-header{padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);box-shadow:none;font-weight:600;justify-content:flex-start;gap:12px}
+.app-header .header-title{font-size:15px;color:var(--text);gap:8px;white-space:nowrap}
+.app-header .header-title span{font-size:18px}
+.app-header .spacer{flex:1}
+.app-header > button{font-size:12px;padding:4px 10px}
+.app-header .tools-btn{padding:4px 14px;font-size:12px}
 
 /* Section navigation bar */
 .section-nav{display:flex;gap:2px;padding:6px 12px;background:var(--panel);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:thin}
@@ -25,11 +34,21 @@ header button{font-size:12px;padding:4px 10px}
 .nav-btn:hover{background:var(--panel3);color:var(--text)}
 .nav-btn:active{background:var(--accent2);color:#fff}
 
-main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 520px;min-height:0}
-.editor-panel{overflow-y:auto;padding-bottom:120px}
-.side-panel{background:var(--panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
-.preview-wrap{padding:12px;background:#a522b4;text-align:center;border-bottom:1px solid var(--border);min-height:180px}
-.preview-wrap canvas{max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+/* Editor | splitter | side panel. --side-w is set by the splitter (editor-app.js) and remembered. */
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 6px var(--side-w,520px);min-height:0}
+.editor-panel{overflow-y:auto;padding-bottom:120px;min-width:0}
+.splitter{cursor:col-resize;background:var(--border);opacity:.35;touch-action:none;user-select:none}
+.splitter:hover,.splitter.dragging{opacity:1;background:var(--accent2)}
+body.resizing{cursor:col-resize;user-select:none}
+body.resizing iframe,body.resizing canvas{pointer-events:none}
+.side-panel{background:var(--panel);overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.side-panel>*{flex-shrink:0}
+/* The preview is never taller than it is wide, and the canvas never exceeds the preview: the
+   canvas keeps its rendered pixel size until that would overflow, then scales down. The wrap
+   is a size container, so inside it 100cqw = its content width (W - 2*12px padding); capping
+   the canvas height there makes the wrap's height at most 24 + (W - 24 - 1) + 1 = W. */
+.preview-wrap{padding:12px;background:#a522b4;border-bottom:1px solid var(--border);min-height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center;container-type:inline-size}
+.preview-wrap canvas{display:block;max-width:100%;max-height:calc(100cqw - 1px);width:auto;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
 .dims{font-size:11px;color:var(--dim);padding:4px 12px}
 .tags-panel{padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;line-height:1.6;color:var(--dim);max-height:130px;overflow-y:auto}
 .tags-panel .tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;margin:1px 2px}
@@ -129,12 +148,46 @@ button.ghost:hover{background:var(--panel3)}
 .status{font-size:11px;color:var(--dim);flex:1}
 .status.error{color:#ff6b6b}
 .section-controls>details>summary{font-size:12px}
+/* Encoded DNA row */
+.raw-wrap .code-row{display:none!important;}
+.raw-wrap .links{font-size:11px;color:var(--dim);display:none!important;}
+.code-row input{flex:1;min-width:0;background:#101014;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 6px;font:11px ui-monospace,Consolas,monospace}
+.code-row input:focus{outline:none;border-color:var(--accent)}
+.raw-wrap .links{font-size:11px;color:var(--dim)}
+.raw-wrap .links a{color:var(--accent);text-decoration:none}
+.raw-wrap .links a:hover{text-decoration:underline}
+.status.warn{color:#f0c070;cursor:help}
+/* Side-panel blocks (Pop / DNA Library / Custom Data): markup and classes come from the shared
+   modules and css/sidebar-panels.css; these rules only fit them into this page. */
+.panel-body{padding:10px 12px}
+.panel-body .preset-list{max-height:260px;overflow-y:auto}
+.library-controls,.import-export-btns{display:flex;gap:6px;margin:0 0 8px}
+.library-controls button,.import-export-btns button{flex:1;font-size:11px;padding:4px 8px}
+.library-controls button:disabled{opacity:.5;cursor:not-allowed;background:var(--panel3)}
+.category-list{max-height:340px;overflow-y:auto}
+.category-actions{display:flex;gap:2px}
+.category-actions button,.entry-actions button,.preset-row button{background:transparent;border:0;padding:1px 4px;font-size:12px;color:var(--text)}
+.category-actions button:hover,.entry-actions button:hover,.preset-row button:hover{background:var(--panel3)}
+.entry-actions{display:flex;gap:2px}
+.custom-file-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#resetCustomDataBtn{margin-top:6px;font-size:11px}
+.library-search{margin:0 0 8px}
+.lib-match{background:#3d6fb888;color:inherit;border-radius:2px;padding:0 1px}
+.library-empty{list-style:none;padding:8px;color:var(--dim);font-style:italic}
+.toast.error{background:#7f1d1d}
+.toast.warn{background:#78350f}
+.toast.ok{background:#14532d}
+
+
+
+
+
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <span>🐴 Visual Genome Editor</span>
+  <header class="header-bar app-header">
+    <div class="header-title"><span>🐴</span> Visual Genome Editor</div>
         <div class="search-wrap">
       <input type="text" id="searchInput" placeholder="Filter genes..." class="search-input"/>
       <button type="button" id="btnClearSearch" class="search-clear" title="Clear filter" aria-label="Clear filter">×</button>
@@ -146,10 +199,15 @@ button.ghost:hover{background:var(--panel3)}
     <button id="btnReset" class="ghost">Reset</button>
     <button id="btnCopy">Copy DNA</button>
     <button id="btnPaste" class="ghost">Paste DNA</button>
+    <div class="tools-dropdown" id="toolsDropdown">
+      <button class="tools-btn" id="toolsBtn">🔧 Tools <span class="arrow">▼</span></button>
+      <div class="dropdown-menu" id="dropdownMenu"><!-- populated by ../js/headers.js --></div>
+    </div>
   </header>
   <nav class="section-nav" id="sectionNav" aria-label="Section navigation"></nav>
   <main>
     <div class="editor-panel" id="editorPanel"></div>
+    <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" tabindex="0" title="Drag to resize · double-click to reset · ←/→ with focus"></div>
     <aside class="side-panel">
       <div class="preview-wrap">
         <canvas id="preview"></canvas>
@@ -172,24 +230,92 @@ button.ghost:hover{background:var(--panel3)}
         <button class="zoom-btn" data-zoom="8">8x</button>
       </div>
       <div class="tags-panel" id="tagsPanel"></div>
-      <details class="section" open>
+      <details class="section" open data-panel="raw">
         <summary>Raw Genome</summary>
         <div class="raw-wrap">
+          <!-- accepts 40 HH:SEQ lines in any layout, a DNA code, or a ?dna= link -->
           <textarea id="rawGenome" spellcheck="false"></textarea>
           <div class="row">
             <button id="btnApplyRaw">Apply</button>
             <span class="status" id="rawStatus"></span>
           </div>
+          <div class="row code-row">
+            <input id="dnaCode" spellcheck="false" autocomplete="off" title="Encoded genome (base64url) - the same code SIMPR and the DNA Shortener use. Paste a code here and press Enter to load it.">
+            <button id="btnLoadCode" class="ghost" title="Load the code in the box">Load</button>
+            <button id="btnCopyCode" class="ghost">Copy code</button>
+            <button id="btnCopyLink" class="ghost">Copy link</button>
+          </div>
+          <div class="row links">
+            Open in <a id="lnkSimpr" href="../simpr.html" target="_blank" rel="noopener">SIMPR</a>
+            · <a id="lnkShortener" href="../index.html" target="_blank" rel="noopener">DNA Shortener</a>
+          </div>
+        </div>
+      </details>
+      <details class="section" data-panel="pop">
+        <summary>🧪 Pop</summary>
+        <div class="panel-body">
+          <div class="preset-filter-wrap">
+            <input type="text" id="popFilter" class="preset-filter" placeholder="Filter populations…">
+            <button id="popFilterClear" class="preset-filter-clear" title="Clear filter">✖</button>
+          </div>
+          <div class="preset-list" id="popList"><div class="presets-empty">Loading populations…</div></div>
+        </div>
+      </details>
+      <details class="section" open data-panel="library">
+        <summary>📁 DNA Library</summary>
+        <div class="panel-body">
+          <div class="library-controls">
+            <button id="addCategoryBtn">➕ Add Category</button>
+            <button id="saveDnaBtn"><span id="saveBtnText">Save DNA</span></button>
+          </div>
+          <div class="preset-filter-wrap library-search">
+            <input type="text" id="librarySearch" class="preset-filter" placeholder="Search DNA…">
+            <button id="librarySearchClear" class="preset-filter-clear" title="Clear search">✖</button>
+          </div>
+          <ul class="category-list" id="categoryList"></ul>
+          <div class="import-export-btns">
+            <button id="exportLibBtn">⬇️ Export</button>
+            <button id="importLibBtn">⬆️ Import</button>
+          </div>
+        </div>
+      </details>
+      <details class="section" data-panel="customdata">
+        <summary>⚙️ Custom Data</summary>
+        <div class="panel-body">
+          <div class="custom-file-row">
+            <label for="genesXmlInput">genes.xml</label>
+            <input type="file" id="genesXmlInput" accept=".xml">
+          </div>
+          <div class="custom-file-row">
+            <label for="popXmlInput">pop.xml</label>
+            <input type="file" id="popXmlInput" accept=".xml">
+          </div>
+          <div class="custom-status" id="customDataStatus"></div>
+          <button id="resetCustomDataBtn" class="ghost">↺ Reset to bundled data</button>
         </div>
       </details>
     </aside>
   </main>
 </div>
 
-<script src="horse-render.js"></script>
+<div id="toast" class="toast"></div>
+
+<!-- Shared data + codec (tools/js). genes.js / pop.js load their tables asynchronously; the
+     editor itself only needs horse-render.js's HorseyData, which is ready immediately. -->
+<script src="../js/genes.js"></script>
+<script src="../js/pop.js"></script>
+<script src="../js/horse-render.js"></script>
+<script src="../js/genome-text.js"></script>
+<script src="../js/splitter.js"></script>
+<script src="../js/custom-data.js"></script>
+<script src="../js/dna-library.js"></script>
+<script src="../js/pop-presets.js"></script>
+<!-- editor-core.js applies a cached custom genes.xml before editor-specs.js sizes the controls -->
 <script src="editor-core.js"></script>
 <script src="editor-specs.js"></script>
 <script src="editor-app.js"></script>
+<!-- after the header markup: it fills #dropdownMenu as soon as it runs -->
+<script src="../js/headers.js"></script>
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script>
   kofiWidgetOverlay.draw('zyonixgaming', {

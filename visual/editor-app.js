@@ -13,6 +13,12 @@
   var controlRefs = Object.create(null); // id → { el, spec, input, valueEl, swatch? }
   var previewZoom = 4;
   var previewBg = null;
+  // False until a genome has really been loaded (paste, Apply, ?dna=, Pop, library). The
+  // wildtype shown at boot is a placeholder, so partial input then is filled randomly
+  // rather than from it - see GenomeText.normalize's `previous`.
+  var hasLoadedGenome = false;
+  var pop = null, library = null, customData = null;
+  var UI_KEY_PREFIX = 'visual_';   // per-tool UI state; never synced with the other tools
 
   // ---- DOM ----
   var editorPanel = document.getElementById('editorPanel');
@@ -40,6 +46,119 @@
     return { gt: gt, ph: ph, colors: colors, lines: lines };
   }
 
+  // ---- genome changed: one path for every source ----
+  // Everything that shows the genome is refreshed here: raw text, preview, tags, controls,
+  // the DNA code / links, the URL and the Pop validity dots.
+  function afterGenomeChange() {
+    if (rawEl) rawEl.value = lines.join('\n');
+    renderPreview();
+    renderTags();
+    syncControls();
+    updateCode();
+    if (pop) pop.genomeChanged();
+  }
+
+  // Re-derive state from `lines` and refresh everything.
+  function commit() {
+    if (!refreshState()) return false;
+    afterGenomeChange();
+    return true;
+  }
+
+  // ---- toast ----
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function toast(msg, kind, ms) {
+    if (!toastEl) { console.log(msg); return; }
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show' + (kind ? ' ' + kind : '');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.className = 'toast'; }, ms || 2200);
+  }
+
+  function uiGet(key, dflt) {
+    try { var v = localStorage.getItem(UI_KEY_PREFIX + key); return v === null ? dflt : v; }
+    catch (e) { return dflt; }
+  }
+  function uiSet(key, v) { try { localStorage.setItem(UI_KEY_PREFIX + key, v); } catch (e) {} }
+
+  // Side-panel <details> remember whether they were open (per tool, not synced).
+  function persistPanels() {
+    document.querySelectorAll('.side-panel details.section[data-panel]').forEach(function (d) {
+      var key = d.getAttribute('data-panel') + '_open';
+      var v = uiGet(key, null);
+      if (v !== null) d.open = v === '1';
+      d.addEventListener('toggle', function () { uiSet(key, d.open ? '1' : '0'); });
+    });
+  }
+
+  // ---- resizable editor | side panel split ----
+  // ../js/splitter.js (shared with SIMPR): drag the divider, or focus it and use arrow keys;
+  // double-click resets. Clamped so neither panel collapses; remembered per tool.
+  var SIDE_DEFAULT = 520, SIDE_MIN = 320, EDITOR_MIN = 360;
+
+  function initSplitter() {
+    var mainEl = document.querySelector('main');
+    var splitter = document.getElementById('splitter');
+    if (!mainEl || !splitter || !root.Splitter) return;
+    root.Splitter.attach({
+      handle: splitter, container: mainEl, cssVar: '--side-w', side: 'right',
+      min: SIDE_MIN, defaultWidth: SIDE_DEFAULT, storageKey: UI_KEY_PREFIX + 'side_w',
+      max: function () { return mainEl.clientWidth - EDITOR_MIN - splitter.offsetWidth; }
+    });
+  }
+
+  // ---- DNA code, links, ?dna= ----
+  var codeEl = document.getElementById('dnaCode');
+  var currentCode = '';
+  var urlTimer = null;
+
+  function updateCode() {
+    try { currentCode = root.GenomeText.encode(lines); }
+    catch (e) { currentCode = ''; }
+    if (codeEl && document.activeElement !== codeEl) codeEl.value = currentCode;
+    var q = currentCode ? '?dna=' + currentCode : '';
+    var s1 = document.getElementById('lnkSimpr');
+    var s2 = document.getElementById('lnkShortener');
+    if (s1) s1.href = '../simpr.html' + q;
+    if (s2) s2.href = '../index.html' + q;
+    // history.replaceState is rate-limited (Safari throws past ~100 calls / 30 s) and slider
+    // drags fire continuously, so the URL is written on a trailing edge.
+    if (urlTimer) clearTimeout(urlTimer);
+    urlTimer = setTimeout(function () {
+      try { history.replaceState(null, '', location.pathname + q); } catch (e) {}
+    }, 300);
+  }
+
+  function shareLink() {
+    return location.origin + location.pathname + '?dna=' + currentCode;
+  }
+
+  function copyText(text, btn, label) {
+    if (!navigator.clipboard) { toast('Clipboard not available', 'error'); return; }
+    navigator.clipboard.writeText(text).then(function () {
+      if (btn) {
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = label; }, 1200);
+      }
+    }, function () { toast('Clipboard access denied', 'error'); });
+  }
+
+  // Allele pairs in the shape PopPresets' validity dots want. Needs genes.js loaded.
+  function genePairs() {
+    if (typeof arrayHp === 'undefined' || !arrayHp[0] || !arrayHp[0][0]) return [];
+    var out = [];
+    for (var h = 0; h < 20; h++) {
+      var a = lines[h * 2], b = lines[h * 2 + 1];
+      var sa = a.substring(a.indexOf(':') + 1), sb = b.substring(b.indexOf(':') + 1);
+      for (var p = 0; p < arrayHp[h].length; p++) {
+        var e = arrayHp[h][p];
+        out.push({ desc: e.desc, n: e.n, allele1: sa.charAt(p), allele2: sb.charAt(p) });
+      }
+    }
+    return out;
+  }
+
   // ---- render preview ----
   function renderPreview() {
     if (!parts || !canvas) return;
@@ -48,7 +167,8 @@
         zoom: previewZoom, background: previewBg
       });
       if (dimsEl) dimsEl.textContent = info.width + '×' + info.height +
-        ' @1×  ·  shown ' + previewZoom + '×  ·  ' + parts.length + ' parts';
+        ' @1×  ·  shown ' + previewZoom + '×  ·  ' + parts.length + ' parts' +
+        (C.customGenes.active ? '  ·  custom genes.xml' : '');
     } catch (e) {
       console.error(e);
     }
@@ -408,11 +528,7 @@
       var b = Math.floor(Math.random() * 4);
       C.writeGenePair(lines, name, a, b);
     }
-    if (!refreshState()) return;
-    if (rawEl) rawEl.value = lines.join('\n');
-    renderPreview();
-    renderTags();
-    syncControls();
+    commit();
   }
 
   function buildSections() {
@@ -649,31 +765,43 @@
       console.error('write failed for', id, e);
       return;
     }
-    if (!refreshState()) return;
-    if (rawEl) rawEl.value = lines.join('\n');
-    renderPreview();
-    renderTags();
-    syncControls();
+    commit();
   }
 
   // ---- raw genome ----
-  function setLinesFromText(text) {
-    var parsed = root.Genome.parse(text);
-    if (!parsed.ok) {
-      rawStatus.textContent = parsed.errors[0] || 'Parse error';
-      rawStatus.className = 'status error';
+  function setStatus(text, cls, title) {
+    rawStatus.textContent = text;
+    rawStatus.className = 'status' + (cls ? ' ' + cls : '');
+    rawStatus.title = title || '';
+  }
+
+  // The one entry point for genome TEXT from any source: raw box, paste, DNA code, ?dna=,
+  // DNA Library, Pop. GenomeText.normalize repairs what it can (any whitespace layout, digit
+  // alleles, a code or ?dna= link, missing data from the previous genome) and reports it;
+  // horse-render's strict Genome.parse then checks the canonical result.
+  function loadGenomeText(text, source) {
+    var r = root.GenomeText.normalize(text, { previous: hasLoadedGenome ? lines.slice() : null });
+    if (!r.lines) {
+      setStatus(r.errors[0] || 'Parse error', 'error', r.errors.join('\n'));
       return false;
     }
-    lines = root.Genome.format(parsed.alleles, 0).split(/\r?\n/);
-    if (!refreshState()) return false;
-    if (rawEl) rawEl.value = lines.join('\n');
-    rawStatus.textContent = 'OK';
-    rawStatus.className = 'status';
-    renderPreview();
-    renderTags();
-    syncControls();
+    var parsed = root.Genome.parse(r.lines.join('\n'));
+    if (!parsed.ok) {
+      setStatus(parsed.errors[0] || 'Parse error', 'error', parsed.errors.join('\n'));
+      return false;
+    }
+    lines = r.lines;
+    hasLoadedGenome = true;
+    if (!commit()) return false;
+    if (r.warnings.length) {
+      setStatus('OK · ' + r.warnings.length + ' warning' + (r.warnings.length === 1 ? '' : 's') +
+        ' (hover)', 'warn', r.warnings.join('\n'));
+    } else {
+      setStatus(r.source === 'encoded' ? 'OK · decoded from DNA code' : 'OK');
+    }
     return true;
   }
+  function setLinesFromText(text) { return loadGenomeText(text, 'raw'); }
 
   function applyRawText() {
     if (!rawEl) return;
@@ -685,20 +813,13 @@
     var rnd = document.getElementById('btnRandomize');
     if (rnd) rnd.addEventListener('click', function () {
       lines = C.randomizeLines();
-      refreshState();
-      if (rawEl) rawEl.value = lines.join('\n');
-      renderPreview();
-      renderTags();
-      syncControls();
+      hasLoadedGenome = true;
+      commit();
     });
     var rst = document.getElementById('btnReset');
     if (rst) rst.addEventListener('click', function () {
       lines = C.makeWildtypeLines();
-      refreshState();
-      if (rawEl) rawEl.value = lines.join('\n');
-      renderPreview();
-      renderTags();
-      syncControls();
+      commit();
     });
     var cp = document.getElementById('btnCopy');
     if (cp) cp.addEventListener('click', function () {
@@ -778,6 +899,25 @@
       });
     });
 
+    var loadCode = document.getElementById('btnLoadCode');
+    function loadFromCodeBox() {
+      var v = codeEl ? codeEl.value.trim() : '';
+      if (!v) return;
+      if (v === currentCode) return;
+      if (!loadGenomeText(v, 'code')) toast('That is not a valid DNA code', 'error');
+      else codeEl.blur();
+    }
+    if (loadCode) loadCode.addEventListener('click', loadFromCodeBox);
+    if (codeEl) {
+      codeEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') loadFromCodeBox(); });
+      codeEl.addEventListener('blur', function () { if (codeEl.value.trim() !== currentCode) codeEl.value = currentCode; });
+      codeEl.addEventListener('focus', function () { codeEl.select(); });
+    }
+    var copyCode = document.getElementById('btnCopyCode');
+    if (copyCode) copyCode.addEventListener('click', function () { copyText(currentCode, copyCode, 'Copy code'); });
+    var copyLink = document.getElementById('btnCopyLink');
+    if (copyLink) copyLink.addEventListener('click', function () { copyText(shareLink(), copyLink, 'Copy link'); });
+
     var zoomBtns = document.querySelectorAll('.zoom-btn');
     zoomBtns.forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -790,25 +930,108 @@
   }
 
   // ---- boot ----
-  function boot() {
-    var params = new URLSearchParams(location.search);
-    var dna = params.get('dna');
-    if (dna) {
-      try {
-        lines = root.HorseyDnaCodec.decodeToLines(dna);
-      } catch (e) {
-        console.warn('Could not decode ?dna= parameter:', e.message);
-      }
+  // ---- custom genes.xml applied while the page is open ----
+  // Slider ranges, toggles and dropdowns are computed from gene values when EditorSpecs builds
+  // them, so they are rebuilt. The genome TEXT is kept (as SIMPR does); a reordered `n` then
+  // reads the same bases as different alleles, which is what the game would do too.
+  function onGenesChanged(xmlText) {
+    var res = C.applyGenesXml(xmlText);         // renderer already has it; this clears caches
+    C.customGenes.active = !!xmlText && res.ok;
+    C.customGenes.errors = res.errors;
+    var open = {};
+    editorPanel.querySelectorAll('details.section').forEach(function (d) {
+      open[d.getAttribute('data-section-key')] = d.open;
+    });
+    for (var k in controlRefs) delete controlRefs[k];
+    S.rebuild();
+    refreshState();
+    buildSections();
+    editorPanel.querySelectorAll('details.section').forEach(function (d) {
+      var key = d.getAttribute('data-section-key');
+      if (key in open) d.open = open[key];
+    });
+    buildSectionNav();
+    var q = document.getElementById('searchInput');
+    if (q && q.value) filterControls(q.value);
+    afterGenomeChange();
+  }
+
+  // ---- side panel: Pop, DNA Library, Custom Data (shared modules in ../js) ----
+  function initSidePanels() {
+    persistPanels();
+
+    if (root.DnaLibrary) {
+      library = root.DnaLibrary.create({
+        listEl: '#categoryList', addCategoryBtn: '#addCategoryBtn',
+        saveBtn: '#saveDnaBtn', saveBtnText: '#saveBtnText',
+        exportBtn: '#exportLibBtn', importBtn: '#importLibBtn',
+        searchInput: '#librarySearch', searchClear: '#librarySearchClear',
+        getGenome: function () { return lines.join('\n'); },
+        loadGenome: function (text, entry) {
+          if (loadGenomeText(text, 'library')) toast('Loaded DNA "' + entry.name + '"', 'ok');
+          else toast('"' + entry.name + '" is not a readable genome', 'error');
+        },
+        // no onCompare: compare mode is off in this tool
+        toast: toast
+      });
+      library.render();
     }
 
+    if (root.PopPresets) {
+      pop = root.PopPresets.create({
+        listEl: '#popList', filterInput: '#popFilter', filterClear: '#popFilterClear',
+        popXmlUrl: '../data/pop.xml',
+        loadGenome: function (text) { loadGenomeText(text, 'pop'); },
+        // no onCompare / onOdds: compare and % are off in this tool
+        getGenePairs: genePairs,
+        toast: toast
+      });
+    }
+
+    if (root.CustomData) {
+      customData = root.CustomData.create({
+        genesInput: '#genesXmlInput', popInput: '#popXmlInput',
+        statusEl: '#customDataStatus', resetBtn: '#resetCustomDataBtn',
+        genesXmlUrl: '../data/genes.xml', popXmlUrl: '../data/pop.xml',
+        onGenesChanged: function (xml) {
+          onGenesChanged(xml);
+          if (pop) pop.genomeChanged();
+        },
+        onPopChanged: function (xml) { if (pop) return pop.reload(xml || undefined); },
+        toast: toast
+      });
+      // genes.js + pop.js tables (custom or bundled), then the Pop list.
+      customData.init().then(function (res) {
+        (res.warnings || []).forEach(function (w) { toast(w, 'warn', 6000); });
+        if (pop) return pop.reload(res.popXml || undefined);
+      }).catch(function (e) {
+        console.error('Custom data / Pop failed to load', e);
+        toast('Could not load gene / population data: ' + e.message, 'error', 6000);
+      });
+    } else if (pop) {
+      pop.reload();
+    }
+  }
+
+  function boot() {
+    initSplitter();
     refreshState();
     buildSections();
     buildSectionNav();
-    if (rawEl) rawEl.value = lines.join('\n');
-    renderPreview();
-    renderTags();
-    syncControls();
     bindHeader();
+
+    var dna = root.GenomeText.readUrlParam();
+    if (dna) {
+      if (loadGenomeText(dna, 'url')) {
+        setStatus('OK · loaded from link');
+      } else {
+        toast('Could not decode the ?dna= link', 'error', 5000);
+        commit();
+      }
+    } else {
+      commit();
+    }
+    initSidePanels();
   }
 
   if (document.readyState === 'loading') {

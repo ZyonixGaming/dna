@@ -144,6 +144,9 @@
     .crispr-link-area a:hover {
       text-decoration: underline;
     }
+    .crispr-link-area { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .crispr-link-area .tool-link { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .crispr-link-area .tool-link img { width: 16px; height: 16px; }
 
     footer {
       margin-top: 1rem;
@@ -263,10 +266,41 @@
       font-size: 0.7rem;
     }
     .entry-actions button:hover { color: #f1f5f9; }
+    /* Library search (js/dna-library.js) */
+    .library-search { display: flex; gap: 0.4rem; }
+    .library-search input {
+      flex: 1; min-width: 0;
+      border: 1px solid #475569; border-radius: 0.5rem;
+      padding: 0.35rem 0.6rem; background: #0f172a; color: #f1f5f9; font-size: 0.8rem;
+    }
+    .library-search input:focus { outline: none; border-color: #3b82f6; }
+    .library-search button { padding: 0.2rem 0.6rem; }
+    .lib-match { background: #3b82f655; color: inherit; border-radius: 2px; padding: 0 1px; }
+    .library-empty { list-style: none; padding: 0.5rem; color: #64748b; font-size: 0.8rem; font-style: italic; }
+    #saveDnaBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Pop (js/pop-presets.js) */
+    .pop-toggle { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem; }
+    .pop-toggle .chevron { font-size: 0.7rem; color: #64748b; transition: transform 0.15s; }
+    .pop-toggle.collapsed .chevron { transform: rotate(-90deg); }
+    #popBody { display: flex; flex-direction: column; gap: 0.5rem; }
+    .preset-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .preset-row {
+      display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.5rem;
+      background: #0f172a; border-radius: 0.5rem; cursor: pointer; font-size: 0.8rem;
+    }
+    .preset-row:hover { background: #334155; }
+    .preset-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preset-dot { color: #22c55e; font-size: 0.75rem; }
+    .preset-dot.invalid { color: #64748b; }
+    .presets-empty { color: #64748b; font-size: 0.8rem; font-style: italic; padding: 0.3rem; }
     .sidebar-controls {
       display: flex;
       gap: 0.5rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+    }
+    .sidebar-controls button {
+      flex: 1 1 0; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .drag-handle {
       cursor: grab;
@@ -535,6 +569,8 @@
       <div class="horse-stage" >
         <canvas id="horseCanvas" width="10" height="10"></canvas>
       </div>
+      <!-- background swatches (js/preview-bg.js); one row, extras drop out when narrow -->
+      <div id="previewBg"></div>
       <div id="horseStatus" class="horse-status" hidden></div>
       <div id="horseDims" class="horse-dims"></div>
     </div>
@@ -544,18 +580,30 @@
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
 	<a id="crisprLink" href="https://zyonixgaming.github.io/dna/crispr.html" target="_blank" rel="noopener noreferrer">🧪</a>
-    <a id="simprLink" href="https://zyonixgaming.github.io/dna/simpr.html" target="_blank" rel="noopener noreferrer">Open SIMPR Horsey Genome Editor</a>
+    <a id="simprLink" class="tool-link" href="./simpr.html" target="_blank" rel="noopener noreferrer" title="Open this genome in the SIMPR Horsey Genome Editor"><img src="./dna.ico" alt=""> SIMPR Editor</a>
+    <a id="visualLink" class="tool-link" href="./visual/index.html" target="_blank" rel="noopener noreferrer" title="Open this genome in the Visual Genome Editor"><img src="./horse.ico" alt=""> Visual Editor</a>
   </div>
-
 
 </div>
 
 <!-- Sidebar -->
 <div class="sidebar">
+  <h2 class="pop-toggle" id="popToggle" title="Click to show / hide"><span class="chevron">▼</span> 🧪 Pop</h2>
+  <div id="popBody">
+    <div class="library-search">
+      <input type="text" id="popFilter" placeholder="Filter populations…" aria-label="Filter populations">
+      <button id="popFilterClear" class="ghost" title="Clear filter">✖</button>
+    </div>
+    <div class="preset-list" id="popList"><div class="presets-empty">Loading populations…</div></div>
+  </div>
   <h2>📁 DNA Library</h2>
   <div class="sidebar-controls">
     <button id="addCategoryBtn"><span>➕</span> Add Category</button>
     <button id="saveDnaBtn"><span>💾</span> <span id="saveBtnText">Save DNA</span></button>
+  </div>
+  <div class="library-search">
+    <input type="text" id="librarySearch" placeholder="Search DNA…" aria-label="Search the DNA library">
+    <button id="librarySearchClear" class="ghost" title="Clear search">✖</button>
   </div>
   <ul class="category-list" id="categoryList"></ul>
   <div class="import-export-btns">
@@ -579,11 +627,19 @@
 <!-- Horsey render pipeline (existing files, loaded here)           -->
 <!-- ============================================================= -->
 <script src="./js/horse-render.js"></script>
+<!-- Shared modules (also used by simpr.html and visual/; see common-modules.md) -->
+<script src="./js/pop.js"></script>
+<script src="./js/genome-text.js"></script>
+<script src="./js/dna-library.js"></script>
+<script src="./js/pop-presets.js"></script>
+<script src="./js/preview-bg.js"></script>
 
 <script>
   (function() {
 
-	const simprUrl = "https://zyonixgaming.github.io/dna/simpr.html"
+	// Relative, so they work locally and when deployed next to this page (deploy.cmd).
+	const simprUrl = "./simpr.html"
+	const visualUrl = "./visual/index.html"
 	const crisprUrl = "https://zyonixgaming.github.io/dna/crispr.html"
 
     function colorizeDNA(plainText) {
@@ -597,16 +653,21 @@
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const copyTextBtn = document.getElementById('copyTextBtn');
     const pasteTextBtn = document.getElementById('pasteTextBtn');
-    const categoryList = document.getElementById('categoryList');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const saveDnaBtn = document.getElementById('saveDnaBtn');
-    const saveBtnText = document.getElementById('saveBtnText');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importFileInput = document.getElementById('importFileInput');
     const toastContainer = document.getElementById('toastContainer');
     const crisprLink = document.getElementById('crisprLink');
 	const simprLink = document.getElementById('simprLink');
+	const visualLink = document.getElementById('visualLink');
+
+    // CRISPR / SIMPR / Visual Editor links carry the genome when there is a valid one
+    // (same tab), otherwise they open the empty tool in a new tab - as before.
+    function setToolLinks(encoded) {
+      const q = encoded ? `?dna=${encoded}` : '';
+      const target = encoded ? '_self' : '_blank';
+      crisprLink.href = crisprUrl + q;
+      simprLink.href = simprUrl + q;
+      visualLink.href = visualUrl + q;
+      crisprLink.target = simprLink.target = visualLink.target = target;
+    }
 
     // ---------- Toast ----------
     function showToast(message, type = 'success') {
@@ -621,71 +682,29 @@
       }, 2500);
     }
 
-    // ---------- Local storage ----------
-    const STORAGE_KEY = 'dna_shortener_categories';
+    // ---------- DNA Library ----------
+    // js/dna-library.js, shared with SIMPR and the visual editor. Same storage key
+    // ('dna_shortener_categories') and BroadcastChannel ('dna-shortener-sync') as
+    // before. Created on load (see Initialization). No ⚖️ compare here.
+    let library = null;
+    let pop = null;      // js/pop-presets.js - click a population to generate a genome
 
-    function loadCategories() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch (e) {}
+    // The editor's genome as allele pairs for Pop's validity dots (strict: only a
+    // complete genome is checked).
+    function genePairs() {
+      if (typeof arrayHp === 'undefined' || !arrayHp[0] || !arrayHp[0][0]) return [];
+      const r = GenomeText.normalize(editor.innerText, { fill: false });
+      if (!r.lines) return [];
+      const out = [];
+      for (let h = 0; h < 20; h++) {
+        const a = r.lines[h * 2].slice(3), b = r.lines[h * 2 + 1].slice(3);
+        for (let p = 0; p < arrayHp[h].length; p++) {
+          const e = arrayHp[h][p];
+          out.push({ desc: e.desc, n: e.n, allele1: a.charAt(p), allele2: b.charAt(p) });
+        }
       }
-      return [{
-        id: generateId(),
-        name: 'Horse',
-        entries: []
-      }];
+      return out;
     }
-
-    function saveCategories() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
-    }
-
-    function generateId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    }
-	
-	// ----- Cross‑tab sync -----
-	const syncChannel = new BroadcastChannel('dna-shortener-sync');
-
-	syncChannel.onmessage = (event) => {
-		if (event.data && event.data.type === 'update') {
-			if(event.data && event.data.categories){
-				categories = event.data.categories;
-			}
-			else{
-				categories = loadCategories();
-			}
-			if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
-			  selectedCategoryId = null;
-			}
-			
-			renderSidebar();
-			updateSaveButton();
-		}
-	};
-
-	// Helper to reload before any modification
-	function reloadCategoriesFromStorage() {
-	  categories = loadCategories();
-	  if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
-		selectedCategoryId = null;
-	  }
-	}
-
-	// Replace all calls to saveCategories() with this function
-	function broadcastUpdate() {
-		saveCategories();
-		syncChannel.postMessage({
-			type: 'update', 
-			categories: JSON.parse(JSON.stringify(categories))
-		});
-	}
-	
-    let categories = loadCategories();
-    let selectedCategoryId = null;
 
     // ---------- UI update ----------
     function updatePlaceholder() {
@@ -726,13 +745,28 @@
       sel.addRange(range);
     }
 
+    // Editor text: upper case, "00: ACGT" -> "00:ACGT", any other separator -> newline.
+    // Only [ACGT0-9:\n] survive, which also makes colorizeDNA's HTML safe.
+    function cleanDnaText(text) {
+      return String(text)
+        .toUpperCase()
+        .replace(/[ \t]*:[ \t]*/g, ':')
+        .replace(/[^ACGT0-9:\n]+/g, '\n')
+        .replace(/\n{2,}/g, '\n')
+        .replace(/^\n+|\n+$/g, '');
+    }
+
+    // A pasted DNA code or ?dna= link becomes the 40 lines it encodes; null if the
+    // text is not one.
+    function decodePastedCode(text) {
+      const code = GenomeText.extractDnaParam(text) || (GenomeText.looksEncoded(text) ? text.trim() : null);
+      if (!code) return null;
+      try { return GenomeText.decode(code).join('\n'); } catch (e) { return null; }
+    }
+
     function refreshEditorContent(preserveCursor = true) {
       const { text, offset } = getTextAndCursor(editor);
-		const cleaned = text
-		  .toUpperCase()
-		  .replace(/[^ACGT0-9:\n]+/g, '\n')
-		  .replace(/\n{2,}/g, '\n')
-		  .replace(/^\n+|\n+$/g, '');
+		const cleaned = cleanDnaText(text);
       editor.innerHTML = colorizeDNA(cleaned);
       if (preserveCursor) setCursor(editor, Math.min(offset, cleaned.length));
       updatePlaceholder();
@@ -754,438 +788,45 @@
     }
 
     function refreshLink() {
+      if (pop) pop.genomeChanged();
       const plainText = editor.innerText.trim();
       if (!plainText) {
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = crisprUrl;
-		simprLink.href = simprUrl;		
-		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
-		crisprLink.target = "_blank";
-		simprLink.target = "_blank";
+        setToolLinks('');
         hideError();
         return;
       }
-      const lines = plainText.split(/[^a-zA-Z0-9:]+/).filter(l => l.trim() !== '');
+      // GenomeText in strict mode: any layout, but a missing helix or a strand of the
+      // wrong length is an error - the shortener never invents bases.
+      const parsed = GenomeText.normalize(plainText, { fill: false });
       try {
-        const encoded = encodeSequences(lines);
+        if (!parsed.lines) {
+          const more = parsed.errors.length > 1 ? ` (+${parsed.errors.length - 1} more)` : '';
+          errorDiv.title = parsed.errors.join('\n');
+          throw new Error(parsed.errors[0] + more);
+        }
+        errorDiv.title = '';
+        const encoded = GenomeText.encode(parsed.lines);
         const fullUrl = `${window.location.href.split('?')[0]}?dna=${encoded}`;
         linkDisplay.value = fullUrl;
         updateUrlParam(encoded);
         // Update CRISPR editor link with compressed DNA
-        crisprLink.href = `${crisprUrl}?dna=${encoded}`;
-		simprLink.href = `${simprUrl}?dna=${encoded}`;
-		simprLink.textContent = "Edit in SIMPR Horsey Genome Editor";
-		crisprLink.target = "_self";
-		simprLink.target = "_self";		
+        setToolLinks(encoded);
         hideError();
       } catch (e) {
         showError(e.message);
         linkDisplay.value = '';
         updateUrlParam('');
-        crisprLink.href = crisprUrl;
-		simprLink.href = simprUrl;
-		simprLink.textContent = "Open SIMPR Horsey Genome Editor";
-		crisprLink.target = "_blank";
-		simprLink.target = "_blank";		
+        setToolLinks('');
       }
-    }
-
-    // ---------- Sidebar rendering ----------
-    function renderSidebar() {
-      categoryList.innerHTML = '';
-      categories.forEach(cat => {
-        const li = document.createElement('li');
-        li.className = 'category-item';
-        if (cat.id === selectedCategoryId) li.classList.add('selected');
-        li.draggable = true;
-        li.dataset.categoryId = cat.id;
-
-        li.addEventListener('dragstart', handleCategoryDragStart);
-        li.addEventListener('dragover', handleCategoryDragOver);
-        li.addEventListener('drop', handleCategoryDrop); // unified drop handler
-        li.addEventListener('dragend', handleDragEnd);
-
-        const header = document.createElement('div');
-        header.className = 'category-header';
-
-        const dragHandle = document.createElement('span');
-        dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = '⋮⋮';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'category-name';
-        nameSpan.textContent = cat.name;
-        nameSpan.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selectCategory(cat.id);
-        });
-
-        const actions = document.createElement('div');
-        actions.className = 'category-actions';
-
-        const renameBtn = document.createElement('button');
-        renameBtn.innerHTML = '✏️';
-        renameBtn.title = 'Rename category';
-		renameBtn.addEventListener('click', (e) => {
-		  e.stopPropagation();
-		  const newName = prompt('New category name:', cat.name);
-		  if (newName && newName.trim()) {
-			reloadCategoriesFromStorage();
-			const targetCat = categories.find(c => c.id === cat.id);
-			if (targetCat) {
-			  targetCat.name = newName.trim();
-			  broadcastUpdate();
-			  renderSidebar();
-			  showToast(`Category renamed to "${targetCat.name}"`);
-			}
-		  }
-		});
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '🗑️';
-        deleteBtn.title = 'Delete category';
-		deleteBtn.addEventListener('click', (e) => {
-		  e.stopPropagation();
-		  if (confirm(`Delete category "${cat.name}" and all its DNA?`)) {
-			reloadCategoriesFromStorage();
-			categories = categories.filter(c => c.id !== cat.id);
-			if (selectedCategoryId === cat.id) selectedCategoryId = null;
-			broadcastUpdate();
-			renderSidebar();
-			updateSaveButton();
-			showToast(`Category "${cat.name}" deleted`, 'error');
-		  }
-		});
-
-        actions.appendChild(renameBtn);
-        actions.appendChild(deleteBtn);
-        header.appendChild(dragHandle);
-        header.appendChild(nameSpan);
-        header.appendChild(actions);
-        li.appendChild(header);
-
-        if (cat.id === selectedCategoryId) {
-          const entryList = document.createElement('ul');
-          entryList.className = 'entry-list';
-          cat.entries.forEach(entry => {
-            const entryLi = document.createElement('li');
-            entryLi.className = 'entry-item';
-            entryLi.draggable = true;
-            entryLi.dataset.entryId = entry.id;
-            entryLi.dataset.categoryId = cat.id;
-
-            entryLi.addEventListener('dragstart', handleEntryDragStart);
-            entryLi.addEventListener('dragover', handleEntryDragOver);
-            entryLi.addEventListener('drop', handleEntryDrop);
-            entryLi.addEventListener('dragend', handleDragEnd);
-
-            const entryDragHandle = document.createElement('span');
-            entryDragHandle.className = 'drag-handle';
-            entryDragHandle.innerHTML = '⋮';
-            entryDragHandle.style.fontSize = '0.8rem';
-
-            const entryName = document.createElement('span');
-            entryName.className = 'entry-name';
-            entryName.textContent = entry.name;
-            entryLi.addEventListener('click', () => {
-				loadEntry(entry);
-				reloadCategoriesFromStorage();
-			});
-
-            const entryActions = document.createElement('div');
-            entryActions.className = 'entry-actions';
-
-            const entryRename = document.createElement('button');
-            entryRename.innerHTML = '✏️';
-            entryRename.title = 'Rename DNA';
-			entryRename.addEventListener('click', (e) => {
-			  e.stopPropagation();
-			  const newName = prompt('New name:', entry.name);
-			  if (newName && newName.trim()) {
-				reloadCategoriesFromStorage();
-				const targetCat = categories.find(c => c.id === cat.id);
-				if (targetCat) {
-				  const targetEntry = targetCat.entries.find(e => e.id === entry.id);
-				  if (targetEntry) {
-					targetEntry.name = newName.trim();
-					broadcastUpdate();
-					renderSidebar();
-					showToast(`DNA renamed to "${targetEntry.name}"`);
-				  }
-				}
-			  }
-			});
-
-            const entryDelete = document.createElement('button');
-            entryDelete.innerHTML = '🗑️';
-            entryDelete.title = 'Delete DNA';
-			entryDelete.addEventListener('click', (e) => {
-			  e.stopPropagation();
-			  if (confirm(`Delete DNA "${entry.name}"?`)) {
-				reloadCategoriesFromStorage();
-				const targetCat = categories.find(c => c.id === cat.id);
-				if (targetCat) {
-				  targetCat.entries = targetCat.entries.filter(e => e.id !== entry.id);
-				  broadcastUpdate();
-				  renderSidebar();
-				  showToast(`DNA "${entry.name}" deleted`, 'error');
-				}
-			  }
-			});
-
-            entryActions.appendChild(entryRename);
-            entryActions.appendChild(entryDelete);
-            entryLi.appendChild(entryDragHandle);
-            entryLi.appendChild(entryName);
-            entryLi.appendChild(entryActions);
-            entryList.appendChild(entryLi);
-          });
-          li.appendChild(entryList);
-        }
-        categoryList.appendChild(li);
-      });
-    }
-
-    function selectCategory(id) {
-      selectedCategoryId = id;
-      renderSidebar();
-      updateSaveButton();
-    }
-
-    function updateSaveButton() {
-      const cat = categories.find(c => c.id === selectedCategoryId);
-      saveBtnText.textContent = cat ? `Save DNA to ${cat.name}` : 'Save DNA';
     }
 
     function loadEntry(entry) {
-      editor.innerHTML = colorizeDNA(entry.dnaText);
+      editor.innerHTML = colorizeDNA(cleanDnaText(entry.dnaText));
       updatePlaceholder();
       refreshLink();
       showToast(`Loaded DNA "${entry.name}"`);
-    }
-
-    // ---------- Drag & Drop (enhanced for cross‑category moves) ----------
-    let draggedCategoryId = null;
-    let draggedEntryId = null;
-    let draggedFromCategoryId = null;
-
-    function handleCategoryDragStart(e) {
-      draggedCategoryId = this.dataset.categoryId;
-      this.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    }
-    function handleCategoryDragOver(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      if (target && target.dataset.categoryId !== draggedCategoryId)
-        target.style.borderTop = '2px solid #3b82f6';
-    }
-    // Unified drop handler for categories: reorder categories OR drop entry
-    function handleCategoryDrop(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      target.style.borderTop = '';
-      const targetCategoryId = target.dataset.categoryId;
-      if (!targetCategoryId) return;
-
-      reloadCategoriesFromStorage();
-
-      // Case 1: reorder categories
-      if (draggedCategoryId && draggedCategoryId !== targetCategoryId) {
-        const draggedIndex = categories.findIndex(c => c.id === draggedCategoryId);
-        const targetIndex = categories.findIndex(c => c.id === targetCategoryId);
-        if (draggedIndex !== -1 && targetIndex !== -1) {
-          const [moved] = categories.splice(draggedIndex, 1);
-          categories.splice(targetIndex, 0, moved);
-          broadcastUpdate();
-          renderSidebar();
-          showToast(`Category moved`);
-        }
-        return;
-      }
-
-      // Case 2: drop an entry onto a category (move to that category)
-      if (draggedEntryId && draggedFromCategoryId) {
-        const sourceCat = categories.find(c => c.id === draggedFromCategoryId);
-        const targetCat = categories.find(c => c.id === targetCategoryId);
-        if (!sourceCat || !targetCat) return;
-
-        const entryIndex = sourceCat.entries.findIndex(ent => ent.id === draggedEntryId);
-        if (entryIndex === -1) return;
-
-        const [movedEntry] = sourceCat.entries.splice(entryIndex, 1);
-        targetCat.entries.push(movedEntry); // append at end
-
-        broadcastUpdate();
-        renderSidebar();
-        showToast(`Moved DNA to "${targetCat.name}"`);
-      }
-    }
-
-    function handleEntryDragStart(e) {
-      draggedEntryId = this.dataset.entryId;
-      draggedFromCategoryId = this.dataset.categoryId;
-      this.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.stopPropagation();
-    }
-    function handleEntryDragOver(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      if (target && target.dataset.entryId !== draggedEntryId && target.dataset.categoryId === draggedFromCategoryId)
-        target.style.borderTop = '2px solid #3b82f6';
-    }
-    // Handles drop on another entry (reorder within same category OR move to different category)
-    function handleEntryDrop(e) {
-      e.preventDefault();
-      const target = e.currentTarget;
-      target.style.borderTop = '';
-      if (!draggedEntryId || !draggedFromCategoryId) return;
-      reloadCategoriesFromStorage();
-
-      const targetCategoryId = target.dataset.categoryId;
-      const targetEntryId = target.dataset.entryId;
-
-      const sourceCat = categories.find(c => c.id === draggedFromCategoryId);
-      const targetCat = categories.find(c => c.id === targetCategoryId);
-      if (!sourceCat || !targetCat) return;
-
-      const draggedIndex = sourceCat.entries.findIndex(ent => ent.id === draggedEntryId);
-      if (draggedIndex === -1) return;
-
-      const [movedEntry] = sourceCat.entries.splice(draggedIndex, 1);
-
-      // If same category and target entry exists, insert before target
-      if (draggedFromCategoryId === targetCategoryId && targetEntryId) {
-        const targetIndex = targetCat.entries.findIndex(ent => ent.id === targetEntryId);
-        if (targetIndex !== -1) {
-          targetCat.entries.splice(targetIndex, 0, movedEntry);
-        } else {
-          targetCat.entries.push(movedEntry);
-        }
-      }
-      // Different category – insert before target entry if possible, else append
-      else {
-        if (targetEntryId) {
-          const targetIndex = targetCat.entries.findIndex(ent => ent.id === targetEntryId);
-          if (targetIndex !== -1) {
-            targetCat.entries.splice(targetIndex, 0, movedEntry);
-          } else {
-            targetCat.entries.push(movedEntry);
-          }
-        } else {
-          targetCat.entries.push(movedEntry);
-        }
-      }
-
-      broadcastUpdate();
-      renderSidebar();
-      showToast(`Moved DNA to "${targetCat.name}"`);
-    }
-    function handleDragEnd() {
-      this.classList.remove('dragging');
-      document.querySelectorAll('.category-item, .entry-item').forEach(el => el.style.borderTop = '');
-      draggedCategoryId = null;
-      draggedEntryId = null;
-      draggedFromCategoryId = null;
-    }
-
-    // ---------- Category / Entry actions ----------
-    function addCategory() {
-      const name = prompt('Category name:');
-      if (!name || !name.trim()) return;
-	  reloadCategoriesFromStorage();
-      const newCat = {
-        id: generateId(),
-        name: name.trim(),
-        entries: []
-      };
-      categories.push(newCat);
-      broadcastUpdate();
-      renderSidebar();
-      selectCategory(newCat.id);
-      showToast(`Category "${newCat.name}" created`);
-    }
-
-    function saveCurrentDna() {
-      if (!selectedCategoryId) {
-        alert('Please select a category first.');
-        return;
-      }
-	  reloadCategoriesFromStorage();
-      const cat = categories.find(c => c.id === selectedCategoryId);
-      if (!cat) return;
-      const dnaText = editor.innerText;
-      if (!dnaText.trim()) {
-        alert('DNA editor is empty.');
-        return;
-      }
-      const name = prompt('Name for this DNA snapshot:', `DNA ${new Date().toLocaleTimeString()}`);
-      if (!name || !name.trim()) return;
-      cat.entries.push({
-        id: generateId(),
-        name: name.trim(),
-        dnaText: dnaText
-      });
-      broadcastUpdate();
-      renderSidebar();
-      showToast(`DNA "${name.trim()}" saved`);
-    }
-
-    // ---------- Export / Import ----------
-    function exportLibrary() {
-      const jsonStr = JSON.stringify(categories, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'dna_library.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('Library exported!');
-    }
-
-    function importLibrary() {
-      importFileInput.click();
-    }
-
-	function handleImportFile(event) {
-	  const file = event.target.files[0];
-	  if (!file) return;
-	  const reader = new FileReader();
-	  reader.onload = function(e) {
-		try {
-		  const imported = JSON.parse(e.target.result);
-		  if (!Array.isArray(imported)) throw new Error('Invalid format');
-		  reloadCategoriesFromStorage();
-		  imported.forEach(cat => {
-            if (!cat.name || typeof cat.name !== 'string') throw new Error('Invalid category');
-            const newCatId = generateId();
-            const entries = Array.isArray(cat.entries) ? cat.entries : [];
-            const newEntries = entries.map(entry => ({
-              id: generateId(),
-              name: entry.name || 'Unnamed DNA',
-              dnaText: entry.dnaText || ''
-            }));
-            categories.push({
-              id: newCatId,
-              name: cat.name,
-              entries: newEntries
-            });
-          });
-		  
-          
-		  broadcastUpdate();
-          renderSidebar();
-          showToast(`Imported ${imported.length} categories`);
-        } catch (err) {
-          showToast('Invalid import file', 'error');
-        }
-      };
-      reader.readAsText(file);
-      importFileInput.value = '';
     }
 
     // ---------- Main event listeners ----------
@@ -1202,15 +843,20 @@
       const clipboardData = (e.clipboardData || window.clipboardData);
       if (!clipboardData) return;
       const pastedText = clipboardData.getData('text/plain');
+      const decoded = decodePastedCode(pastedText);
+      if (decoded) {
+        // a DNA code or link replaces the whole genome
+        editor.innerHTML = colorizeDNA(decoded);
+        updatePlaceholder();
+        refreshLink();
+        showToast('DNA code decoded');
+        return;
+      }
       const sel = window.getSelection();
       if (!sel.rangeCount) return;
       const range = sel.getRangeAt(0);
       range.deleteContents();
-		const cleaned = pastedText
-		  .toUpperCase()
-		  .replace(/[^ACGT0-9:]+/g, '\n')   // any separator (space, tab, comma, |…) → newline
-		  .replace(/\n{2,}/g, '\n')          // collapse blank lines
-		  .replace(/^\n+|\n+$/g, '');        // trim leading/trailing newlines
+		const cleaned = cleanDnaText(pastedText);   // any separator (space, tab, comma, |…) → newline
       const textNode = document.createTextNode(cleaned);
       range.insertNode(textNode);
       range.setStartAfter(textNode);
@@ -1247,11 +893,7 @@
     pasteTextBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
-			const cleaned = text
-			  .toUpperCase()
-			  .replace(/[^ACGT0-9:]+/g, '\n')
-			  .replace(/\n{2,}/g, '\n')
-			  .replace(/^\n+|\n+$/g, '');
+        const cleaned = decodePastedCode(text) || cleanDnaText(text);
 
         editor.innerHTML = colorizeDNA(cleaned);
         const range = document.createRange();
@@ -1266,11 +908,6 @@
         setTimeout(() => { pasteTextBtn.innerHTML = '<span>📥</span> Paste DNA'; }, 1500);
       } catch (err) { showError('Unable to read clipboard. Please paste manually.'); }
     });
-    addCategoryBtn.addEventListener('click', addCategory);
-    saveDnaBtn.addEventListener('click', saveCurrentDna);
-    exportBtn.addEventListener('click', exportLibrary);
-    importBtn.addEventListener('click', importLibrary);
-    importFileInput.addEventListener('change', handleImportFile);
 
     // ---------- Initialization ----------
     function loadFromUrl() {
@@ -1278,7 +915,7 @@
       const dna = params.get('dna');
       if (dna) {
         try {
-          const lines = decodeToLines(dna);
+          const lines = GenomeText.decode(dna);
           editor.innerHTML = colorizeDNA(lines.join('\n'));
           linkDisplay.value = window.location.href;
           updatePlaceholder();
@@ -1299,21 +936,50 @@
       return false;
     }
 
-    window.addEventListener('load', () => {
-      if (!categories.length) {
-        categories = loadCategories();
-        saveCategories();
-      }
-      const loadedFromUrl = loadFromUrl();
-      renderSidebar();
-      // Select first category if none selected
-      if (!selectedCategoryId && categories.length > 0) {
-        selectedCategoryId = categories[0].id;
-        updateSaveButton();
-        renderSidebar(); // re-render to show selection highlight
-      }
+    window.addEventListener('load', async () => {
+      loadFromUrl();
+      library = DnaLibrary.create({
+        listEl: '#categoryList', addCategoryBtn: '#addCategoryBtn',
+        saveBtn: '#saveDnaBtn', saveBtnText: '#saveBtnText',
+        exportBtn: '#exportBtn', importBtn: '#importBtn', importInput: '#importFileInput',
+        searchInput: '#librarySearch', searchClear: '#librarySearchClear',
+        getGenome: () => editor.innerText,
+        loadGenome: (text, entry) => loadEntry(entry),
+        toast: (msg, kind) => showToast(msg, kind === 'error' || kind === 'warn' ? 'error' : 'success')
+      });
+      library.render();
+      // Open with the first category selected, as before; clicking it again
+      // collapses every category.
+      const cats = library.getCategories();
+      if (cats.length) library.select(cats[0].id);
       // Ensure the CRISPR link reflects current state
       refreshLink();
+
+      // Horse preview background (remembered for the Shortener only)
+      PreviewBg.attach({ bar: '#previewBg', target: '.render-col .horse-stage', storageKey: 'shortener_preview_bg' });
+
+      // Pop: the bundled genes.xml / pop.xml (this page has no Custom Data panel).
+      pop = PopPresets.create({
+        listEl: '#popList', filterInput: '#popFilter', filterClear: '#popFilterClear',
+        headerEl: '#popToggle', bodyEl: '#popBody', collapseKey: 'shortener_pop_open',
+        popXmlUrl: './data/pop.xml',
+        loadGenome: (text, row) => {
+          editor.innerHTML = colorizeDNA(cleanDnaText(text));
+          updatePlaceholder();
+          refreshLink();
+          showToast(`Generated from ${row.name}`);
+        },
+        // no compare / odds on this page
+        getGenePairs: genePairs,
+        toast: (msg, kind) => showToast(msg, kind === 'error' || kind === 'warn' ? 'error' : 'success')
+      });
+      try {
+        await loadGeneDataFromXml();
+        await loadPopDataFromXml();
+        await pop.reload();
+      } catch (e) {
+        console.error('Pop failed to load', e);
+      }
     });
   })();
   

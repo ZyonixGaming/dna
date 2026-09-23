@@ -414,6 +414,11 @@
 
   var CONTROLS = {};
 
+  // Everything below reads gene values (slider ranges, toggle alleles, dropdown labels) when it
+  // is BUILT, so a custom genes.xml applied after load needs a rebuild - see rebuild() at the
+  // bottom. CONTROLS stays the same object; only its section arrays are replaced.
+  function buildControls() {
+
 
 
   // ==== BODY ====
@@ -1203,6 +1208,8 @@ combined('headArea', 'Head Size',
 
   ];
 
+  }  // buildControls
+
   var SECTIONS = [
     { key: 'body',     label: 'Body' },
 	{ key: 'leg_joint',     label: 'Leg Socket' },
@@ -1325,10 +1332,16 @@ combined('headArea', 'Head Size',
       })(specs[i]);
     }
   }
-  Object.keys(CONTROLS).forEach(function(key) { applyMeta(CONTROLS[key]); });
+  function rebuild() {
+    Object.keys(CONTROLS).forEach(function (key) { delete CONTROLS[key]; });
+    buildControls();
+    Object.keys(CONTROLS).forEach(function (key) { applyMeta(CONTROLS[key]); });
+  }
+  rebuild();
 
   root.EditorSpecs = {
     CONTROLS: CONTROLS,
+    rebuild: rebuild,
     SECTIONS: SECTIONS,
     PALETTE: PALETTE,
     SKIN_COLORS: SKIN_COLORS,
