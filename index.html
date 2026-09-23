@@ -579,7 +579,7 @@
 
   <!-- Link to CRISPR editor -->
   <div class="crispr-link-area">
-	<a id="crisprLink" href="https://zyonixgaming.github.io/dna/crispr.html" target="_blank" rel="noopener noreferrer">🧪</a>
+
     <a id="simprLink" class="tool-link" href="./simpr.html" target="_blank" rel="noopener noreferrer" title="Open this genome in the SIMPR Horsey Genome Editor"><img src="./dna.ico" alt=""> SIMPR Editor</a>
     <a id="visualLink" class="tool-link" href="./visual/index.html" target="_blank" rel="noopener noreferrer" title="Open this genome in the Visual Genome Editor"><img src="./horse.ico" alt=""> Visual Editor</a>
   </div>
@@ -640,7 +640,7 @@
 	// Relative, so they work locally and when deployed next to this page (deploy.cmd).
 	const simprUrl = "./simpr.html"
 	const visualUrl = "./visual/index.html"
-	const crisprUrl = "https://zyonixgaming.github.io/dna/crispr.html"
+
 
     function colorizeDNA(plainText) {
       return plainText.replace(/([ACGT])/g, '<span class="base-$1">$1</span>');
@@ -654,19 +654,16 @@
     const copyTextBtn = document.getElementById('copyTextBtn');
     const pasteTextBtn = document.getElementById('pasteTextBtn');
     const toastContainer = document.getElementById('toastContainer');
-    const crisprLink = document.getElementById('crisprLink');
 	const simprLink = document.getElementById('simprLink');
 	const visualLink = document.getElementById('visualLink');
 
-    // CRISPR / SIMPR / Visual Editor links carry the genome when there is a valid one
+    // SIMPR / Visual Editor links carry the genome when there is a valid one
     // (same tab), otherwise they open the empty tool in a new tab - as before.
     function setToolLinks(encoded) {
       const q = encoded ? `?dna=${encoded}` : '';
-      const target = encoded ? '_self' : '_blank';
-      crisprLink.href = crisprUrl + q;
+      const target = encoded ? '_self' : '_blank';      
       simprLink.href = simprUrl + q;
       visualLink.href = visualUrl + q;
-      crisprLink.target = simprLink.target = visualLink.target = target;
     }
 
     // ---------- Toast ----------
