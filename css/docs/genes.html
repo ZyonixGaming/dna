@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Structure of Genes in Horsey Game</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --muted:#555;
+    --rule:#d8d8d8;
+    --accent:#6b3fa0;
+    --accent-soft:#f3eefb;
+    --code-bg:#f6f6f4;
+    --table-head:#efeaf7;
+    --table-alt:#faf8fd;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    padding:0 1.25rem 6rem;
+    background:#fff;
+    color:var(--ink);
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:17px;
+    line-height:1.62;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  header.title{
+    padding:3.5rem 0 2rem;
+    border-bottom:3px double var(--rule);
+    margin-bottom:2rem;
+  }
+  header.title h1{
+    font-size:2.05rem;
+    line-height:1.2;
+    margin:0 0 .6rem;
+    letter-spacing:-.01em;
+  }
+  header.title .subtitle{
+    font-size:1.05rem;
+    color:var(--muted);
+    font-style:italic;
+    margin:0;
+  }
+  header.title .meta{
+    margin-top:1.4rem;
+    font-size:.85rem;
+    color:var(--muted);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  h2{
+    font-size:1.5rem;
+    margin:3.2rem 0 1rem;
+    padding-bottom:.35rem;
+    border-bottom:2px solid var(--accent);
+    letter-spacing:-.01em;
+  }
+  h3{
+    font-size:1.16rem;
+    margin:2.2rem 0 .7rem;
+    color:#2b2b2b;
+  }
+  h4{
+    font-size:1rem;
+    margin:1.6rem 0 .5rem;
+    color:#333;
+  }
+  p{margin:.75rem 0;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  code,kbd,pre{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    font-size:.86em;
+  }
+  code{background:var(--code-bg);padding:.08em .34em;border-radius:3px;}
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--accent);
+    border-radius:4px;
+    padding:.85rem 1rem;
+    overflow-x:auto;
+    line-height:1.5;
+    margin:1rem 0;
+  }
+  pre code{background:none;padding:0;}
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin:1.1rem 0;
+    font-size:.88rem;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  th,td{
+    border:1px solid var(--rule);
+    padding:.45rem .6rem;
+    text-align:left;
+    vertical-align:top;
+  }
+  th{background:var(--table-head);font-weight:600;}
+  tbody tr:nth-child(even){background:var(--table-alt);}
+  blockquote{
+    margin:1.2rem 0;
+    padding:.7rem 1.1rem;
+    border-left:4px solid var(--accent);
+    background:var(--accent-soft);
+    border-radius:0 4px 4px 0;
+    font-size:.95rem;
+  }
+  blockquote p{margin:.4rem 0;}
+  hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0;}
+  .toc{
+    background:#fcfbfe;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:1.4rem 1.6rem 1.6rem;
+    margin:0 0 3rem;
+  }
+  .toc h2{
+    margin:0 0 .9rem;
+    border:none;
+    font-size:1.12rem;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:var(--accent);
+    padding:0;
+  }
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:chap;}
+  .toc > ol > li{
+    counter-increment:chap;
+    margin:.7rem 0 .25rem;
+  }
+  .toc > ol > li > a::before{
+    content:counter(chap) ". ";
+    color:var(--accent);
+    font-weight:700;
+  }
+  .toc a{display:inline-block;}
+  .toc .sub{
+    list-style:none;
+    margin:.15rem 0 .5rem 1.5rem;
+    padding:0;
+    font-size:.88rem;
+    color:var(--muted);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .toc .sub li{margin:.1rem 0;}
+  .badge{
+    display:inline-block;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.04em;
+    padding:.08em .45em;
+    border-radius:3px;
+    background:#e8e2f5;
+    color:#4a2c78;
+    vertical-align:.12em;
+    white-space:nowrap;
+  }
+  .badge.re{background:#e2f0e6;color:#25603a;}
+  .badge.der{background:#fdf1dc;color:#7a5310;}
+  .badge.open{background:#fbe4e4;color:#8a2020;}
+  .lead{font-size:1.02rem;}
+  .note{font-size:.9rem;color:var(--muted);}
+  .backtotop{
+    display:block;
+    text-align:right;
+    font-size:.78rem;
+    margin-top:1.4rem;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .dedication{
+    text-align:center;
+    font-style:italic;
+    color:var(--muted);
+    margin:3.5rem 0 0;
+    padding-top:2rem;
+    border-top:1px solid var(--rule);
+  }
+  @media print{
+    body{font-size:11pt;padding:0;}
+    .toc{page-break-after:always;}
+    h2{page-break-after:avoid;}
+    pre,table,blockquote{page-break-inside:avoid;}
+    .backtotop{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============================ TITLE ============================ -->
+<header class="title">
+  <h1>The Structure of Genes in Horsey Game</h1>
+  <p class="subtitle">A Technical Thesis on the Genome Format, Gene Properties, and Their Effects on the Creature</p>
+  <p class="meta">240 genes &middot; 20 chromosomes &middot; two strands &middot; four alleles per gene &middot; one phenotype</p>
+</header>
+
+<!-- ============================ TOC ============================ -->
+<nav class="toc" id="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#abstract">Abstract</a></li>
+    <li><a href="#ch1">The Genome and Its Genes</a>
+      <ul class="sub">
+        <li><a href="#s1-1">1.1 Two Strands of 240 Genes</a></li>
+        <li><a href="#s1-2">1.2 Allele Normalization</a></li>
+        <li><a href="#s1-3">1.3 Allele Ordering and the Sorted Arrays</a></li>
+        <li><a href="#s1-4">1.4 Chromosomes and the Gene Map</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch2">The Gene Property Table</a>
+      <ul class="sub">
+        <li><a href="#s2-1">2.1 The genes.xml Schema</a></li>
+        <li><a href="#s2-2">2.2 The Blend Weight</a></li>
+        <li><a href="#s2-3">2.3 The Scale Divisor</a></li>
+        <li><a href="#s2-4">2.4 Per-Allele Values</a></li>
+        <li><a href="#s2-5">2.5 Nucleotide Ordering</a></li>
+        <li><a href="#s2-6">2.6 The Runtime Table Layout</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch3">Reading a Gene</a>
+      <ul class="sub">
+        <li><a href="#s3-1">3.1 The Two Accessors</a></li>
+        <li><a href="#s3-2">3.2 The Floating-Point Blend</a></li>
+        <li><a href="#s3-3">3.3 The Integer Blend</a></li>
+        <li><a href="#s3-4">3.4 Traps in the Accessors</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch4">The Canonical Gene Order</a>
+      <ul class="sub">
+        <li><a href="#s4-1">4.1 The Major Groups</a></li>
+        <li><a href="#s4-2">4.2 The Complete Order</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch5">Structural Genes</a>
+      <ul class="sub">
+        <li><a href="#s5-1">5.1 Body Dimensions and Posture</a></li>
+        <li><a href="#s5-2">5.2 Legs</a></li>
+        <li><a href="#s5-3">5.3 Arms</a></li>
+        <li><a href="#s5-4">5.4 Feet and Hands</a></li>
+        <li><a href="#s5-5">5.5 Tail</a></li>
+        <li><a href="#s5-6">5.6 Neck</a></li>
+        <li><a href="#s5-7">5.7 Head</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch6">Adornment Genes</a>
+      <ul class="sub">
+        <li><a href="#s6-1">6.1 The Shared Record</a></li>
+        <li><a href="#s6-2">6.2 HAS_ANTLERS as Master Switch</a></li>
+        <li><a href="#s6-3">6.3 Antler Genes</a></li>
+        <li><a href="#s6-4">6.4 Hat Genes</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch7">Colour Genes</a>
+      <ul class="sub">
+        <li><a href="#s7-1">7.1 Base Colour Selection</a></li>
+        <li><a href="#s7-2">7.2 Cream and the Ladder</a></li>
+        <li><a href="#s7-3">7.3 White and Lethal White</a></li>
+        <li><a href="#s7-4">7.4 Skin Hue</a></li>
+        <li><a href="#s7-5">7.5 Swaps and Overrides</a></li>
+        <li><a href="#s7-6">7.6 Per-Part Slots</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch8">Pattern Genes</a>
+      <ul class="sub">
+        <li><a href="#s8-1">8.1 The Pattern Fields</a></li>
+        <li><a href="#s8-2">8.2 The Grid</a></li>
+        <li><a href="#s8-3">8.3 The Generator</a></li>
+        <li><a href="#s8-4">8.4 The Noise Function</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch9">Allele-Level Rules</a>
+      <ul class="sub">
+        <li><a href="#s9-1">9.1 The Dominant and Recessive Arrays</a></li>
+        <li><a href="#s9-2">9.2 The Six Allele Tests</a></li>
+        <li><a href="#s9-3">9.3 OSTO_SIZE</a></li>
+        <li><a href="#s9-4">9.4 CHEST_SMALL and the Sloped Chest</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch10">Feature Flags and Trait Genes</a>
+      <ul class="sub">
+        <li><a href="#s10-1">10.1 The Feature Bitmask</a></li>
+        <li><a href="#s10-2">10.2 Behavioural, Health, and Ageing Genes</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch11">Locomotion Genes</a>
+      <ul class="sub">
+        <li><a href="#s11-1">11.1 The Signal/React/Event Architecture</a></li>
+        <li><a href="#s11-2">11.2 The Five Locomotion Fields</a></li>
+        <li><a href="#s11-3">11.3 The Signal Table</a></li>
+        <li><a href="#s11-4">11.4 The Emit Pass</a></li>
+        <li><a href="#s11-5">11.5 The Consume Pass</a></li>
+        <li><a href="#s11-6">11.6 The Locomotion Gene Groups</a></li>
+        <li><a href="#s11-7">11.7 An Example Gait</a></li>
+        <li><a href="#s11-8">11.8 LOCO_SYNC</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch12">The Genome Hash</a>
+      <ul class="sub">
+        <li><a href="#s12-1">12.1 The Hash Function</a></li>
+        <li><a href="#s12-2">12.2 Seeding and Per-Horse Randomness</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch13">From Genome to Phenotype</a>
+      <ul class="sub">
+        <li><a href="#s13-1">13.1 The Processing Flow</a></li>
+        <li><a href="#s13-2">13.2 Reading the Phenotype</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch14">If You Are Writing an Editor</a>
+      <ul class="sub">
+        <li><a href="#s14-1">14.1 Ten Imperatives</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch15">Conclusion</a>
+      <ul class="sub">
+        <li><a href="#s15-1">15.1 Summary of Contributions</a></li>
+        <li><a href="#s15-2">15.2 Implications</a></li>
+        <li><a href="#s15-3">15.3 Future Work</a></li>
+        <li><a href="#s15-4">15.4 Final Remarks</a></li>
+      </ul>
+    </li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<!-- ============================ ABSTRACT ============================ -->
+<h2 id="abstract">Abstract</h2>
+
+<p class="lead">This thesis describes the structure of the genome in Horsey Game: a set of 240 genes, each carried on two strands, each resolving to one of four alleles, and each contributing to a single decoded phenotype. It sets out the storage format, the property table that gives every gene its per-allele values and its blending weight, the two accessors that read a gene, the canonical order of the genes and the groups they fall into, and the effects each group has on the creature. It covers the allele-level rules that test the sorted dominant and recessive arrays rather than the blended value, the colour and pattern systems that give the coat its appearance, the feature flags that record binary traits, the locomotion signal system that coordinates limb movement, and the genome hash that seeds per-horse randomness. It is written for anyone who needs to understand what a gene is, how to read one correctly, and what each one does.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 1 ======================== -->
+
+<h2 id="ch1">Chapter 1: The Genome and Its Genes</h2>
+
+<p>A Horsey genome is a fixed-length sequence of genes. It is not a variable collection and it is not a hierarchy; it is an array of exactly 240 entries, each indexed by a small integer, and every creature in the game carries the same 240 entries in the same order. What differs between creatures is the <em>allele</em> each entry holds, and the property table that turns that allele into a number.</p>
+
+<p>This chapter describes the physical storage of the genome: how the 240 genes are held in memory, how a raw byte becomes an allele index, and how the two copies of each gene are sorted into the arrays that some rules read instead of the blended value.</p>
+
+<h3 id="s1-1">1.1 Two Strands of 240 Genes</h3>
+
+<p>Each creature carries two strands. The strands are stored contiguously in the creature's entity structure, one after the other, each 240 bytes long and each an array of signed bytes:</p>
+
+<table>
+  <thead>
+    <tr><th>Strand</th><th>Entity offset</th><th>Size</th><th>Element type</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Dominant strand</td><td><code>entity + 0x2B8</code></td><td>240 bytes</td><td><code>int8_t</code></td></tr>
+    <tr><td>Recessive strand</td><td><code>entity + 0x3A8</code></td><td>240 bytes</td><td><code>int8_t</code></td></tr>
+  </tbody>
+</table>
+
+<p>The total genome size is therefore 480 bytes. The two strands are <em>storage labels</em> only; as Section 1.3 explains, the blend that produces a gene's value is based on the numerically higher and lower allele indices, not on which strand a byte came from.</p>
+
+<p>When the game decodes a genome, it copies both strands into a single contiguous 480-byte local buffer. The first 240 bytes are one strand and the second 240 bytes are the other. The two accessors described in Chapter 3 take a pointer to this buffer and a gene index, and read the two alleles from <code>buffer[gene]</code> and <code>buffer[gene + 0xF0]</code>.</p>
+
+<blockquote>
+  <p><strong>On disk the layout is different.</strong> A save file packs both alleles of a gene into a single byte as <code>n2 * 8 + n1</code>, using 1-based indices into the gene's own nucleotide order. That is 240 bytes, not 480. The in-memory layout described here is what the decoder sees after the save has been unpacked. Both descriptions are correct at their own layer.</p>
+</blockquote>
+
+<h3 id="s1-2">1.2 Allele Normalization</h3>
+
+<p>Each raw gene byte is normalized to an allele index in the range <code>0..3</code>. The normalization is a positive modulo operation:</p>
+
+<pre><code>allele = (byte % 4 + 4) % 4</code></pre>
+
+<p>The observed implementation uses the bitmask <code>x &amp; 0x80000003</code> followed by a sign correction for signed characters. The result is always one of four values, regardless of the raw byte's sign or magnitude. Only four allele indices exist per gene, and every rule that reads an allele reads one of those four numbers.</p>
+
+<h3 id="s1-3">1.3 Allele Ordering and the Sorted Arrays</h3>
+
+<p>For each gene, the two normalized allele indices are sorted into a high and a low value. The decoder builds two derived arrays immediately after copying the genome: a <strong>dominant</strong> array holding the smaller of the two allele indices for each gene, and a <strong>recessive</strong> array holding the larger. The terminology is slightly counter-intuitive: the <em>dominant</em> allele is the one with the <em>lower</em> index, and the <em>recessive</em> allele is the one with the <em>higher</em> index.</p>
+
+<pre><code>typedef struct HorseAllelesHiLo {
+    uint8_t hi[240];
+    uint8_t lo[240];
+} HorseAllelesHiLo;
+
+typedef union HorseAlleles {
+    uint8_t sorted[480];
+    HorseAllelesHiLo rank;
+} HorseAlleles;</code></pre>
+
+<p>The flattened representation is:</p>
+
+<ul>
+  <li><code>sorted[0..239]</code>: greater allele index for each gene</li>
+  <li><code>sorted[240..479]</code>: lesser allele index for each gene</li>
+</ul>
+
+<p>The loop that fills these arrays is a pair of conditional moves off a single comparison, so the two arrays are genuinely <code>min</code> and <code>max</code>, gene by gene. Most genes are read through the blended value described in Chapter 3, but a small number of rules test the sorted arrays directly. Those rules are the subject of Chapter 9.</p>
+
+<p>The decoding scratch area also contains a 16-entry coat palette used during colour processing:</p>
+
+<pre><code>typedef struct HorseDecodeAlleleScratch {
+    HorseColor coat_palette[16];
+    HorseAlleles alleles;
+} HorseDecodeAlleleScratch;</code></pre>
+
+<h3 id="s1-4">1.4 Chromosomes and the Gene Map</h3>
+
+<p>The 240 genes are grouped into 20 chromosomes, numbered <code>00</code> through <code>19</code>. Each chromosome has a fixed length, and the lengths sum to 240:</p>
+
+<pre><code>10, 13, 13, 15, 11, 8, 11, 8, 11, 11, 13, 15, 13, 11, 11, 13, 15, 11, 11, 16</code></pre>
+
+<p>A <code>GENE_MAP[helix][position]</code> table gives the canonical gene index for each position on each chromosome. The map is a permutation: every gene index from 0 to 239 appears exactly once, and the position of a gene on a chromosome has no relationship to its index in the canonical order.</p>
+
+<p>On disk, a genome is written as 40 lines of <code>HH:SEQUENCE</code>, with each chromosome appearing twice in a row — once per strand. The sequence is one nucleotide per gene, and the nucleotide's index within the gene's own ordering (Section 2.5) is its allele.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 2 ======================== -->
+
+<h2 id="ch2">Chapter 2: The Gene Property Table</h2>
+
+<p>A gene on its own is just an index. The meaning of a gene — what it does, how its alleles differ, and how strongly one allele dominates the other — comes from a property table. That table is the single most important data structure in the genome system, and it is populated at runtime from <code>genes.xml</code>.</p>
+
+<h3 id="s2-1">2.1 The genes.xml Schema</h3>
+
+<p><code>genes.xml</code> holds all 240 genes in canonical order. Each entry has six attributes:</p>
+
+<table>
+  <thead>
+    <tr><th>Attribute</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>The gene's name, matching the <code>G_*</code> identifiers used throughout this thesis.</td></tr>
+    <tr><td><code>m</code></td><td>Blend weight, as a percentage applied to the lower allele.</td></tr>
+    <tr><td><code>s</code></td><td>Scale divisor. The final value is the blended raw value divided by <code>s</code>.</td></tr>
+    <tr><td><code>g0</code>–<code>g3</code></td><td>Raw value for each allele index. <code>g0</code> is the value when the allele is 0, and so on.</td></tr>
+    <tr><td><code>n</code></td><td>Per-gene nucleotide ordering: a permutation of <code>ACGT</code>. The index of a letter within this string is its allele number, and lower index is dominant.</td></tr>
+  </tbody>
+</table>
+
+<p>An example entry:</p>
+
+<pre><code>&lt;gene name="SIZE" m="95" s="100" g0="100" g1="50" g2="35" g3="75" n="ATGC" /&gt;</code></pre>
+
+<p>Here <code>SIZE</code> has a blend weight of 95, a scale divisor of 100, raw values of 100, 50, 35, and 75 for alleles 0 through 3, and a nucleotide ordering of A, T, G, C. A creature carrying the nucleotide <code>A</code> on both strands has allele 0 on both, which resolves to a raw value of 100 and a final value of 1.0.</p>
+
+<h3 id="s2-2">2.2 The Blend Weight</h3>
+
+<p>The <code>m</code> attribute is a percentage that determines how much weight the lower allele receives when the two alleles differ. A value of 100 means the lower allele's value is used exclusively. A value of 50 means the two alleles contribute equally. A value of 0 would mean the higher allele is used exclusively, though no gene in the table has that value.</p>
+
+<p>Of the 240 genes, 190 have <code>m = 100</code>, meaning they are fully dominant: the lower allele's value is used and the higher allele is ignored for the blended result. The remaining 50 genes are genuinely blended, and their values depend on both alleles.</p>
+
+<p>Because the blend direction is always the same — <code>m</code> weights the lower allele and <code>100 - m</code> weights the higher — a gene with <code>m = 100</code> short-circuits to the lower allele's value. That is the most common case, and it is why so many genes behave as though only one of the two alleles matters.</p>
+
+<h3 id="s2-3">2.3 The Scale Divisor</h3>
+
+<p>The <code>s</code> attribute divides the blended raw value to produce the final value used by the phenotype. Most genes have <code>s = 1</code> or <code>s = 100</code>:</p>
+
+<ul>
+  <li><code>s = 1</code> for 143 genes. These genes use their raw values directly.</li>
+  <li><code>s = 100</code> for 94 genes. These genes store their values as percentages or as centi-units, and divide by 100 to get a fraction.</li>
+  <li><code>s = 10</code> for 3 genes. These are intermediate scales.</li>
+</ul>
+
+<p>The scale divisor is applied <em>after</em> blending. A gene with <code>s = 100</code> and raw values of 100 and 50 produces a blended raw value of 75 when both alleles contribute equally, and a final value of 0.75.</p>
+
+<h3 id="s2-4">2.4 Per-Allele Values</h3>
+
+<p>The four <code>g</code> attributes give the raw value for each allele index. The values are not sorted; they follow the gene's own logic. For a gene like <code>TAIL_EXISTS</code>, the values might be 1, 0, 1, 2 — meaning allele 0 gives a normal tail, allele 1 gives no tail, allele 2 gives a normal tail, and allele 3 gives two tails.</p>
+
+<p>For a gene like <code>SIZE</code>, the values are 100, 50, 35, 75 — four different sizes, with the allele index determining which one applies. Because lower index is dominant, an allele pair of 0 and 3 blends toward the allele 0 value.</p>
+
+<h3 id="s2-5">2.5 Nucleotide Ordering</h3>
+
+<p>The <code>n</code> attribute is the bridge between the letters in a genome sequence and the allele indices used by the property table. Each gene has its own ordering, and the index of a letter within that string is its allele number.</p>
+
+<p>For <code>SIZE</code>, <code>n="ATGC"</code> means A is allele 0, T is allele 1, G is allele 2, and C is allele 3. For <code>ASPECT</code>, <code>n="GCAT"</code> means G is allele 0, C is allele 1, A is allele 2, and T is allele 3. The two genes have different orderings, and a global mapping from letters to alleles would be wrong for at least one of them.</p>
+
+<blockquote>
+  <p><strong>This is per gene, not global.</strong> Do not assume that <code>A</code> always means allele 0. Read the <code>n</code> attribute for the gene you are working with, and use <code>n.indexOf(letter)</code> to get the allele index.</p>
+</blockquote>
+
+<h3 id="s2-6">2.6 The Runtime Table Layout</h3>
+
+<p>At runtime, the property table is an array of 240 entries, each 32 bytes:</p>
+
+<pre><code>struct GeneProperties {
+    uint32_t gene_id;      // +0x00  must equal its own index, else an assertion fires
+    int32_t  base_value;   // +0x04  blend weight, 0..100
+    uint8_t  unknown[8];   // +0x08  name pointer or reserved bytes
+    float    values[4];    // +0x10  one per allele, already divided by the scale
+};</code></pre>
+
+<p>The total size is <code>4 + 4 + 8 + 16 = 32</code> bytes, and <code>240 * 32 = 7680</code> bytes for the whole table. Before using an entry, the decoder verifies that <code>GENE_PROPS[gene_index].gene_id == gene_index</code>. A mismatch triggers an assertion, which is how a corrupted or misaligned table is caught.</p>
+
+<p>The <code>values[4]</code> array holds the per-allele values already divided by the <code>s</code> attribute, so the accessors in Chapter 3 do not need to apply the divisor themselves.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 3 ======================== -->
+
+<h2 id="ch3">Chapter 3: Reading a Gene</h2>
+
+<p>Reading a gene means taking two allele indices and producing a single number. The game provides two accessors for this — one returning a floating-point value, one returning an integer — and they differ in more than their return type. Understanding both, and the traps in each, is necessary before any gene's effect can be predicted.</p>
+
+<h3 id="s3-1">3.1 The Two Accessors</h3>
+
+<p>Both accessors take a pointer to the genome buffer and a gene index. They read the two alleles from the buffer, normalize them, sort them into high and low, retrieve the corresponding values from the property table, and blend them according to the gene's <code>base_value</code>.</p>
+
+<p>The pseudo-code is the same for both:</p>
+
+<pre><code>base = GENE_PROPS[gene].base_value
+hi   = greater allele index
+lo   = lesser allele index</code></pre>
+
+<p>The two alleles are read from the two strands. The lower index is the dominant allele, and the higher index is the recessive allele. The blend weights the lower allele by <code>base / 100</code> and the higher allele by <code>1 - base / 100</code>.</p>
+
+<h3 id="s3-2">3.2 The Floating-Point Blend</h3>
+
+<p>The floating-point accessor produces a value that can be fractional:</p>
+
+<pre><code>GetGeneFloat =
+    (1.0 - base / 100.0) * GENE_PROPS[gene].values[hi]
+  + (base / 100.0)       * GENE_PROPS[gene].values[lo]</code></pre>
+
+<p>The formula is a simple linear interpolation. When <code>base = 100</code>, the first term vanishes and the result is <code>values[lo]</code>. When <code>base = 0</code>, the second term vanishes and the result is <code>values[hi]</code>. For intermediate values, the result is a weighted average.</p>
+
+<p>This is the accessor used by every gene that produces a dimension, an angle, a scale, or any other value that needs sub-unit precision.</p>
+
+<h3 id="s3-3">3.3 The Integer Blend</h3>
+
+<p>The integer accessor produces a whole number:</p>
+
+<pre><code>GetGeneInt =
+    (base * values[lo] + (100 - base) * values[hi]) / 100</code></pre>
+
+<p>At first glance this looks equivalent to the floating-point version scaled by 100. It is not, because of truncation. The integer accessor truncates each value to an integer <em>before</em> blending, and then truncates the result of the division. The floating-point accessor blends the values as floats and only truncates if the caller chooses to.</p>
+
+<blockquote>
+  <p><strong>A gene read through the integer accessor is always 0 if its scale divisor is 100.</strong> The <code>values[]</code> array holds values that have already been divided by <code>s</code>. For a gene with <code>s = 100</code>, those values are fractions between 0 and 1, and truncating them to integers gives 0 for every allele. The blended result is then 0 for every genome. This is not a bug in the game; it is a consequence of the two accessors having different rounding behaviour, and it means that a gene's effect depends on which accessor reads it.</p>
+</blockquote>
+
+<p>The integer accessor is used by genes whose values are naturally integers — counts, flags, and small enumerations. The floating-point accessor is used by genes whose values are dimensions or angles.</p>
+
+<h3 id="s3-4">3.4 Traps in the Accessors</h3>
+
+<p>Two traps are worth stating explicitly, because both have misled analyses:</p>
+
+<ul>
+  <li><strong>There is no special case for <code>base_value == 100</code>.</strong> The general form of the floating-point blend already yields <code>values[lo]</code> when <code>base = 100</code>. A port that adds a special case for 100 is not wrong, but it is not doing anything the general formula does not already do.</li>
+  <li><strong>The integer accessor truncates before blending.</strong> A port that blends as floats and then truncates will produce different results from the game for any gene with fractional values. The difference is small for large values and total for values below 1.</li>
+</ul>
+
+<p>Both traps are consequences of the same design: the two accessors are not two views of one function, they are two functions that happen to share a formula. Treating them as interchangeable produces errors that are invisible on most genes and obvious on a few.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 4 ======================== -->
+
+<h2 id="ch4">Chapter 4: The Canonical Gene Order</h2>
+
+<p>The 240 genes are numbered from <code>0x00</code> through <code>0xEF</code>. The constant <code>GENE_COUNT</code> is <code>0xF0</code>. The order is fixed and every reference to a gene — in the property table, in the decoder, in any tool — uses the same index.</p>
+
+<h3 id="s4-1">4.1 The Major Groups</h3>
+
+<p>The genes fall into contiguous groups, each group covering one aspect of the creature:</p>
+
+<table>
+  <thead>
+    <tr><th>Index range</th><th>Group</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x00..0x14</code></td><td>Body dimensions, posture, locomotion, and break force</td></tr>
+    <tr><td><code>0x15..0x21</code></td><td>Tail geometry and behaviour</td></tr>
+    <tr><td><code>0x22..0x34</code></td><td>Legs, feet attachment, knees, and joint behaviour</td></tr>
+    <tr><td><code>0x35..0x47</code></td><td>Arms, hands, elbows, and upper-arm placement</td></tr>
+    <tr><td><code>0x48..0x55</code></td><td>Neck shape, mounting, and joint behaviour</td></tr>
+    <tr><td><code>0x56..0x60</code></td><td>Feet, hands, toes, and fingers</td></tr>
+    <tr><td><code>0x61..0x8B</code></td><td>Head, eyes, ears, mouth, jaw, tongue, and nose</td></tr>
+    <tr><td><code>0x8C..0x9F</code></td><td>Antlers and related adornment properties</td></tr>
+    <tr><td><code>0xA0..0xAE</code></td><td>Hat geometry and behaviour</td></tr>
+    <tr><td><code>0xAF..0xCE</code></td><td>Coat colours, skin colours, swaps, and patterns</td></tr>
+    <tr><td><code>0xCF..0xDA</code></td><td>Behavioural, health, ageing, and locomotion traits</td></tr>
+    <tr><td><code>0xDB..0xEE</code></td><td>Leg, arm, tail, and neck locomotion signals and events</td></tr>
+    <tr><td><code>0xEF</code></td><td>Locomotion synchronization</td></tr>
+  </tbody>
+</table>
+
+<p>Of the 240 genes, roughly 207 affect static appearance. The remaining 33 — the behavioural, health, and locomotion groups — only matter once physics runs.</p>
+
+<h3 id="s4-2">4.2 The Complete Order</h3>
+
+<p>The canonical order is the order in which the genes appear in <code>genes.xml</code>. It is also the order in which the decoder reads them, which matters because some genes read registers left over from earlier genes. The full list is:</p>
+
+<pre><code>G_SIZE, G_ASPECT, G_SKINNY, G_BONES, G_BONES2, G_CHEST_BIG,
+G_CHEST_SMALL, G_GIANT_DWARF, G_MUSCLE_USE, G_QUADRUPED, G_BIPED,
+G_SPLAY, G_LEG_IN, G_LEG_IN2, G_GUT, G_GUT_IS_UDDER,
+G_OSTODERM, G_OSTO_SIZE, G_DERRIERE, G_SPEED_FACTOR, G_BREAK_FORCE,
+G_TAIL_TAG, G_TAIL_EXISTS, G_TAIL_SIZE, G_TAIL_SHORT, G_TAIL_ASPECT,
+G_TAIL_ANGLE, G_TAIL_JOINT_TYPE, G_TAIL_STIFF, G_TAIL_SPEED,
+G_TAIL_FLEXIBILITY, G_TAIL_SHAPE, G_TAIL_BOTTOM, G_TAIL_SEGMENTS,
+G_LEG_TAG, G_LEG_TYPE, G_LEG_LENGTH, G_LEG_STRETCH, G_LEG_STRETCH2,
+G_LEG_STRENGTH, G_LEG_HAS_FOOT, G_LEG_JOINT_TYPE, G_LEG_FLEXIBILITY,
+G_LEG_FLEX_BIAS, G_LEG_THRUST_BACK, G_LEG_IS_CIRCLE, G_LEG_COUNT,
+G_LEG_SKEW, G_LEG_PENCIL, G_LEG_AND_ARM_LIMP, G_HAS_KNEE,
+G_KNEE_MIN, G_KNEE_MAX, G_ARM_TAG, G_ARM_TYPE, G_ARM_LENGTH,
+G_ARM_STRETCH, G_ARM_STRETCH2, G_ARM_STRENGTH, G_ARM_HAS_HAND,
+G_ARM_JOINT_TYPE, G_ARM_FLEXIBILITY, G_ARM_FLEX_BIAS, G_ARM_FORWARD,
+G_ARM_SKEW, G_ARM_NODE_SCALE, G_HAS_ELBOW, G_ELBOW_RANGE,
+G_UPARM_TAG, G_UPARM_Y, G_UPARM_ANGLE, G_UPARM_GOOFY,
+G_NECK_TAG, G_NECK_TYPE, G_NECK_LENGTH, G_NECK_GIRAFFE,
+G_NECK_THICKNESS, G_NECK_ANGLE, G_NECK_COCK, G_NECK_JOINT_TYPE,
+G_NECK_FLEXIBILITY, G_NECK_FLEX_BIAS, G_NECK_SLOUCH, G_NECK_ONTOP,
+G_NECK_STIFF, G_NECK_SPEED, G_HAS_FOOT, G_FOOT_SIZE, G_FOOT_CLOWN,
+G_FOOT_THICKNESS, G_FOOT_TOE, G_FOOT_IS_CIRCLE, G_FOOT_BACKWARDS,
+G_HAS_HAND, G_HAND_WIDTH, G_HAND_LENGTH, G_HAND_FINGER,
+G_HEAD_SIZE, G_HEAD_THICK_SKULL, G_HEAD_X_GROWTH, G_HEAD_Y_GROWTH,
+G_HEAD_ASPECT, G_HEAD_SQUARE, G_HEAD_HAS_BACK, G_HEAD_GIANT,
+G_HEAD_SHRUNK, G_HEAD_JOINTED, G_HEAD_CHIMERA, G_EYE_STYLE,
+G_BUGEYE, G_EYEBOX_X, G_EYEBOX_Y, G_EYEBOX_SIZE, G_EYE_SIZE,
+G_PUPIL_SIZE, G_HAS_PUPIL, G_BROW_SIZE, G_BROW_SLANT,
+G_EAR_STYLE, G_EAR_SHAPE, G_EAR_FLOP, G_EAR_X, G_EAR_SIZE,
+G_EAR_ASPECT, G_EAR_SLANT, G_EAR_INTERIOR, G_TEETH_SHAPE,
+G_HAS_MOUTH, G_MOUTH_Y, G_MOUTH_SIZE, G_JAW, G_TEETH_UPPER,
+G_TEETH_UPPER2, G_TONGUE, G_TONGUE_SEGS, G_NOSE_STYLE,
+G_NOSE_INNY, G_NOSE_Y, G_NOSE_SIZE, G_NOSE_INTERIOR,
+G_HAS_ANTLERS, G_ANTLER_X, G_ANTLER_W, G_ANTLER_H, G_ANTLER_TAPER,
+G_ANTLER_POM, G_ANTLER_COLOR, G_POM_COLOR, G_POM_USECOLOR,
+G_ANTLER_REC, G_ANTLER_REC2, G_ANTLER_FLIP, G_ANTLER_MOD,
+G_ANTLER_SCALEH, G_ANTLER_SCALEW, G_ANTLER_ANGLE, G_ANTLER_ANGLE2,
+G_ANTLER_ANGLE_RAND, G_ANTLER_T1, G_ANTLER_T2, G_HAT_EXISTS,
+G_HAT_SIZE, G_HAT_RAKE, G_HAT_ASPECT, G_HAT_TAPER, G_HAT_POM,
+G_HAT_POM_IS_LID, G_HAT_CLONE, G_HAT_BACK_SCALE, G_HAT_FRONT_SCALE,
+G_HAT_BACK_ANGLE, G_HAT_FRONT_ANGLE, G_HAT_ANGLE_RAND, G_HAT_FLIP,
+G_HAT_T, G_BASE_BROWN, G_BASE_BLACK, G_BASE_RED, G_BASE_GREEN,
+G_GREEN_KNOCKOUT, G_BASE_CREAM, G_ALT_BLUE, G_SPOT_YELLOW,
+G_SKIN_HUE, G_SKIN_HUE2, G_SWAP_BASE_SPOT, G_SWAP_ALT_SPOT,
+G_WHITE, G_WHITE_IS_LETHAL, G_EYE_HUE, G_NOSE_HUE, G_HOOF_COLOR,
+G_AGOUTI, G_BELLY_ALT, G_SKIN_HEAD, G_SKIN_HANDS, G_FOOT_IS_HOOF,
+G_RACCOON_EYE, G_EAR_COMP, G_TAIL_ALT, G_PAT_SPLIT, G_PAT_BELLY,
+G_PAT_STRIPE, G_PAT_SPOT, G_PAT_PERLIN, G_PAT_PERLIN2,
+G_PAT_PERLIN_SIZE, G_RAMPAGE, G_SPINAL_LOCO, G_BRAIN_SPASTIC,
+G_HIGH_INTELLECT, G_OMNIVORE, G_LITTER_SIZE, G_OLD_AGE, G_LIMP,
+G_NARCOLEPSY, G_FLU_IMMUNITY, G_TAIL_WAG, G_STIFF_JOINTS,
+G_L_LEG_SIGNAL, G_L_LEG_FTOB_REACT, G_L_LEG_FTOB_EVENT,
+G_L_LEG_BTOF_REACT, G_L_LEG_BTOF_EVENT, G_L_ARM_SIGNAL,
+G_L_ARM_FTOB_REACT, G_L_ARM_FTOB_EVENT, G_L_ARM_BTOF_REACT,
+G_L_ARM_BTOF_EVENT, G_L_TAIL_SIGNAL, G_L_TAIL_FTOB_REACT,
+G_L_TAIL_FTOB_EVENT, G_L_TAIL_BTOF_REACT, G_L_TAIL_BTOF_EVENT,
+G_L_NECK_SIGNAL, G_L_NECK_FTOB_REACT, G_L_NECK_FTOB_EVENT,
+G_L_NECK_BTOF_REACT, G_L_NECK_BTOF_EVENT, G_LOCO_SYNC</code></pre>
+
+<p>The order matters for two reasons. First, it is the order the decoder reads them, and a few genes inherit register values from earlier reads. Second, it is the order tools should present them in, so that a gene's index and its position in a list agree.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 5 ======================== -->
+
+<h2 id="ch5">Chapter 5: Structural Genes</h2>
+
+<p>The structural genes determine the creature's shape: its body dimensions, its posture, its limbs, its tail, its neck, and its head. They are the largest group and the one most responsible for the visible difference between creatures.</p>
+
+<h3 id="s5-1">5.1 Body Dimensions and Posture</h3>
+
+<p>The body's size and shape come from a small set of genes that combine multiplicatively:</p>
+
+<pre><code>bones_scale_a = GetGeneFloat(G_BONES) + 1.0
+bones_scale   = GetGeneFloat(G_BONES2) + bones_scale_a
+giant_dwarf   = GetGeneFloat(G_GIANT_DWARF)
+chest_small   = GetGeneFloat(G_CHEST_SMALL)
+chest_big     = GetGeneFloat(G_CHEST_BIG)
+size          = GetGeneFloat(G_SIZE)
+
+body_area = (size + size) * bones_scale * chest_big * chest_small * giant_dwarf
+
+skinny        = GetGeneFloat(G_SKINNY)
+aspect_skinny = skinny * GetGeneFloat(G_ASPECT)
+body_aspect   = (chest_small * aspect_skinny) / chest_big</code></pre>
+
+<p>The body's area and aspect ratio are then combined with the posture genes to produce width and height. The posture genes are <code>G_BIPED</code> and <code>G_QUADRUPED</code>, which select one of four body plans:</p>
+
+<table>
+  <thead>
+    <tr><th>Biped</th><th>Quadruped</th><th>Body plan</th><th>Aspect handling</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>1</td><td>Horse</td><td>unchanged</td></tr>
+    <tr><td>0</td><td>0</td><td>Rabbit</td><td><code>1.5 / aspect</code>, or <code>aspect * 0.8</code> if <code>NECK_ONTOP</code></td></tr>
+    <tr><td>1</td><td>0</td><td>Human</td><td><code>1.0 / aspect</code></td></tr>
+    <tr><td>1</td><td>1</td><td>Centaur</td><td>unchanged, plus a second torso</td></tr>
+  </tbody>
+</table>
+
+<p>Once the aspect ratio has been adjusted, the body's width and height are:</p>
+
+<pre><code>body_width  = sqrt(body_aspect * body_area)
+body_height = body_area / body_width</code></pre>
+
+<p>The final dimensions include a back offset that is non-zero only when the higher allele of <code>CHEST_SMALL</code> is 3, giving a sloped chest. That offset is capped at a quarter of the body's shorter side, and on a centaur it is further capped by the room left in front of the second torso.</p>
+
+<h3 id="s5-2">5.2 Legs</h3>
+
+<p>The leg genes determine whether legs exist, how long they are, how thick they are, and how they bend. The core calculation is:</p>
+
+<pre><code>leg_type     = GetGeneInt(G_LEG_TYPE)
+leg_enabled  = leg_type != 0
+stretch_a    = GetGeneFloat(G_LEG_STRETCH) + 1.0
+stretch_scl  = GetGeneFloat(G_LEG_STRETCH2) + stretch_a
+leg_length   = GetGeneFloat(G_LEG_LENGTH) * stretch_scl
+leg_thickness = GetGeneFloat(G_LEG_STRENGTH) * 0.16</code></pre>
+
+<p>If <code>LEG_TYPE</code> is 2, the leg becomes a square stub: both length and thickness are doubled, and the length is set equal to the thickness. This is the fixed-length stubby leg.</p>
+
+<p>The leg's muscle-derived sizes are:</p>
+
+<pre><code>muscle_use = GetGeneFloat(G_MUSCLE_USE) * 100.0
+leg_upper  = GetGeneFloat(G_LEG_STRENGTH) * muscle_use
+leg_lower  = leg_upper * 0.6</code></pre>
+
+<p>For type 2, <code>leg_upper</code> is halved. The leg's angle comes from <code>G_SPLAY</code>, and its joint behaviour comes from <code>G_LEG_JOINT_TYPE</code>, <code>G_LEG_FLEXIBILITY</code>, and <code>G_LEG_FLEX_BIAS</code>. When the joint type is 2, the flex bias is added to the socket angle, giving a one-sided range.</p>
+
+<p>Several leg genes are conditional. <code>G_LEG_PENCIL</code> overrides the leg's dimensions when it is positive, producing a thin, pencil-like leg. <code>G_LEG_SKEW</code> shears the lower half of the leg sideways, but only when the leg is not jointed. <code>G_LEG_IS_CIRCLE</code> turns the leg into a wheel when <code>G_LEG_HAS_FOOT</code> is 0 or <code>G_FOOT_IS_CIRCLE</code> is 0.</p>
+
+<h3 id="s5-3">5.3 Arms</h3>
+
+<p>The arms follow the same pattern as the legs, using the <code>G_ARM_*</code> genes. Their length, thickness, muscle-derived upper and lower sizes, skew, hand flag, elbow range, and angles are calculated independently.</p>
+
+<p>Two quirks are worth noting. First, the arm's length reads <code>LEG_STRETCH</code> and <code>LEG_STRETCH2</code>, not <code>ARM_STRETCH</code> and <code>ARM_STRETCH2</code>. The latter two genes are never read by anything. This is a copy-paste error in the game, and it is visible: a creature with a non-zero <code>ARM_STRETCH2</code> does not have its arms stretched.</p>
+
+<p>Second, <code>ARM_NODE_SCALE</code> scales the length of whatever stands in the front socket — an arm, or with <code>ARM_TAG</code> 1 a leg — and leaves its thickness alone. It reaches legs only, and it reaches the upper arms too, because each upper-arm record starts as a copy of the front socket's record.</p>
+
+<h3 id="s5-4">5.4 Feet and Hands</h3>
+
+<p>The foot genes determine whether a foot exists, how large it is, whether it is circular, and whether it points backwards. The core calculation is:</p>
+
+<pre><code>has_foot   = GetGeneInt(G_HAS_FOOT)
+feet_flag0 = has_foot > 0
+feet_flag1 = GetGeneInt(G_FOOT_BACKWARDS) != 0
+
+feet_x = FOOT_SIZE + leg_thickness + foot_clown_extra
+feet_y = foot_toe * feet_gene89 + feet_x</code></pre>
+
+<p>If both the leg and foot are circular, the foot becomes a circle of radius equal to the foot's widest point. <code>FOOT_BACKWARDS</code> mirrors the foot about the limb's centreline; values 1 and 2 do the same thing, because the decoder collapses the gene to a boolean with a single <code>!= 0</code> test.</p>
+
+<p>The hand genes follow the same pattern. <code>HAND_WIDTH</code>, <code>HAND_LENGTH</code>, and <code>HAND_FINGER</code> determine the hand's shape, and the hand is centred on the limb's centreline rather than flush with its edge.</p>
+
+<h3 id="s5-5">5.5 Tail</h3>
+
+<p>The tail genes determine whether a tail exists, how long it is, how thick it is, and what shape it has. The core calculation is:</p>
+
+<pre><code>tail_exists = GetGeneInt(G_TAIL_EXISTS)
+tail_size   = GetGeneFloat(G_TAIL_SIZE)
+tail_length = GetGeneFloat(G_TAIL_SHORT) * tail_size
+tail_base   = GetGeneFloat(G_TAIL_ASPECT) * tail_size
+tail_style  = GetGeneInt(G_TAIL_SHAPE)</code></pre>
+
+<p>The tail's shape is one of several values. Shape 1 is a rectangle, shape 2 is a reverse triangle, shape 5 is a stubby square, and shape 6 is a decorative chain of tiles. Shape 5 is converted to shape 1 before use, with the length set equal to the base.</p>
+
+<p><code>TAIL_SEGMENTS</code> is gated on the tail's shape. It only takes effect when the shape is 1, and it divides the length only when the length is more than twice the base. On a triangle or a chromosome tail, the gene does nothing.</p>
+
+<p><code>TAIL_EXISTS</code> 2 produces two tails, not one longer one. The second tail is built at the same joint, ten degrees back, unless the socket's joint type is 2.</p>
+
+<p>The tail's angle and joint position depend on <code>QUADRUPED</code>. A quadruped measures its tail off the rear top corner, with <code>TAIL_BOTTOM</code> moving it to the bottom when there is no derriere. A non-quadruped measures its tail off <code>PAT_BELLY</code>, a pattern gene used here as a fraction of the body's height.</p>
+
+<h3 id="s5-6">5.6 Neck</h3>
+
+<p>The neck genes determine whether a neck exists, how long it is, how thick it is, and where it attaches. The core calculation is:</p>
+
+<pre><code>neck_enabled   = GetGeneInt(G_NECK_TYPE) != 0
+neck_length    = GetGeneFloat(G_NECK_LENGTH) * (body_max_dim * 0.5)
+neck_offset_x  = GetGeneFloat(G_NECK_GIRAFFE) + neck_length
+neck_thickness = GetGeneFloat(G_NECK_THICKNESS)
+neck_offset_y  = neck_thickness * (body_min_dim * 0.25)</code></pre>
+
+<p>The neck's joint position is adjusted by <code>NECK_ONTOP</code>, which slides it back along the spine, and by <code>NECK_SLOUCH</code>, which walks it down the front edge. Both are skipped on a centaur.</p>
+
+<p><code>NECK_COCK</code> adds to the neck's pitch: the stored angle is <code>-90 - NECK_ANGLE - NECK_COCK</code>, so the neck rises at the sum of the two angles. <code>NECK_GIRAFFE</code> is added in raw gene units after the length has been scaled by the body.</p>
+
+<p>When <code>NECK_JOINT_TYPE</code> is 2, <code>NECK_FLEX_BIAS</code> is added to the socket angle, giving the neck a resting angle that differs from its gene values.</p>
+
+<h3 id="s5-7">5.7 Head</h3>
+
+<p>The head genes determine the head's size, shape, and features. The core calculation is:</p>
+
+<pre><code>head_scale = GetGeneFloat(G_HEAD_SHRUNK) * GetGeneFloat(G_HEAD_GIANT)
+head_area = ((G_HEAD_THICK_SKULL + G_HEAD_SIZE) * 0.33)
+          * body_bone_scale * head_scale
+
+head_aspect = G_HEAD_SQUARE
+if head_aspect == 0:
+    head_aspect = G_HEAD_ASPECT
+
+head_width  = (G_HEAD_X_GROWTH + 1.0) * sqrt(head_aspect * head_area)
+head_height = (G_HEAD_Y_GROWTH + 1.0) * (head_area / head_width)</code></pre>
+
+<p>The head's features — eyes, ears, mouth, jaw, tongue, and nose — each have their own genes and their own rules. The eye is two circles, with <code>EYE_SIZE</code> determining the eye's radius and <code>PUPIL_SIZE</code> determining the pupil's. The ear's position is determined by <code>EAR_X</code>, <code>EAR_SIZE</code>, and <code>EAR_ASPECT</code>, and its colour is determined by <code>EAR_COMP</code>, which is promoted by <code>EAR_STYLE</code>.</p>
+
+<p>The nose's size is capped by the available span, which is <code>(headHeight - mouthHeight) * MOUTH_Y</code>. This means <code>NOSE_Y</code> cannot move a full-size nose at all, because the nose has already filled its span. The same <code>NOSE_SIZE</code> can produce noses of different sizes on different heads, because the span is head-relative and mouth-relative.</p>
+
+<p><code>HEAD_JOINTED</code> controls whether the head is rigidly attached to the neck or placed on an independent physics joint. For a still-frame renderer, the important consequence is that when <code>HEAD_JOINTED</code> is non-zero, the head's static cock angle is not baked into its position; it becomes a property of the joint instead.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 6 ======================== -->
+
+<h2 id="ch6">Chapter 6: Adornment Genes</h2>
+
+<p>The adornment genes control antlers and hats. Both are the same structure: a recursive branch built from a shared record. The decoder fills two records, one for the antler and one for the hat, and the same builder walks both.</p>
+
+<h3 id="s6-1">6.1 The Shared Record</h3>
+
+<p>The antler and hat records are laid out identically, which is what makes one builder enough for both:</p>
+
+<table>
+  <thead>
+    <tr><th>Offset</th><th>Antler</th><th>Hat</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>+0x00</code></td><td><code>ANTLER_W</code></td><td><code>HAT_EXISTS ? HAT_SIZE : 0</code></td></tr>
+    <tr><td><code>+0x04</code></td><td><code>ANTLER_H</code></td><td><code>HAT_ASPECT * size</code></td></tr>
+    <tr><td><code>+0x08</code></td><td><code>ANTLER_TAPER</code></td><td><code>HAT_TAPER</code></td></tr>
+    <tr><td><code>+0x0C</code></td><td><code>ANTLER_POM</code></td><td><code>HAT_POM</code>, or <code>1 - taper</code> if <code>HAT_POM_IS_LID</code></td></tr>
+    <tr><td><code>+0x10</code></td><td>0</td><td><code>HAT_CLONE</code></td></tr>
+    <tr><td><code>+0x14</code></td><td>0</td><td>1</td></tr>
+    <tr><td><code>+0x18</code></td><td>0.25</td><td>0.25</td></tr>
+    <tr><td><code>+0x1C</code></td><td><code>ANTLER_COLOR</code></td><td><code>ANTLER_COLOR</code> (inherited)</td></tr>
+    <tr><td><code>+0x20</code></td><td><code>POM_COLOR</code>/<code>ANTLER_COLOR</code></td><td>same</td></tr>
+    <tr><td><code>+0x24</code></td><td><code>ANTLER_REC</code></td><td>1</td></tr>
+    <tr><td><code>+0x28</code></td><td><code>ANTLER_REC2</code></td><td>1</td></tr>
+    <tr><td><code>+0x2C</code></td><td><code>ANTLER_FLIP</code></td><td><code>HAT_FLIP</code></td></tr>
+    <tr><td><code>+0x30</code></td><td><code>ANTLER_ANGLE</code></td><td><code>HAT_BACK_ANGLE</code></td></tr>
+    <tr><td><code>+0x34</code></td><td><code>ANTLER_ANGLE2</code></td><td><code>HAT_FRONT_ANGLE</code></td></tr>
+    <tr><td><code>+0x38</code></td><td><code>ANTLER_ANGLE_RAND</code></td><td><code>HAT_ANGLE_RAND</code></td></tr>
+    <tr><td><code>+0x3C</code> / <code>+0x40</code></td><td><code>ANTLER_SCALEW</code> (both)</td><td>1.0 / 1.0</td></tr>
+    <tr><td><code>+0x44</code> / <code>+0x48</code></td><td><code>ANTLER_SCALEH</code> (both)</td><td><code>HAT_BACK_SCALE</code> / <code>HAT_FRONT_SCALE</code></td></tr>
+    <tr><td><code>+0x4C</code> / <code>+0x50</code></td><td><code>ANTLER_T1</code> / <code>ANTLER_T2</code></td><td><code>HAT_T</code> (both)</td></tr>
+    <tr><td><code>+0x54</code></td><td><code>ANTLER_MOD</code></td><td>3</td></tr>
+  </tbody>
+</table>
+
+<p><code>ANTLER_X</code> and <code>HAT_RAKE</code> sit outside both records, immediately before the antler record. They control placement and rake, not branch shape.</p>
+
+<h3 id="s6-2">6.2 HAS_ANTLERS as Master Switch</h3>
+
+<p><code>HAS_ANTLERS</code> is the master switch for both adornments. The decoder's last act in the adornment block is:</p>
+
+<pre><code>if (GetGeneInt(HAS_ANTLERS) == 0) {
+    antler_width = 0;
+    hat_width    = 0;
+}</code></pre>
+
+<p><code>HAT_EXISTS</code> only gates the hat's own size. A hat cannot exist without antlers, and the two genes are not independent. A creature with <code>HAS_ANTLERS = 0</code> and <code>HAT_EXISTS = 1</code> grows no adornment at all.</p>
+
+<h3 id="s6-3">6.3 Antler Genes</h3>
+
+<p>The antler genes control the antler's size, shape, branching, and colour. <code>ANTLER_W</code> and <code>ANTLER_H</code> give the width and height of the root segment. <code>ANTLER_TAPER</code> controls how much the segment narrows toward its tip. <code>ANTLER_POM</code> adds a pom — a circle — at the tip when it is positive.</p>
+
+<p><code>ANTLER_REC</code> and <code>ANTLER_REC2</code> cap the recursion depth for the back and front branches. <code>ANTLER_MOD</code> is a parity bitmask, not an enum: it is tested against <code>(depth % 2) + 1</code>, so a value of 1 branches at one depth parity, 2 at the other, and 3 at every depth.</p>
+
+<p><code>ANTLER_FLIP</code> negates the control record's angles between the back child and the front one, so a flip reaches the second child and everything under it but never leaks back up the tree. <code>ANTLER_T1</code> and <code>ANTLER_T2</code> are attach positions along the parent segment, not thicknesses; a value at or above 0.95 is treated as "at the tip".</p>
+
+<h3 id="s6-4">6.4 Hat Genes</h3>
+
+<p>The hat genes control the hat's size, shape, and cloning. <code>HAT_SIZE</code> gives the hat's width, and <code>HAT_ASPECT</code> gives its aspect ratio. <code>HAT_TAPER</code> controls its taper, and <code>HAT_POM</code> adds a pom. <code>HAT_POM_IS_LID</code> converts the pom into a lid, setting it to <code>1 - taper</code> when the pom is positive.</p>
+
+<p><code>HAT_CLONE</code> draws the whole segment twice, mirrored at <code>±clone * width / 2</code>, but only at the root and only when <code>HAT_TAPER &gt; 0.1</code>. A hat missing one of its two halves is this gene's effect.</p>
+
+<p>The hat inherits <code>ANTLER_COLOR</code> from the antler record, which is why both render in the same colour. The hat also has its own back and front scales, angles, and angle jitter.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 7 ======================== -->
+
+<h2 id="ch7">Chapter 7: Colour Genes</h2>
+
+<p>The colour genes determine the creature's coat, skin, and fixed colours. They are the most interconnected group in the genome: a colour is rarely the product of a single gene, and the order in which the genes are read is part of the specification.</p>
+
+<h3 id="s7-1">7.1 Base Colour Selection</h3>
+
+<p>Base colour selection uses a dispatch on <code>BASE_RED</code> and <code>BASE_GREEN</code>, falling back to <code>BASE_BROWN</code> when both are 0. <code>GREEN_KNOCKOUT</code> disables <code>BASE_GREEN</code> entirely.</p>
+
+<p>The dispatch carries four candidate colours, not two: a spot colour and three rungs of a ladder. The ladder is climbed by <code>BASE_CREAM</code>:</p>
+
+<table>
+  <thead>
+    <tr><th><code>BASE_CREAM</code></th><th>Takes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&gt; 0.66</code></td><td>The lightest rung</td></tr>
+    <tr><td><code>0.33 .. 0.66</code></td><td>The middle rung</td></tr>
+    <tr><td>otherwise</td><td>The darkest rung</td></tr>
+  </tbody>
+</table>
+
+<p>Unset candidates hold a sentinel, opaque black, and are filled in from their neighbour afterwards: <code>if (mid == sentinel) mid = dark</code>, then <code>if (light == sentinel) light = mid</code>. Without that fixup, a default brown horse renders black.</p>
+
+<h3 id="s7-2">7.2 Cream and the Ladder</h3>
+
+<p>The three rungs are the base colour, a middle shade, and a light shade. <code>BASE_CREAM</code> selects which rung becomes the base. The other two rungs are used by the pattern system and by parts that need a lighter or darker shade.</p>
+
+<p>The ladder is one of the few places where a gene's value is a threshold rather than a multiplier. The thresholds at 0.33 and 0.66 divide the gene's range into three bands, and the band determines which rung is used.</p>
+
+<h3 id="s7-3">7.3 White and Lethal White</h3>
+
+<p><code>WHITE</code> forces the base colour to a hard-coded <code>#dcdcdc</code>, which is not a palette entry. When <code>WHITE_IS_LETHAL</code> is also set, the spot and alternate colours are washed out to the same value. The skin colour and the fixed colours (hoof, teeth, eye) are unchanged.</p>
+
+<p>The effect is purely a slot overwrite with no geometric side effect. The pixel counts are byte-identical between <code>WHITE = 0</code> and <code>WHITE = 1</code> apart from the colour itself.</p>
+
+<h3 id="s7-4">7.4 Skin Hue</h3>
+
+<p>Two genes form a 4-by-4 palette index:</p>
+
+<pre><code>skin_hue_index = allele(G_SKIN_HUE) + 4 * allele(G_SKIN_HUE2)</code></pre>
+
+<p>Separate low- and high-allele indices are calculated. The genome hash's low bit selects which one becomes the final skin colour. This is the mechanism behind the observation that skin is prone to random per-horse differences: two creatures with the same skin hue genes can have different skin colours if their genome hashes differ in the low bit.</p>
+
+<h3 id="s7-5">7.5 Swaps and Overrides</h3>
+
+<p>Colour processing supports several swaps and overrides:</p>
+
+<ul>
+  <li><strong><code>SWAP_BASE_SPOT</code></strong> exchanges the base and spot colours.</li>
+  <li><strong><code>SWAP_ALT_SPOT</code></strong> exchanges the alternate and spot colours.</li>
+  <li><strong><code>BASE_BLACK</code></strong> swaps base and alternate for every part except the torso, which keeps the pre-swap base.</li>
+  <li><strong><code>AGOUTI</code></strong> restricts the black to the extremities when <code>BASE_BLACK</code> is also set.</li>
+  <li><strong><code>BELLY_ALT</code></strong> recolours the upper limb to slot 2 or slot 1, depending on its value.</li>
+  <li><strong><code>TAIL_ALT</code></strong> writes the tail's slot directly to 1 or 2.</li>
+  <li><strong><code>FOOT_IS_HOOF</code></strong> sets the foot's slot to 4.</li>
+  <li><strong><code>SKIN_HEAD</code></strong> sets the head and ear slots to 3, and at value 2 also the neck and the pattern remap.</li>
+  <li><strong><code>SKIN_HANDS</code></strong> sets the hand's slot to 3, and at value 2 also the arm, leg, tail, and foot slots.</li>
+</ul>
+
+<p>These overrides run in a fixed order, and later genes overwrite earlier ones. The order is load-bearing: a gene that writes slot 2 may be overwritten by a later gene that writes slot 3, and the final colour depends on which gene ran last.</p>
+
+<h3 id="s7-6">7.6 Per-Part Slots</h3>
+
+<p>A part's colour is a slot index, not a colour role. Slots are resolved at the end, after all the swaps and overrides have run. This matters because swaps and <code>BASE_BLACK</code> move roles between slots: slot 2 is the black on one genome and the yellow on another. A tool that translates "slot 2" into a role name once, up front, silently picks the wrong one.</p>
+
+<p>Three genes bend the slot index. <code>RACCOON_EYE</code> and <code>EAR_COMP</code> share a 4-by-3 remap. <code>TAIL_ALT</code> does not use the remap; it writes the tail's slot directly. <code>BASE_BLACK</code> puts the tail on slot 2 with or without <code>AGOUTI</code>.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 8 ======================== -->
+
+<h2 id="ch8">Chapter 8: Pattern Genes</h2>
+
+<p>The pattern genes determine the coat's pattern: stripes, spots, perlin noise, and the belly band. The pattern is generated by a dedicated function that fills a grid of slot indices, one cell at a time, and the grid is then painted onto the torso.</p>
+
+<h3 id="s8-1">8.1 The Pattern Fields</h3>
+
+<p>The pattern fields are read from a small set of genes:</p>
+
+<pre><code>pat_split       = GetGeneFloat(G_PAT_SPLIT)
+pat_belly       = GetGeneFloat(G_PAT_BELLY)
+gene193_any     = GetGeneInt(G_BELLY_ALT) != 0
+pat_stripe      = GetGeneFloat(G_PAT_STRIPE)
+pat_spot        = GetGeneFloat(G_PAT_SPOT)
+pat_perlin      = GetGeneFloat(G_PAT_PERLIN)
+pat_perlin2     = GetGeneFloat(G_PAT_PERLIN2)
+pat_perlin_size = int(GetGeneFloat(G_PAT_PERLIN_SIZE))</code></pre>
+
+<p>Each field contributes to one of four scores, and the cell's slot is the index of the highest score.</p>
+
+<h3 id="s8-2">8.2 The Grid</h3>
+
+<p>The grid's dimensions are derived from the body's size and aspect ratio:</p>
+
+<pre><code>cols = trunc( sqrt(ASPECT * SIZE) * 12 )
+rows = max( 1, trunc( cols / body_aspect + 0.5 ) )</code></pre>
+
+<p>Because <code>body_aspect</code> is exactly <code>bodyWidth / bodyHeight</code>, dividing by it makes the cells roughly square whatever the body's shape. A normal horse gets a 16-by-9 grid; an alligator gets a 16-by-3 grid.</p>
+
+<h3 id="s8-3">8.3 The Generator</h3>
+
+<p>The generator fills the grid by computing four scores for each cell and taking the index of the highest:</p>
+
+<pre><code>s[0] = 0.5                                              // the torso's own colour
+s[1] = perlin(px, py, grad1) * PAT_PERLIN  + (stripe - spot)
+s[2] = perlin(px, py, grad2) * PAT_PERLIN2 + x * PAT_SPLIT / cols
+s[3] = 0.0                                              // never wins
+
+stripe = PAT_STRIPE if (x % 2 == 0) else 0
+spot   = PAT_SPOT   if (y % 2 == 0) else 0
+belly  = 10.0 if PAT_BELLY <= y / rows else 0.0
+s[ BELLY_ALT ? 2 : 1 ] = max(belly, s[ BELLY_ALT ? 2 : 1 ])
+
+cell = argmax(s)</code></pre>
+
+<p>Three consequences fall out of this. First, <code>PAT_SPOT</code> needs <code>PAT_STRIPE</code>, because they share one score and spot enters it negatively; alone, <code>-PAT_SPOT</code> can never beat the 0.5 baseline. Second, <code>PAT_SPLIT</code> at 1.0 covers 43% of the grid, not half, because the term beats 0.5 only when <code>x / cols &gt; 0.5</code>. Third, <code>PAT_BELLY</code> is a hard override, not a blend: 10.0 swamps every other score, so the belly band is solid.</p>
+
+<h3 id="s8-4">8.4 The Noise Function</h3>
+
+<p>The noise is a textbook 2D Perlin with random unit gradients, except that the interpolator is a plain linear interpolation, not the usual <code>6t⁵ - 15t⁴ + 10t³</code> fade. That is what produces the faceted, blocky look of the coat.</p>
+
+<p>The lattice size is:</p>
+
+<pre><code>gw = trunc(cols / psize) + 3
+gh = trunc(rows / psize) + 3
+psize = max(1, trunc(PAT_PERLIN_SIZE))</code></pre>
+
+<p>Two independent gradient fields are generated, one for <code>PAT_PERLIN</code> and one for <code>PAT_PERLIN2</code>, interleaved as <code>grad1[i], grad2[i], grad1[i+1], ...</code>. Sampling is at <code>x/psize + offX</code>, <code>y/psize + offY</code>, where the two offsets are the first two random draws.</p>
+
+<p>The result is offset by <code>+0.5</code>, so comparing against the 0.5 baseline means "noise above zero". A guard clamps the result to 0 if either intermediate falls outside ±10; it effectively never fires.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 9 ======================== -->
+
+<h2 id="ch9">Chapter 9: Allele-Level Rules</h2>
+
+<p>Most genes are read through the blended value. A small number of rules read one of the two sorted allele arrays instead, and those rules behave differently from the blend. This chapter describes the arrays, the six tests that read them, and the two genes whose effects are entirely allele-driven.</p>
+
+<h3 id="s9-1">9.1 The Dominant and Recessive Arrays</h3>
+
+<p>Immediately after copying the genome, the decoder builds two derived arrays:</p>
+
+<pre><code>dominant[i]  = min(strandA[i], strandB[i])
+recessive[i] = max(strandA[i], strandB[i])</code></pre>
+
+<p>The names are slightly counter-intuitive: the <em>dominant</em> allele is the one with the lower index, and the <em>recessive</em> allele is the one with the higher index. The loop is a pair of conditional moves off a single comparison, so the two arrays are genuinely <code>min</code> and <code>max</code>, gene by gene.</p>
+
+<h3 id="s9-2">9.2 The Six Allele Tests</h3>
+
+<p>There are exactly six tests in the decoder that read an allele rather than a value:</p>
+
+<table>
+  <thead>
+    <tr><th>Array</th><th>Gene</th><th>Effect</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Recessive</td><td><code>OSTO_SIZE</code></td><td>Scalloped spikes instead of triangles</td></tr>
+    <tr><td>Dominant</td><td><code>OSTO_SIZE</code></td><td>Forces <code>OSTODERM</code> to 2</td></tr>
+    <tr><td>Recessive</td><td><code>CHEST_SMALL</code></td><td>The sloped chest</td></tr>
+    <tr><td>Dominant</td><td><code>EYE_HUE</code></td><td>Eye styling</td></tr>
+    <tr><td>Recessive</td><td><code>AGOUTI</code></td><td>The ear's slot inside the AGOUTI branch</td></tr>
+    <tr><td>Dominant</td><td>Gene 209</td><td>Behaviour, not appearance</td></tr>
+  </tbody>
+</table>
+
+<p>The predicate "recessive == 3" means "the higher allele is 3". The predicate "dominant == 3" means "both alleles are 3", because the dominant array holds the smaller of the two and it equals 3 only when both are 3. The two are not mirrors of each other, and a rule that reads one cannot be replaced by a rule that reads the other.</p>
+
+<h3 id="s9-3">9.3 OSTO_SIZE</h3>
+
+<p><code>OSTO_SIZE</code> is the clearest example of an allele-driven gene. Its two tests do different things:</p>
+
+<pre><code>if (recessive[OSTO_SIZE] == 3)  ostoderm_style = scalloped;
+if (dominant[OSTO_SIZE] == 3)   OSTODERM = 2;</code></pre>
+
+<p>The first test makes the ostoderm's spikes scalloped rather than triangular. The second test forces <code>OSTODERM</code> to 2, which is the single big spike, even when <code>OSTODERM</code> itself is 0. The value written is a register left over from an earlier gene read; it happens to hold 2.</p>
+
+<p>The practical consequence is that a creature carrying allele index 3 on both strands grows the single big spike even with <code>OSTODERM</code> at 0. This is not visible in the blended value, and a tool that reads <code>OSTO_SIZE</code> through the accessors will not see it.</p>
+
+<h3 id="s9-4">9.4 CHEST_SMALL and the Sloped Chest</h3>
+
+<p><code>CHEST_SMALL</code>'s recessive test enables the sloped chest:</p>
+
+<pre><code>back = (recessive[CHEST_SMALL] == 3)
+     ? min(bodyWidth - torso2Width, 0.25 * bodyMinDim)
+     : 0;</code></pre>
+
+<p>The cap is the room left of the second torso, which is the whole body only when there isn't one. On a centaur, the chamfer is capped by the room in front of the main torso, not by the whole body. The sloped chest itself is a chamfer across the front-top corner, drawn as a triangle, with the strip behind it painted flat in slot 0.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 10 ======================== -->
+
+<h2 id="ch10">Chapter 10: Feature Flags and Trait Genes</h2>
+
+<p>The feature flags are a bitmask that records binary traits derived from the genome. They are not genes themselves; they are computed from genes during decoding and stored in the phenotype. The trait genes are the behavioural, health, and ageing genes that produce those flags.</p>
+
+<h3 id="s10-1">10.1 The Feature Bitmask</h3>
+
+<p>The phenotype contains a 32-bit feature bitmask. Each bit corresponds to a condition:</p>
+
+<table>
+  <thead>
+    <tr><th>Bit</th><th>Condition</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x00000001</code></td><td>High intellect, or antlers combined with a sufficiently large hat</td></tr>
+    <tr><td><code>0x00000004</code></td><td>Brain-spastic allele contains 1</td></tr>
+    <tr><td><code>0x00000008</code></td><td>Brain-spastic allele contains 2</td></tr>
+    <tr><td><code>0x00000020</code></td><td>Limp equals 1</td></tr>
+    <tr><td><code>0x00000040</code></td><td>Lethal-white condition is active</td></tr>
+    <tr><td><code>0x00000080</code></td><td>Narcolepsy equals 1</td></tr>
+    <tr><td><code>0x00000100</code></td><td>Spinal locomotion equals 1</td></tr>
+    <tr><td><code>0x00001000</code></td><td>Body bone scale exceeds 1.1</td></tr>
+    <tr><td><code>0x00002000</code></td><td>Eye hue equals 198</td></tr>
+    <tr><td><code>0x00004000</code></td><td>Raccoon-eye trait equals 1</td></tr>
+    <tr><td><code>0x00008000</code></td><td>Nose hue equals 1, or nose marking is larger than 0.14</td></tr>
+    <tr><td><code>0x00010000</code></td><td>Neck-joint angle is at most −150 degrees</td></tr>
+    <tr><td><code>0x00020000</code></td><td>Ear size field is below 0.17</td></tr>
+    <tr><td><code>0x00040000</code></td><td>Base black is active</td></tr>
+    <tr><td><code>0x00080000</code></td><td>Eyebrow size exceeds 0.07</td></tr>
+    <tr><td><code>0x00200000</code></td><td>Secondary Perlin pattern exceeds 0.1</td></tr>
+    <tr><td><code>0x00400000</code></td><td>Head is sufficiently shrunk, or jaw/nose field is at least 0.05</td></tr>
+    <tr><td><code>0x00800000</code></td><td>Mouth style is 3 and rampage is nonzero</td></tr>
+    <tr><td><code>0x01000000</code></td><td>Tail wag equals 1</td></tr>
+  </tbody>
+</table>
+
+<p>The flags are computed during decoding and stored in the phenotype. They are consumed by the physics and behaviour systems, not by the static renderer, with a few exceptions — <code>0x00040000</code> (base black) and <code>0x00004000</code> (raccoon eye) are used by the colour system.</p>
+
+<h3 id="s10-2">10.2 Behavioural, Health, and Ageing Genes</h3>
+
+<p>The trait genes cover behaviour, health, and ageing. They include:</p>
+
+<ul>
+  <li><strong><code>G_RAMPAGE</code></strong>, which interacts with <code>TEETH_SHAPE</code> and <code>HAS_MOUTH</code> to produce a feature flag.</li>
+  <li><strong><code>G_SPINAL_LOCO</code></strong>, which affects locomotion and, at value 2, doubles the second leg angle and halves the body-area ratio.</li>
+  <li><strong><code>G_BRAIN_SPASTIC</code></strong>, whose alleles produce feature flags for values 1 and 2.</li>
+  <li><strong><code>G_HIGH_INTELLECT</code></strong>, which contributes to the high-intellect flag.</li>
+  <li><strong><code>G_OMNIVORE</code></strong>, which sets the omnivore flag in the phenotype.</li>
+  <li><strong><code>G_LITTER_SIZE</code></strong>, which gives the creature's litter size.</li>
+  <li><strong><code>G_OLD_AGE</code></strong>, which gives an ageing modifier: <code>old_age_plus_9 = GetGeneInt(G_OLD_AGE) + 9</code>.</li>
+  <li><strong><code>G_LIMP</code></strong>, <code>G_NARCOLEPSY</code>, <code>G_FLU_IMMUNITY</code>, and <code>G_TAIL_WAG</code>, which produce their respective flags.</li>
+  <li><strong><code>G_STIFF_JOINTS</code></strong>, which scales the final minimum and maximum ranges for all major joints.</li>
+</ul>
+
+<p>These genes only matter once physics runs. For a still-frame renderer, they are decoded and stored but not consumed.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 11 ======================== -->
+
+<h2 id="ch11">Chapter 11: Locomotion Genes</h2>
+
+<p>The locomotion genes control how a creature moves. They do not affect its static appearance — a creature rendered in its build pose looks the same whether its locomotion genes are active or not — but once the physics simulation runs, they determine the gait, the timing, and the coordination between limbs. The locomotion genes occupy indices <code>0xDB</code> through <code>0xEF</code>, a contiguous block of 21 genes at the end of the canonical order.</p>
+
+<p>This chapter describes the signal/react/event architecture that the locomotion genes implement, the five fields each node carries, the signal table that coordinates them, and the specific genes that populate those fields.</p>
+
+<h3 id="s11-1">11.1 The Signal/React/Event Architecture</h3>
+
+<p>The locomotion system is a publish-subscribe network. Each node in the creature's skeleton can <em>emit</em> a signal on one of four channels, and each node can <em>listen</em> for signals on one of those channels. When a node hears the signal it is listening for, it switches its motor direction. There is no central gait controller; the gait emerges from the local interactions between nodes.</p>
+
+<p>The architecture has three parts:</p>
+
+<ul>
+  <li><strong>Signal groups.</strong> Each node that participates in locomotion is assigned an emit channel, numbered 1 through 4. When the node's joint reaches a limit, touches the ground, or a timer expires, it broadcasts on its channel.</li>
+  <li><strong>Reactions.</strong> Each node can listen to one channel for fore-to-back motion and one channel for back-to-fore motion. The fore-to-back reaction is what makes a limb swing forward when another limb completes its backward stroke; the back-to-fore reaction is the reverse.</li>
+  <li><strong>Events.</strong> A reaction is not enough on its own; the node must also specify <em>which</em> event on that channel triggers it. An event is one of four conditions: the joint hitting its back limit, the joint hitting its fore limit, the body touching the ground, or a timer expiring.</li>
+</ul>
+
+<p>The result is a network in which each limb can be made to respond to any combination of conditions on any channel. The default gaits — walking, trotting, galloping — are produced by particular assignments of these five fields across the creature's nodes.</p>
+
+<h3 id="s11-2">11.2 The Five Locomotion Fields</h3>
+
+<p>Each node has five locomotion fields:</p>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Role</th><th>Example</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>signal_group</code></td><td>EMIT channel (1–4) — this node broadcasts to this channel</td><td>Back leg emits on channel 1</td></tr>
+    <tr><td><code>ftob_react</code></td><td>RECEIVE channel for fore-to-back motion</td><td>"Listen to channel 2"</td></tr>
+    <tr><td><code>ftob_event</code></td><td>TRIGGER condition for ftob (1=back limit, 2=fore limit, 3=touch, 4=timed)</td><td>"When that channel fires event 2"</td></tr>
+    <tr><td><code>btof_react</code></td><td>RECEIVE channel for back-to-fore motion</td><td>"Listen to channel 1"</td></tr>
+    <tr><td><code>btof_event</code></td><td>TRIGGER condition for btof</td><td>"When that channel fires event 1"</td></tr>
+  </tbody>
+</table>
+
+<p>The signal group is the channel a node emits on. The react fields are the channels a node listens to. The event fields are the conditions that must be true on the listened channel for the reaction to fire.</p>
+
+<p>Channels are numbered 1 through 4. A node with <code>signal_group = 0</code> does not emit; a node with <code>react = 0</code> does not listen. The default baseline genome assigns the back leg to channel 1 and the front leg to channel 2, producing the alternating gait described in Section 11.7.</p>
+
+<h3 id="s11-3">11.3 The Signal Table</h3>
+
+<p>Each physics tick, a 5-by-5 table is built:</p>
+
+<pre><code>signal_table[channel][event_type] = 0 or 1</code></pre>
+
+<p>The first index is the channel (0–4, with 0 unused). The second index is the event type (0–4, with 0 unused). The table starts all zeros and is filled by the emit pass.</p>
+
+<p>The event types are:</p>
+
+<table>
+  <thead>
+    <tr><th>Event</th><th>Condition</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>The joint hits its back limit</td></tr>
+    <tr><td>2</td><td>The joint hits its fore limit</td></tr>
+    <tr><td>3</td><td>The body touches the ground</td></tr>
+    <tr><td>4</td><td>A timer expires (60 frames elapsed)</td></tr>
+  </tbody>
+</table>
+
+<p>The table is rebuilt every tick. A signal emitted on one tick does not carry over to the next; the network is stateless between ticks, and the state that produces a gait lives in the joints' positions and the motors' directions.</p>
+
+<h3 id="s11-4">11.4 The Emit Pass</h3>
+
+<p>The emit pass iterates every node with a non-zero <code>signal_group</code>. For each such node, it checks the node's joint against the four event conditions and sets the corresponding table entries:</p>
+
+<pre><code>if joint hits back limit:
+    signal_table[signal_group][1] = 1
+if joint hits fore limit:
+    signal_table[signal_group][2] = 1
+if body touches ground:
+    signal_table[signal_group][3] = 1
+if 60 frames elapsed:
+    signal_table[signal_group][4] = 1</code></pre>
+
+<p>The emit pass does not care which node emits; it only cares about the channel. Two nodes emitting on the same channel produce the same table entries, and a listener on that channel cannot distinguish between them. This is what allows a single channel to coordinate multiple limbs: all the limbs that share a channel behave as one emitter.</p>
+
+<h3 id="s11-5">11.5 The Consume Pass</h3>
+
+<p>The consume pass iterates every node with a non-zero <code>react</code> field. For each such node, it checks the two reaction channels against their event conditions:</p>
+
+<pre><code>if signal_table[ftob_react][ftob_event] == 1:
+    switch motor to ftob direction
+if signal_table[btof_react][btof_event] == 1:
+    switch motor to btof direction</code></pre>
+
+<p>A node can have both a fore-to-back reaction and a back-to-fore reaction. If both conditions are true on the same tick, the second check overrides the first, because it runs after it. In practice, a well-formed gait avoids this by ensuring that the two conditions cannot both be true at once.</p>
+
+<p>The consume pass is what turns the signal table into motion. A node that hears its trigger switches its motor direction, and the joint begins to move the other way. The next tick, the joint may hit its limit, which emits a new signal, which triggers another node, and the cycle continues.</p>
+
+<h3 id="s11-6">11.6 The Locomotion Gene Groups</h3>
+
+<p>The locomotion genes are organised into four groups of five, one group for each limb type, plus a final synchronisation gene:</p>
+
+<table>
+  <thead>
+    <tr><th>Group</th><th>Genes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Leg</td><td><code>L_LEG_SIGNAL</code>, <code>L_LEG_FTOB_REACT</code>, <code>L_LEG_FTOB_EVENT</code>, <code>L_LEG_BTOF_REACT</code>, <code>L_LEG_BTOF_EVENT</code></td></tr>
+    <tr><td>Arm</td><td><code>L_ARM_SIGNAL</code>, <code>L_ARM_FTOB_REACT</code>, <code>L_ARM_FTOB_EVENT</code>, <code>L_ARM_BTOF_REACT</code>, <code>L_ARM_BTOF_EVENT</code></td></tr>
+    <tr><td>Tail</td><td><code>L_TAIL_SIGNAL</code>, <code>L_TAIL_FTOB_REACT</code>, <code>L_TAIL_FTOB_EVENT</code>, <code>L_TAIL_BTOF_REACT</code>, <code>L_TAIL_BTOF_EVENT</code></td></tr>
+    <tr><td>Neck</td><td><code>L_NECK_SIGNAL</code>, <code>L_NECK_FTOB_REACT</code>, <code>L_NECK_FTOB_EVENT</code>, <code>L_NECK_BTOF_REACT</code>, <code>L_NECK_BTOF_EVENT</code></td></tr>
+    <tr><td>Synchronisation</td><td><code>L_LOCO_SYNC</code></td></tr>
+  </tbody>
+</table>
+
+<p>Each group's genes populate the five fields on the nodes of that limb type. The signal gene gives the node's emit channel; the four react/event pairs give its listen channels and trigger conditions.</p>
+
+<p>The genes are read through the integer accessor, because their values are small enumerations. A gene's allele values are the channel numbers and event types it can select; a value of 0 means "do nothing" for that field.</p>
+
+<h3 id="s11-7">11.7 An Example Gait</h3>
+
+<p>The default alternating gait is produced by assigning the back leg to channel 1 and the front leg to channel 2, with each limb listening to the other:</p>
+
+<pre><code>Back leg:
+  signal_group=1          → emits on channel 1
+  ftob_react=2            → listens to channel 2
+  ftob_event=2            → when front leg hits its fore limit
+  btof_react=2            → listens to channel 2
+  btof_event=1            → when front leg hits its back limit
+
+Front leg:
+  signal_group=2          → emits on channel 2
+  ftob_react=1            → listens to channel 1
+  ftob_event=2            → when back leg hits its fore limit
+  btof_react=1            → listens to channel 1
+  btof_event=1            → when back leg hits its back limit</code></pre>
+
+<p>Trace one cycle:</p>
+
+<ol>
+  <li>The back leg's joint hits its fore limit. It emits event 2 on channel 1.</li>
+  <li>The front leg is listening to channel 1 for event 2. It switches its motor to the fore-to-back direction and begins to swing backward.</li>
+  <li>The front leg's joint hits its back limit. It emits event 1 on channel 2.</li>
+  <li>The back leg is listening to channel 2 for event 1. It switches its motor to the back-to-fore direction and begins to swing forward.</li>
+  <li>The back leg's joint hits its fore limit again, and the cycle repeats.</li>
+</ol>
+
+<p>The result is an alternating gait in which the two legs take turns. The gait is not programmed; it is a fixed point of the signal network. The genes set the channels and the events, and the physics produces the motion.</p>
+
+<p>More complex gaits — trotting, galloping, bounding — are produced by different assignments. A trot pairs diagonal limbs on the same channel; a gallop puts the back legs on one channel and the front legs on another with different timing events. The architecture does not distinguish between these gaits; it merely provides the signalling primitives, and the gene values determine which gait emerges.</p>
+
+<h3 id="s11-8">11.8 LOCO_SYNC</h3>
+
+<p><code>LOCO_SYNC</code> is the final gene in the canonical order, at index <code>0xEF</code>. It is a synchronisation gene that coordinates the locomotion system as a whole. Its exact effect is a global modifier on the timing of the signal network, and it is the only locomotion gene that does not belong to a specific limb group.</p>
+
+<p><code>LOCO_SYNC</code> is read through the integer accessor, and its allele values select from a small set of synchronisation modes. A value of 0 leaves the network unsynchronised; higher values introduce a global timing constraint that aligns the limbs' cycles.</p>
+
+<p>The gene is the last one read by the decoder, which means it has access to every other gene's value through the phenotype. A tool that reads it independently of the rest of the locomotion block will miss its interactions with the signal and react genes.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 12 ======================== -->
+
+<h2 id="ch12">Chapter 12: The Genome Hash</h2>
+
+<p>Every creature has a genome hash: a 32-bit value computed from the genome's bytes. The hash is used to seed the random number generator, which in turn drives the pattern generator and any other random decisions. It is also the source of the low bit that selects the skin hue.</p>
+
+<h3 id="s12-1">12.1 The Hash Function</h3>
+
+<p>The hash is calculated over the genome bytes beginning at index 3. It runs two passes of 40 iterations, processing six bytes per iteration:</p>
+
+<pre><code>hash = 0
+ptr = &amp;genome[3]
+
+for pass in 0..1:
+    for i in 0..39:
+        a = 1139564289 * (ptr[-2] + 1)
+          + 65599 * (ptr[1] + 1
+          + 65599 * (ptr[0] + 1
+          + 65599 * (ptr[-1] + 1)))
+        b = ptr[-3] + 1
+        c = ptr[2]
+        ptr += 6
+        hash = c + 1 + 372007231 * b + a - 701829503 * hash</code></pre>
+
+<p>The result is stored as a 32-bit unsigned integer. Its low bit selects the low or high skin-hue index.</p>
+
+<blockquote>
+  <p><strong>A second copy of this hash exists elsewhere, with an extra instruction that clears bit 28.</strong> That copy is not the genome hash. Applying the bit-clearing to the genome hash corrupts the result for roughly half of all genomes.</p>
+</blockquote>
+
+<h3 id="s12-2">12.2 Seeding and Per-Horse Randomness</h3>
+
+<p>The genome hash seeds a global xorshift64 random number generator. The seed is the hash sign-extended to 64 bits; if the result is zero, the state is set to 1 instead. A separate saved-seed value allows the generator to be reset.</p>
+
+<pre><code>SeedRNG(s)  // s is the genome hash sign-extended to 64 bits
+    saved = s
+    state = (s == 0) ? 1 : s
+
+ResetRNG()
+    state = saved
+
+next()
+    x ^= x &lt;&lt; 13
+    x ^= x &gt;&gt; 7
+    x ^= x &lt;&lt; 17
+    state = x
+
+rand01()
+    return (next() &amp; 0xFFFF) / 65536
+
+rand(lo, hi)
+    return rand01() * (hi - lo) + lo</code></pre>
+
+<p>The random number generator is a single shared stream. The coat pattern is the first thing to draw from it — the seed is set at the top of the part builder and nothing consumes the generator before the torso is built. Anything else random about a creature, such as the angle jitter on antlers and hats, draws from the same stream afterwards. <strong>Consumption order is part of the specification:</strong> reproducing any later consumer requires reproducing every earlier one.</p>
+
+<p>Two creatures with the same genome have the same hash, the same seed, and the same random sequence. Two creatures with different genomes have different hashes, different seeds, and different random sequences. The hash is the bridge between the genome and every random decision the creature makes.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 13 ======================== -->
+
+<h2 id="ch13">Chapter 13: From Genome to Phenotype</h2>
+
+<p>The phenotype is the decoded result of the genome: a structure containing all the blended and derived values that the rest of the game consumes. This chapter describes the flow from raw genome to phenotype and the layout of the phenotype itself.</p>
+
+<h3 id="s13-1">13.1 The Processing Flow</h3>
+
+<p>The processing flow is:</p>
+
+<pre><code>Raw genome: 480 bytes
+  dominant strand at entity + 0x2B8
+  recessive strand at entity + 0x3A8
+        |
+        v
+Copy both strands into a local 480-byte genome buffer
+        |
+        v
+Normalize each byte to an allele index in 0..3
+        |
+        v
+Sort each gene pair
+  high alleles -> scratch.alleles.sorted[0..239]
+  low alleles  -> scratch.alleles.sorted[240..479]
+        |
+        v
+Validate GENE_PROPS[gene].gene_id
+        |
+        v
+Blend alleles with GetGeneFloat or GetGeneInt
+        |
+        v
+Calculate body, limbs, joints, head, adornments,
+colours, patterns, feature flags, ratios, and hash
+        |
+        v
+HorseGenePhenotype</code></pre>
+
+<p>The decoder reads every gene in canonical order, from <code>G_SIZE</code> through <code>G_LOCO_SYNC</code>. Some genes are read more than once; some are read through the sorted arrays rather than the accessors. The order is fixed, and a few genes depend on registers left over from earlier reads.</p>
+
+<h3 id="s13-2">13.2 Reading the Phenotype</h3>
+
+<p>The phenotype is a large structure. Confirmed offsets include:</p>
+
+<table>
+  <thead>
+    <tr><th>Offset</th><th>Field</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>+0x34</code>, <code>+0x80</code>, <code>+0xCC</code>, <code>+0x114</code>, <code>+0x15C</code>, <code>+0x1A4</code></td><td>Joint records, 0x48 bytes each</td></tr>
+    <tr><td><code>+0x38C</code> / <code>+0x390</code></td><td>Head width / height</td></tr>
+    <tr><td><code>+0x428</code> / <code>+0x42C</code></td><td><code>ANTLER_X</code> / <code>HAT_RAKE</code></td></tr>
+    <tr><td><code>+0x430 … +0x487</code></td><td>Antler adornment record</td></tr>
+    <tr><td><code>+0x488 … +0x4DF</code></td><td>Hat adornment record</td></tr>
+    <tr><td><code>+0x4E0</code></td><td>Slot-remap index for the pattern grid</td></tr>
+    <tr><td><code>+0x4E4 … +0x530</code></td><td>Colour array, 20 ARGB values</td></tr>
+    <tr><td><code>+0x508</code></td><td>Resolved nose colour</td></tr>
+    <tr><td><code>+0x534 … +0x558</code></td><td>Pattern block</td></tr>
+    <tr><td><code>+0x55C</code> / <code>+0x560</code></td><td>Derived pixel size / scaled</td></tr>
+    <tr><td><code>+0x580</code></td><td>Genome hash</td></tr>
+  </tbody>
+</table>
+
+<p>The joint records are five in number, at <code>+0x34</code> (tail), <code>+0x80</code> (leg), <code>+0xCC</code> (arm), <code>+0x114</code> and <code>+0x15C</code> (upper arms), and <code>+0x1A4</code> (neck). Each is 0x48 bytes and holds the joint's existence flag, position, angle, tag, type, and range.</p>
+
+<p>The colour array at <code>+0x4E4</code> holds 20 ARGB values. The first four are the base, spot, alternate, and skin colours. The rest are fixed colours and overrides used by specific parts.</p>
+
+<p>The pattern block at <code>+0x534</code> holds the pattern fields, and the grid itself is allocated separately by the body builder.</p>
+
+<p>The locomotion fields are populated from the locomotion genes and are consumed by the physics step, not by the static renderer. A still-frame renderer can ignore them entirely.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 14 ======================== -->
+
+<h2 id="ch14">Chapter 14: If You Are Writing an Editor</h2>
+
+<p>This chapter collects the rules that matter when writing a tool that reads, writes, or renders a Horsey genome. Each one is a consequence of something in the preceding chapters, but each is worth stating on its own because each has been learned the hard way.</p>
+
+<h3 id="s14-1">14.1 Ten Imperatives</h3>
+
+<ol>
+  <li><strong>Read the <code>n</code> attribute.</strong> Each gene has its own nucleotide ordering. Do not assume that <code>A</code> means allele 0 for every gene. (Section 2.5.)</li>
+  <li><strong>Use the right accessor.</strong> The floating-point accessor and the integer accessor behave differently on fractional values. A gene read through the integer accessor is always 0 if its scale divisor is 100. (Section 3.4.)</li>
+  <li><strong>Check the allele arrays.</strong> Six rules test the sorted dominant and recessive arrays rather than the blended value. A gene that appears to do nothing through the accessors may be read through an allele array. (Section 9.2.)</li>
+  <li><strong>Do not assume a gene is independent.</strong> <code>HAS_ANTLERS</code> gates the hat. <code>PAT_SPOT</code> needs <code>PAT_STRIPE</code>. <code>AGOUTI</code> needs <code>BASE_BLACK</code>. Many genes only express when another is set. (Sections 6.2, 8.3, 7.5.)</li>
+  <li><strong>Respect the order of overrides.</strong> Colour slots are written by several genes in a fixed order, and later genes overwrite earlier ones. The final colour depends on which gene ran last. (Section 7.5.)</li>
+  <li><strong>Carry slots as numbers, not roles.</strong> A part's colour is a slot index, and swaps and <code>BASE_BLACK</code> move roles between slots. Translating a slot to a role name up front picks the wrong one on some genomes. (Section 7.6.)</li>
+  <li><strong>Reproduce the RNG order.</strong> The genome hash seeds a single shared random stream, and the coat pattern draws from it first. Reproducing any later consumer requires reproducing every earlier one. (Section 12.2.)</li>
+  <li><strong>Expect stale registers.</strong> Some genes are read through registers left over from earlier reads, and the result is not what the gene's value would suggest. <code>OSTO_SIZE</code> is the clearest case. (Section 9.3.)</li>
+  <li><strong>Treat fixed addresses as build-specific.</strong> The property table's address, the palette's address, and the decoder's address are all specific to one build of the game. Re-find them if the game updates. (Section 2.6.)</li>
+  <li><strong>Probe to verify, disassemble to derive.</strong> A probe answers "where does the ear sit" in twenty seconds; tracing it through the binary takes hours for the same answer. Conversely, no amount of capturing will reveal that the Perlin interpolator omits the standard fade curve. Use each for what it is good at. (Section 13.1.)</li>
+</ol>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ======================== CHAPTER 15 ======================== -->
+
+<h2 id="ch15">Chapter 15: Conclusion</h2>
+
+<h3 id="s15-1">15.1 Summary of Contributions</h3>
+
+<p>This thesis has described the structure of the Horsey genome and the effects of its genes. Its contributions are:</p>
+
+<ol>
+  <li><strong>A complete account of the genome's storage format.</strong> The 240 genes, the two strands, the 480-byte buffer, the allele normalization, and the sorted dominant and recessive arrays that some rules read instead of the blended value. (Chapter 1.)</li>
+  <li><strong>A complete account of the gene property table.</strong> The <code>genes.xml</code> schema, the blend weight, the scale divisor, the per-allele values, and the nucleotide ordering, together with the runtime table layout. (Chapter 2.)</li>
+  <li><strong>A precise description of the two accessors.</strong> The floating-point blend and the integer blend, their differences, and the traps in each. (Chapter 3.)</li>
+  <li><strong>The canonical gene order and its major groups.</strong> The 240 genes, their index ranges, and the aspects of the creature each group controls. (Chapter 4.)</li>
+  <li><strong>A survey of the structural genes.</strong> Body dimensions, posture, legs, arms, feet, hands, tail, neck, and head. (Chapter 5.)</li>
+  <li><strong>A survey of the adornment genes.</strong> The shared antler and hat record, the master switch, and the branching rules. (Chapter 6.)</li>
+  <li><strong>A survey of the colour genes.</strong> Base colour selection, the cream ladder, white and lethal white, skin hue, swaps and overrides, and per-part slots. (Chapter 7.)</li>
+  <li><strong>A survey of the pattern genes.</strong> The pattern fields, the grid, the generator, and the noise function. (Chapter 8.)</li>
+  <li><strong>The allele-level rules.</strong> The sorted arrays, the six tests, and the two genes whose effects are entirely allele-driven. (Chapter 9.)</li>
+  <li><strong>The feature flags and trait genes.</strong> The bitmask and the behavioural, health, and ageing genes that produce it. (Chapter 10.)</li>
+  <li><strong>The locomotion genes.</strong> The signal/react/event architecture, the five fields, the signal table, the four limb groups, and <code>LOCO_SYNC</code>. (Chapter 11.)</li>
+  <li><strong>The genome hash.</strong> The hash function and its role in seeding per-horse randomness. (Chapter 12.)</li>
+  <li><strong>The processing flow.</strong> From raw genome to phenotype, and the layout of the phenotype itself. (Chapter 13.)</li>
+</ol>
+
+<h3 id="s15-2">15.2 Implications</h3>
+
+<p>The genome system is more interconnected than it first appears. A gene is not an independent unit; it is one input to a decoder that reads all 240 genes in a fixed order, and some genes inherit state from earlier reads. A tool that treats genes as independent will be right about most of them and wrong about a few, and the few are the ones that produce the visible differences between creatures.</p>
+
+<p>The distinction between the blended value and the allele arrays is the clearest example. Most genes are read through the accessors, and the accessors produce a weighted average of the two alleles. But six rules read the sorted arrays instead, and those rules see the alleles themselves, not their average. A tool that only implements the accessors will miss those six rules entirely.</p>
+
+<p>The colour system is the second example. A part's colour is a slot index, and the slot is resolved at the end, after all the swaps and overrides have run. A tool that resolves slots early will pick the wrong colour on any genome where a swap or <code>BASE_BLACK</code> moves a role from one slot to another.</p>
+
+<p>The locomotion system is the third. The locomotion genes do not set a gait directly; they set the channels and the events, and the gait emerges from the physics. A tool that reads the locomotion genes in isolation will see channel numbers and event types, not a walk cycle. The walk cycle is a property of the network, not of any single gene.</p>
+
+<h3 id="s15-3">15.3 Future Work</h3>
+
+<ul>
+  <li><strong>The letter sequence of the chromosome tail.</strong> The base for each tile is read from a runtime array populated from in-game state that a still render cannot see. A tool must substitute a fixed sequence. (Chapter 5.)</li>
+  <li><strong>The centaur's second torso.</strong> Its shape is the main torso's aspect ratio inverted, and its height matches the main torso's, but the formula is fitted rather than read. (Chapter 5.)</li>
+  <li><strong>Circle tessellation.</strong> The game's circles are polygons, and coarser than a true circle. The difference is sub-pixel but visible in a pixel-level comparison. (Chapter 5.)</li>
+  <li><strong>The systematic one-pixel height offset.</strong> Across a large sample, a port's silhouette is often exactly one row taller than the game's. The extra row accumulates somewhere in the head-and-neck chain. (Chapter 5.)</li>
+  <li><strong>The antler on a second head.</strong> When a creature carries two heads and no main head, the first head's antler is roughly twice as long as the game's, while the second head's matches exactly. The cause is not yet understood. (Chapter 6.)</li>
+  <li><strong>The eyebox's own clamp.</strong> The game pulls the eyebox up when its bottom would cross the mouth line and its right edge would cross the nose. The condition is located but not yet modelled. (Chapter 5.)</li>
+  <li><strong>The exact effect of LOCO_SYNC.</strong> The gene is the final one in the canonical order and coordinates the locomotion network, but its precise interaction with the four limb groups is not yet fully traced. (Chapter 11.)</li>
+</ul>
+
+<h3 id="s15-4">15.4 Final Remarks</h3>
+
+<p>The Horsey genome is a compact and well-structured system. Its 240 genes are enough to produce an enormous variety of creatures, and its property table makes the genes' effects transparent: each gene's per-allele values are stored in a single table, and the blend between two alleles is a simple weighted average.</p>
+
+<p>The complexity comes not from the genes themselves but from the interactions between them. A colour is not one gene; it is a dispatch on three genes, a ladder climbed by a fourth, a set of swaps and overrides, and a final resolution that depends on the order in which everything ran. A pattern is not one gene; it is four scores computed per cell, with a noise function that is Perlin except for one detail. A head is not one gene; it is a dozen, each with its own preconditions and its own interaction with the others. A gait is not one gene; it is a network of signals and reactions, and the gait emerges from the network.</p>
+
+<p>Understanding the genome means understanding both the parts and the connections. The parts are documented in the property table. The connections are documented in the decoder. This thesis has described both.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ REFERENCES ============================ -->
+<h2 id="refs">References</h2>
+
+<ol>
+  <li><strong>Property table.</strong> <code>genes.xml</code>, the authoritative 240-gene property table. Each entry gives a gene's name, blend weight, scale divisor, per-allele values, and nucleotide ordering.</li>
+  <li><strong>Genome format.</strong> The two-strand storage at <code>entity + 0x2B8</code> and <code>entity + 0x3A8</code>, the 480-byte buffer, the allele normalization, and the sorted dominant and recessive arrays.</li>
+  <li><strong>Gene accessors.</strong> The floating-point and integer accessors, their blend formulas, and their truncation behaviour.</li>
+  <li><strong>Canonical gene order.</strong> The 240 genes indexed from <code>0x00</code> through <code>0xEF</code>, and the chromosome map that gives each gene's position on each of the 20 chromosomes.</li>
+  <li><strong>Structural genes.</strong> The body, limb, tail, neck, and head gene groups and their derived calculations.</li>
+  <li><strong>Adornment genes.</strong> The shared antler and hat record, the <code>HAS_ANTLERS</code> master switch, and the branching rules.</li>
+  <li><strong>Colour genes.</strong> The base colour dispatch, the cream ladder, white and lethal white, skin hue, swaps and overrides, and per-part slots.</li>
+  <li><strong>Pattern genes.</strong> The four-score generator, the grid dimensions, and the Perlin noise function with its plain-linear interpolator.</li>
+  <li><strong>Allele-level rules.</strong> The sorted arrays and the six tests that read them, including <code>OSTO_SIZE</code> and <code>CHEST_SMALL</code>.</li>
+  <li><strong>Feature flags.</strong> The 32-bit bitmask and the trait genes that produce it.</li>
+  <li><strong>Locomotion genes.</strong> The signal/react/event architecture, the five fields, the signal table, the four limb groups, and <code>LOCO_SYNC</code>.</li>
+  <li><strong>Genome hash.</strong> The two-pass, forty-iteration hash function and its role in seeding the random number generator.</li>
+</ol>
+
+<p class="dedication">For everyone who looked at a horse and wondered what made it that way.</p>
+
+</div>
+</body>
+</html>

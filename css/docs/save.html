@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Comprehensive Structural Analysis of the Horsey Game Save File Format (save1.dat)</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --muted:#555;
+    --rule:#d8d8d8;
+    --accent:#6b3fa0;
+    --accent-soft:#f3eefb;
+    --code-bg:#f6f6f4;
+    --table-head:#efeaf7;
+    --table-alt:#faf8fd;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    padding:0 1.25rem 6rem;
+    background:#fff;
+    color:var(--ink);
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:17px;
+    line-height:1.62;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  header.title{
+    padding:3.5rem 0 2rem;
+    border-bottom:3px double var(--rule);
+    margin-bottom:2rem;
+  }
+  header.title h1{
+    font-size:2.05rem;
+    line-height:1.2;
+    margin:0 0 .6rem;
+    letter-spacing:-.01em;
+  }
+  header.title .subtitle{
+    font-size:1.05rem;
+    color:var(--muted);
+    font-style:italic;
+    margin:0;
+  }
+  header.title .meta{
+    margin-top:1.4rem;
+    font-size:.85rem;
+    color:var(--muted);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  h2{
+    font-size:1.5rem;
+    margin:3.2rem 0 1rem;
+    padding-bottom:.35rem;
+    border-bottom:2px solid var(--accent);
+    letter-spacing:-.01em;
+  }
+  h3{
+    font-size:1.16rem;
+    margin:2.2rem 0 .7rem;
+    color:#2b2b2b;
+  }
+  h4{
+    font-size:1rem;
+    margin:1.6rem 0 .5rem;
+    color:#333;
+  }
+  p{margin:.75rem 0;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  code,kbd,pre{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    font-size:.86em;
+  }
+  code{background:var(--code-bg);padding:.08em .34em;border-radius:3px;}
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--accent);
+    border-radius:4px;
+    padding:.85rem 1rem;
+    overflow-x:auto;
+    line-height:1.5;
+    margin:1rem 0;
+  }
+  pre code{background:none;padding:0;}
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin:1.1rem 0;
+    font-size:.88rem;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  th,td{
+    border:1px solid var(--rule);
+    padding:.45rem .6rem;
+    text-align:left;
+    vertical-align:top;
+  }
+  th{background:var(--table-head);font-weight:600;}
+  tbody tr:nth-child(even){background:var(--table-alt);}
+  blockquote{
+    margin:1.2rem 0;
+    padding:.7rem 1.1rem;
+    border-left:4px solid var(--accent);
+    background:var(--accent-soft);
+    border-radius:0 4px 4px 0;
+    font-size:.95rem;
+  }
+  blockquote p{margin:.4rem 0;}
+  hr{border:none;border-top:1px solid var(--rule);margin:2.5rem 0;}
+  .toc{
+    background:#fcfbfe;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:1.4rem 1.6rem 1.6rem;
+    margin:0 0 3rem;
+  }
+  .toc h2{
+    margin:0 0 .9rem;
+    border:none;
+    font-size:1.12rem;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:var(--accent);
+    padding:0;
+  }
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:chap;}
+  .toc > ol > li{
+    counter-increment:chap;
+    margin:.7rem 0 .25rem;
+  }
+  .toc > ol > li > a::before{
+    content:counter(chap) ". ";
+    color:var(--accent);
+    font-weight:700;
+  }
+  .toc a{display:inline-block;}
+  .toc .sub{
+    list-style:none;
+    margin:.15rem 0 .5rem 1.5rem;
+    padding:0;
+    font-size:.88rem;
+    color:var(--muted);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .toc .sub li{margin:.1rem 0;}
+  .badge{
+    display:inline-block;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.04em;
+    padding:.08em .45em;
+    border-radius:3px;
+    background:#e8e2f5;
+    color:#4a2c78;
+    vertical-align:.12em;
+    white-space:nowrap;
+  }
+  .badge.re{background:#e2f0e6;color:#25603a;}
+  .badge.der{background:#fdf1dc;color:#7a5310;}
+  .badge.open{background:#fbe4e4;color:#8a2020;}
+  .lead{font-size:1.02rem;}
+  .note{font-size:.9rem;color:var(--muted);}
+  .backtotop{
+    display:block;
+    text-align:right;
+    font-size:.78rem;
+    margin-top:1.4rem;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .dedication{
+    text-align:center;
+    font-style:italic;
+    color:var(--muted);
+    margin:3.5rem 0 0;
+    padding-top:2rem;
+    border-top:1px solid var(--rule);
+  }
+  @media print{
+    body{font-size:11pt;padding:0;}
+    .toc{page-break-after:always;}
+    h2{page-break-after:avoid;}
+    pre,table,blockquote{page-break-inside:avoid;}
+    .backtotop{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="title">
+  <h1>A Comprehensive Structural Analysis of the Horsey Game Save File Format (<code>save1.dat</code>)</h1>
+  <p class="subtitle">A Doctoral Thesis on Binary Serialization, Virtual Dispatch, and Persistence Architecture in Horsey Game</p>
+  <p class="meta">148 corpus files &middot; versions 8&ndash;12 &middot; 142 parse, 142 walk end to end &middot; reference save 440,624 bytes (v12)</p>
+</header>
+
+<nav class="toc" id="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#abstract">Abstract</a></li>
+    <li><a href="#ch1">Introduction</a>
+      <ul class="sub">
+        <li><a href="#s1-1">1.1 Motivation</a></li>
+        <li><a href="#s1-2">1.2 Corpus and Methodology</a></li>
+        <li><a href="#s1-3">1.3 Confidence Key</a></li>
+        <li><a href="#s1-4">1.4 Terminology</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch2">Top-Level Layout and the Header</a>
+      <ul class="sub">
+        <li><a href="#s2-1">2.1 The File Skeleton</a></li>
+        <li><a href="#s2-2">2.2 Header Fields</a></li>
+        <li><a href="#s2-2a">2.2a The Header&rsquo;s Non-Version Fields</a></li>
+        <li><a href="#s2-3">2.3 Record Table</a></li>
+        <li><a href="#s2-4">2.4 Pedigree &mdash; Bidirectional Link Structure</a></li>
+        <li><a href="#s2-5">2.5 Appending a Record</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch3">The Global Player Block</a>
+      <ul class="sub">
+        <li><a href="#s3-1">3.1 Fixed 0xF0-Byte Structure</a></li>
+        <li><a href="#s3-2">3.2 Complete Byte Coverage</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch4">Map, Buried Items, and World Items</a>
+      <ul class="sub">
+        <li><a href="#s4-1">4.1 Block Chaining</a></li>
+        <li><a href="#s4-2">4.2 The RLE Tile Stream</a></li>
+        <li><a href="#s4-3">4.3 Buried Items</a></li>
+        <li><a href="#s4-4">4.4 World-Item Records</a></li>
+        <li><a href="#s4-5">4.5 Tile Family and Tile Id Must Agree About Growth</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch5">Location Identity</a>
+      <ul class="sub">
+        <li><a href="#s5-1">5.1 Numeric Id from Tiled gid</a></li>
+        <li><a href="#s5-2">5.2 Reading a gid Out of the Atlas</a></li>
+        <li><a href="#s5-3">5.3 Ordinal Pairing Is Wrong</a></li>
+        <li><a href="#s5-4">5.4 Index &rarr; Location Table</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch6">The Location Block</a>
+      <ul class="sub">
+        <li><a href="#s6-1">6.1 An Indexed Array</a></li>
+        <li><a href="#s6-2">6.2 The Record Body, and the Item Records Inside It</a></li>
+        <li><a href="#s6-3">6.3 Stabled Horses &mdash; Exact</a></li>
+        <li><a href="#s6-4">6.4 The Tail &mdash; One Model, Four Special Cases</a></li>
+        <li><a href="#s6-5">6.5 The Bookies Live Inside Race Track&rsquo;s Tail</a></li>
+        <li><a href="#s6-5a">6.5a Race Track&rsquo;s Own Fields</a></li>
+        <li><a href="#s6-6">6.6 The Lost Horse</a></li>
+        <li><a href="#s6-7">6.7 Bubber&rsquo;s Hutch &mdash; Six Strings</a></li>
+        <li><a href="#s6-8">6.8 Clide&rsquo;s Rides &mdash; The Car Counter</a></li>
+        <li><a href="#s6-9">6.9 The Bio-Hacker Vat Matrix</a></li>
+        <li><a href="#s6-10">6.10 The <code>unknown</code> Record</a></li>
+        <li><a href="#s6-10a">6.10a Crowd Counts Are Not Free</a></li>
+        <li><a href="#s6-11">6.11 What Is Left</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch7">Player Inventory</a></li>
+    <li><a href="#ch8">Truck Upgrades</a></li>
+    <li><a href="#ch9">Horse Containers and the Horse Record</a>
+      <ul class="sub">
+        <li><a href="#s9-1">9.1 Four Containers</a></li>
+        <li><a href="#s9-2">9.2 Length</a></li>
+        <li><a href="#s9-3">9.3 The Detail Block</a></li>
+        <li><a href="#s9-4">9.4 The Owner and Champion Containers Have No Detail Block</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch10">The Genome</a>
+      <ul class="sub">
+        <li><a href="#s10-1">10.1 Encoding</a></li>
+        <li><a href="#s10-2">10.2 Genome Hash</a></li>
+        <li><a href="#s10-3">10.3 Trait Expression</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch11">If You Are Writing an Editor</a></li>
+    <li><a href="#ch12">Reverse-Engineered Code Addresses</a>
+      <ul class="sub">
+        <li><a href="#s12-1">12.1 Save I/O Functions</a></li>
+        <li><a href="#s12-2">12.2 Location Class Dispatch</a></li>
+        <li><a href="#s12-3">12.3 I/O Primitives</a></li>
+        <li><a href="#s12-4">12.4 Location Serialization &mdash; Virtual Dispatch</a></li>
+        <li><a href="#s12-5">12.5 Key Globals</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch13">Corpus Health and Open Questions</a>
+      <ul class="sub">
+        <li><a href="#s13-1">13.1 Corpus Health</a></li>
+        <li><a href="#s13-2">13.2 Open Questions, Ranked</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch14">Conclusion</a>
+      <ul class="sub">
+        <li><a href="#s14-1">14.1 Summary of Contributions</a></li>
+        <li><a href="#s14-2">14.2 Implications for Game Preservation</a></li>
+        <li><a href="#s14-3">14.3 Future Work</a></li>
+        <li><a href="#s14-4">14.4 Final Remarks</a></li>
+      </ul>
+    </li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<!-- ============================ ABSTRACT ============================ -->
+<h2 id="abstract">Abstract</h2>
+
+<p class="lead">This thesis presents a complete structural, semantic, and reverse-engineered analysis of the Horsey Game save file format, designated <code>save1.dat</code>. The format is a tightly packed, version-dependent binary serialization of the entire game world, encompassing player state, equine genetics, location metadata, world items, and persistent progression counters. Through exhaustive corpus analysis of 148 save files spanning versions 8 through 12, disassembly of the Horsey executable (4,374,528 bytes, x86-64 PE), and controlled before/after experimentation, we establish a definitive reference for the format. Every byte from offset 0 to end-of-file is accounted for in the live reference save. We document the header and record table, the global player block, the RLE-encoded map, buried and world items, the indexed location array with its version-dependent slot count, stabled horse crowds, owner and champion genomes, Bookie records, the Bio-Hacker vat matrix, the 240-byte genome encoding, player inventory, Truck upgrades, and the horse detail block. We further provide a confidence taxonomy, a catalogue of corpus artifacts, and a set of editorial imperatives for any tool that reads or writes the format. This work is intended as a definitive companion for save editors, modders, and preservationists, and as a case study in the reverse engineering of bespoke game serialization.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 1 ============================ -->
+<h2 id="ch1">Chapter 1: Introduction</h2>
+
+<h3 id="s1-1">1.1 Motivation</h3>
+
+<p>The Horsey Game save file, <code>save1.dat</code>, is the sole persistent artifact of a player&rsquo;s entire career: their horses, their ranch, their progress, their world. Unlike many modern games that use standardized serialization frameworks (JSON, Protocol Buffers, SQLite), Horsey Game employs a bespoke, hand-rolled binary format that chains every block exactly, with no scanning, no padding, and no tolerance for desynchronization. This makes the format both fragile and fascinating: a single misplaced byte can crash the game on load, while a correct understanding allows complete mastery of the game state.</p>
+
+<p>This thesis exists because the format was previously undocumented in its entirety. Earlier attempts at reverse engineering produced heuristic scanners that guessed at boundaries. Those scanners are now obsolete: every block in every walkable file is accounted for structurally. The confidence key in Section&nbsp;1.3 distinguishes between <span class="badge">STRUCTURAL</span> (computed from the file itself), <span class="badge der">DERIVED</span> (verified against an outside oracle), <span class="badge open">OPEN</span> (located but not understood), and <span class="badge re">RE_CONFIRMED</span> (verified by disassembling <code>Horsey.exe</code>). This thesis follows that taxonomy rigorously.</p>
+
+<h3 id="s1-2">1.2 Corpus and Methodology</h3>
+
+<p>The corpus consists of every <code>.dat</code> file under the game&rsquo;s save folder, versions 8 through 12: 148 files, of which 142 parse and all 142 walk end to end. Six files are known artifacts (Section&nbsp;13.1) and are excluded from structural claims. The reference save is <code>save1 - working.dat</code>; the live <code>save1.dat</code> moves between sessions and is therefore not reproducible. The all-locations reference is <code>locs-template.dat</code>, a game-written v12 save holding all 34 location indices at once, each with its own proprietor, crowd and interior list. Statistics that no single file can establish&mdash;the crowd ranges in Section&nbsp;6.10a, the attested tail forms&mdash;come from the whole corpus.</p>
+
+<p>Disassembly was performed on <code>Horsey.exe</code> (4,374,528 bytes, x86-64 PE). All code addresses given in this thesis are build-specific and must be re-anchored against a different executable build before use; the re-anchoring procedure is described alongside each address in Chapter&nbsp;12.</p>
+
+<h3 id="s1-3">1.3 Confidence Key</h3>
+
+<table>
+  <thead>
+    <tr><th>Mark</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="badge">STRUCTURAL</span></td><td>The offset is computed from the file itself. No searching, no guessing.</td></tr>
+    <tr><td><span class="badge der">DERIVED</span></td><td>Meaning verified against an outside oracle: game assets, a controlled before/after pair, or the Tiled map.</td></tr>
+    <tr><td><span class="badge open">OPEN</span></td><td>Bytes located and typed, meaning not established.</td></tr>
+    <tr><td><span class="badge re">RE_CONFIRMED</span></td><td>Verified by disassembling <code>Horsey.exe</code>&rsquo;s save I/O functions.</td></tr>
+  </tbody>
+</table>
+
+<p>Everything below is STRUCTURAL unless it says otherwise.</p>
+
+<h3 id="s1-4">1.4 Terminology</h3>
+
+<ul>
+  <li><strong>u32</strong>, <strong>i32</strong>: 4-byte little-endian unsigned/signed integers.</li>
+  <li><strong>f32</strong>: IEEE 754 single-precision float.</li>
+  <li><strong>u8</strong>, <strong>u16</strong>, <strong>u64</strong>: 1-, 2-, 8-byte little-endian integers.</li>
+  <li><strong>String</strong>: a u32 byte length followed by that many bytes of UTF-8, no terminator.</li>
+  <li><strong>Genome</strong>: 240 bytes, one per gene, each packing two alleles.</li>
+  <li><strong>HDR</strong>: world-item header size, 41 for v9&ndash;12, 45 for v8.</li>
+  <li><strong>S</strong>: <code>HDR &minus; 41</code>, so 0 for v9&ndash;12, 4 for v8.</li>
+  <li><strong>yoff</strong>: shorthand for <code>tableEnd + 0x38</code>, the vial-world entrance Y anchor.</li>
+  <li><strong>EXTRA</strong>: per-location tail bytes beyond the owner block.</li>
+</ul>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 2 ============================ -->
+<h2 id="ch2">Chapter 2: Top-Level Layout and the Header</h2>
+
+<h3 id="s2-1">2.1 The File Skeleton</h3>
+
+<p>The file begins with a 0x14-byte header, followed by the record table, the global player block (0xF0 bytes), the <code>someCount</code> array, the map block (W &times; H, RLE tiles), the buried-item block, the world-item block, the location block (indexed), and a 20-byte trailer. Every block chains exactly. Nothing in the load path scans for a pattern. The live <code>save1.dat</code> (440,624 bytes, v12) accounts for every byte from 0 to EOF.</p>
+
+<pre><code>0x00  header                        &lt;- version, record count
+0x14  record table                  &lt;- every named entity
+      global player block (0xF0)    &lt;- money, inventory, vial-world entrance
+      someCount array
+      map block (W x H, RLE tiles)
+      buried-item block
+      world-item block              &lt;- horses, Truck, location markers, ground items, holes
+      location block (indexed)      &lt;- names, stabled horses, interiors, owners, Bookies
+      20-byte trailer               CONFIRMED (ownerFlag=0 + 16B vial payload, 6.10)</code></pre>
+
+<p>All integers are little-endian. <code>u32</code>/<code>i32</code> are 4 bytes, <code>f32</code> is an IEEE single, <code>u8</code> is one byte. A string is a <code>u32</code> byte length followed by that many bytes of UTF-8, with no terminator.</p>
+
+<h3 id="s2-2">2.2 Header Fields</h3>
+
+<pre><code>version     = u32(0x00)             // 8..12
+rngSeed     = u64(0x04)             // xorshift64 PRNG seed (2.2a)       RE_CONFIRMED
+cycleIndex  = u32(0x0C)             // cyclic array index, wraps at a fixed size  RE_CONFIRMED
+recordCount = u32(0x10)</code></pre>
+
+<h3 id="s2-2a">2.2a The Header&rsquo;s Non-Version Fields</h3>
+
+<p>Bytes 0x04&ndash;0x0B are a <strong>single u64</strong>, not two independent dwords. The record-table writer (<code>0x1400c8240</code>) writes them with one <code>WRITE_U64</code> call. The value comes from global <code>0x1403F45C0</code>, the xorshift64 PRNG state&mdash;specifically the seed, a u32 from a time/entropy source zero-extended to u64. That is why <code>u32(0x08)</code> is &ldquo;usually 0&rdquo;: the upper half starts at zero and only becomes non-zero after many xorshift iterations.</p>
+
+<p>Byte 0x0C is a <strong>cyclic array index</strong> maintained by <code>0x1400c7a20</code>: it reads the index, increments it, and wraps to 0 when it reaches the element count of a small fixed array (<code>0x1403F45D8..E0</code>). The corpus observation &ldquo;small counter, grows with playtime&rdquo; matches a cyclic step-per-event index.</p>
+
+<p>An editor should <strong>carry these values verbatim from the source file</strong> rather than inventing them. The PRNG seed governs every <code>rand()</code> call the game makes after loading (coat patterns, adornment jitter), so changing it changes the visual appearance of every horse.</p>
+
+<h3 id="s2-3">2.3 Record Table</h3>
+
+<pre><code>off = 0x14
+repeat recordCount times:
+    nameLen = u32(off)
+    name    = utf8[nameLen]
+    fixed   = 18 bytes
+    n       = u32(off + 4 + nameLen + 18)
+    links   = n dwords                    // offspring (children) — RE_CONFIRMED (2.4)
+    off    += 4 + nameLen + 18 + 4 + n*4
+tableEnd = off</code></pre>
+
+<p>One entry per <strong>named</strong> entity. The 18-byte fixed block is <span class="badge der">DERIVED</span>:</p>
+
+<pre><code>+0   u8   flags: 0x01 rename on load, 0x02 Championship Horse, 0x04 GMO Horse,
+                 0x08 Diving Medal, 0x10 Strong Horse Medal, 0x20 Trampoline Medal,
+                 0x40 Acrobat Medal
++1   u8   name colour
++2   u8   races participated
++3   u8   regular races won
++4   u8   sumo wins
++5   u8   name colour copy (redundant copy of +1; 0xFF for NPCs)  RE_CONFIRMED
++6   i32  parent A record index (-1 = none)
++10  i32  parent B record index (-1 = none)
++14  u32  reserved (always 0; no runtime reader)  RE_CONFIRMED</code></pre>
+
+<p>Bit <code>0x01</code> makes the game rename the horse on load. That is how a new stable horse gets a name the game chooses rather than one you invent.</p>
+
+<p>The modal value is <code>00 00 00 00 00 00 FF&times;8 00 00 00 00</code>&mdash;24,850 of 171,309 corpus records, and the only common one that reads as <em>nothing has happened to this horse yet</em>. Note what it is not: no record in the corpus is all-zero, hence a zeroed block is a shape the game has never written. Clone a real one rather than synthesising it.</p>
+
+<p>A horse points at its record with the <code>recordIndex</code> i32 in its detail block (Section&nbsp;9.3). <code>-1</code> means unnamed, which is normal for wild horses (574 of 576 on-map in the reference save) and a state the game <strong>never</strong> writes for a stabled one (Section&nbsp;6.3).</p>
+
+<h3 id="s2-4">2.4 Pedigree &mdash; Bidirectional Link Structure</h3>
+
+<p>The <code>n</code> link dwords at the end of each record entry are <strong>offspring (children)</strong>, not siblings or lineage. The structure is bidirectional:</p>
+
+<ul>
+  <li><strong>Child &rarr; parents:</strong> fixed-block <code>+6</code> (parentA, i32) and <code>+10</code> (parentB, i32) point from a child record to its two parents. <code>-1</code> means no parent.</li>
+  <li><strong>Parent &rarr; children:</strong> the trailing <code>n</code> dwords list each child&rsquo;s record index.</li>
+</ul>
+
+<p>At runtime, both directions live in the record struct: parentA at <code>+0x48</code>, parentB at <code>+0x4c</code>, and children as a <code>std::vector&lt;i32&gt;</code> at <code>+0x70</code> (begin_ptr at +0x70, end_ptr at +0x78, capacity_ptr at +0x80). <span class="badge re">RE_CONFIRMED</span> by disassembling both the writer (<code>0x1400c8240</code>: <code>lea rcx,[rdi+0x70]; call 0x140075980</code>) and the reader (<code>0x1400c84d0</code>: <code>lea rcx,[rbx+0x70]; call 0x1400762e0</code>).</p>
+
+<p><strong>The loader trusts the stored offspring list.</strong> The record table reader (<code>0x1400c84d0</code>) reads the children vector directly from the save file via <code>0x1400762e0</code> (reads count then each i32 into the vector). The post-read callback (<code>0x1400c7dd0</code>) performs only a name-string copy&mdash;no consistency check against parent pointers, no rebuild of children from parentA/parentB indices. <strong>An editor MUST keep both directions in sync manually:</strong> when adding a new child record with parentA=X, also append the child&rsquo;s index to record X&rsquo;s link list (and similarly for parentB=Y).</p>
+
+<h3 id="s2-5">2.5 Appending a Record</h3>
+
+<p>A record&rsquo;s identity is its <strong>ordinal position</strong> in the table, and every reference to one is that ordinal: a horse&rsquo;s <code>recordIndex</code>, and another record&rsquo;s parent links. Hence:</p>
+
+<ul>
+  <li><strong>Appending at <code>tableEnd</code> renumbers nothing.</strong> Indices <code>0..n-1</code> keep their meaning and the new entries take <code>n, n+1, &hellip;</code>. Write <code>recordCount</code> at <code>0x10</code> and splice the entries in at <code>tableEnd</code>.</li>
+  <li><strong>Inserting anywhere else silently repoints every horse in the file.</strong> No length field disagrees, the table still walks, and every name after the insertion belongs to the wrong horse. There is no reason to ever do it.</li>
+  <li><strong>Parent links do not survive a move between files.</strong> An index harvested from save A points at whatever sits at that position in save B, so anything importing a fixed block from elsewhere must clear both parent dwords to <code>-1</code>.</li>
+</ul>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 3 ============================ -->
+<h2 id="ch3">Chapter 3: The Global Player Block</h2>
+
+<h3 id="s3-1">3.1 Fixed 0xF0-Byte Structure</h3>
+
+<p>A fixed <strong>0xF0-byte</strong> block at <code>tableEnd</code>. The map block starts at <code>tableEnd + 0xF0</code>, so the size is pinned by the parser on both sides.</p>
+
+<table>
+  <thead>
+    <tr><th>Offset from <code>tableEnd</code></th><th>Type</th><th>Meaning</th><th>Confidence</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>+0x00</code></td><td>u32</td><td><strong>world map X position</strong> (f32 bits; grows as player moves right)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x04</code></td><td>u32</td><td><strong>current year</strong> (0-indexed; the game displays <code>year + 1</code>)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x08</code></td><td>u32</td><td><strong>race circuit tier</strong> (1 = beginner, 2 = advanced)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x0C</code></td><td>f32</td><td><strong>simulation speed</strong> (1.0 = normal, 0.5 = slow motion)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x10</code></td><td>u32</td><td><strong>sleep/day counter</strong> (total sleeps since game start)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x14</code></td><td>u32</td><td><strong>Money</strong> (default 50 on new game)</td><td><span class="badge der">DERIVED</span> + <span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x18</code></td><td>u32</td><td><strong>tutorial step</strong> (&minus;1 = disabled, 13 = start, counts to 0 = done)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x1C</code></td><td>u32&rarr;bool</td><td><strong>treasure map received</strong> (one-time NPC gift flag)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x20</code></td><td>u32&rarr;bool</td><td><strong>first-place bonus pending</strong> (wild-horse hint active)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x24</code></td><td>u32</td><td><strong>digs completed</strong> (DigFinish events; 0&ndash;3+ affects prize tiers)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x28</code></td><td>u32&rarr;bool</td><td><strong>deprecated</strong> &mdash; always 0</td><td><span class="badge re">RE_CONFIRMED</span> (writer: <code>xor ecx,ecx</code>; reader: discarded to a local)</td></tr>
+    <tr><td><code>+0x2C</code></td><td>u32</td><td><strong>race participation count</strong> (career total; drives bar NPC dialogue)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x30</code></td><td>u32&rarr;bool</td><td><strong>has completed a race</strong> (component of the &ldquo;s_god&rdquo; achievement)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x34</code></td><td>f32</td><td><strong>vial-world entrance X</strong></td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>+0x38</code></td><td>f32</td><td><strong>vial-world entrance Y</strong></td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>+0x3C</code></td><td>u32</td><td><strong>annual win flag</strong> (0 = not yet, 1 = championship won)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>+0x40</code>&hellip;<code>+0x87</code></td><td>6 &times; 12 B</td><td><strong>player inventory</strong> &mdash; Chapter 7</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>+0x88</code>&hellip;<code>+0xEF</code></td><td>13 &times; 8 B</td><td><strong>race leaderboard</strong>: <code>{u32 losses, u32 wins}</code> per player slot (0 = local, 1&ndash;12 = NPCs)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+  </tbody>
+</table>
+
+<h3 id="s3-2">3.2 Complete Byte Coverage</h3>
+
+<p>Disassembly of the save writer (<code>0x14006db90</code>) and reader (<code>0x14006e380</code>) accounts for every byte of the 0xF0-byte block. The write sequence after the record table is: 7 &times; u32, 1 &times; f32, 3 &times; u32, 3 &times; u32&rarr;bool, 1 &times; u32, 1 &times; u32&rarr;bool (always 0), 1 &times; u32, 1 &times; u32&rarr;bool, 1 &times; f32 pair (8 B), 1 &times; u32, then the 6-slot inventory loop (72 B), then the 13-pair loop (104 B) = total 0xF0.</p>
+
+<p><strong>Field identifications.</strong> Traced from game state struct offsets to their consumers: <code>+0x04</code> (year) and <code>+0x10</code> (sleeps) are confirmed by the format string <code>"&lt; Simulation Paused - Year %d  Sleeps %d  Races %d &gt;"</code> at <code>0x140307F98</code>. <code>+0x14</code> (Money) is confirmed by the constructor&rsquo;s default of 50 and <code>add [rax+0x308], 0x3E8</code> (+1000) on a race win. <code>+0x18</code> (tutorial step) is confirmed by the constructor: &minus;1 when <code>tut</code> is disabled, 13 when enabled. <code>+0x3C</code> (annual win flag) is set to 1 when the year-end championship condition is met and cleared to 0 after the prize is paid out.</p>
+
+<p><strong>Boolean format.</strong> Fields marked <code>u32&rarr;bool</code> are written as 4-byte dwords (0 or 1) and read back with <code>(val == 1)</code>&mdash;the reader consumes 4 bytes per boolean. The field at <code>+0x28</code> is <strong>always written as 0</strong> (the writer passes <code>xor ecx, ecx</code>) and the reader stores it to a discarded local, so it is a dead field in the current version.</p>
+
+<p><strong>The 13 dword pairs</strong> at <code>+0x88..+0xEF</code> are the <strong>race leaderboard</strong>&mdash;<code>{losses, wins}</code> per player slot. Slot 0 is the local player, slots 1&ndash;12 are the NPC players. Written by <code>0x140105F10</code> on every race finish: position codes 5/6 (top-2 finishers) increment the win counter <code>B[slot]</code>; all other finishes increment the loss counter <code>A[slot]</code>. The leaderboard display at <code>0x14006C180</code> sorts by wins descending, losses as tiebreaker.</p>
+
+<p><strong>Money</strong> comes from a controlled pair: <code>beforeupgrade.dat</code> &rarr; <code>afterupgrade.dat</code> shows <code>49874 &rarr; 49374</code> across one 500-credit Truck upgrade, with no other dword in the block moving in a matching way.</p>
+
+<p><strong>Vial-world entrance</strong> is confirmed against the Tiled map, whose <code>vial world</code> object sits at <code>x=576, y=800</code>. Tiled anchors gid objects at the bottom-left, so <code>y &minus; 32 = 768</code>, and every unmodified save reads exactly <code>576.0</code> and <code>768.0</code>. Files that differ (<code>concept.dat</code>, <code>abandoned.dat</code>) were built from edited maps. This is the anchor the shorthand <code>yoff</code> refers to: <strong><code>yoff = tableEnd + 0x38</code></strong>.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 4 ============================ -->
+<h2 id="ch4">Chapter 4: Map, Buried Items, and World Items</h2>
+
+<h3 id="s4-1">4.1 Block Chaining</h3>
+
+<pre><code>someCount = u32(tableEnd + 0xF0)
+stride    = version &gt;= 12 ? 8 : 6                  // RE_CONFIRMED: 4×u16 for v12, 3×u16 for v8-v11
+mapStart  = tableEnd + 0xF0 + 4 + stride*someCount + 8
+W, H      = u32(mapStart - 8), u32(mapStart - 4)
+&lt;RLE tile stream, W*H tiles&gt;
+mapEnd
+buriedCount = u32(mapEnd)
+buried[i]   = { u32 cell, u32 itemId }              at mapEnd + 4 + 8*i
+buriedEnd   = mapEnd + 4 + buriedCount*8
+wordLength     = u32(buriedEnd)                     // RE_CONFIRMED: a container name string (12.4)
+worldCountOff  = buriedEnd + 4 + wordLength + 8
+worldItemCount = u32(worldCountOff)
+worldItemStart = worldCountOff + 4</code></pre>
+
+<p>The someCount stride is <span class="badge re">RE_CONFIRMED</span>: the save writer always writes 4 &times; <code>WRITE_U16</code> per entry (game struct stride 0x24 = 36 bytes, fields at <code>+4</code>, <code>+8</code>, <code>+0xC</code>, <code>+0x10</code> within each entry). The reader gates the 4th u16 on <code>version &gt;= 12</code> (<code>cmp dword ptr [version], 0xc; jl skip</code>).</p>
+
+<p>Map pixel coordinates are <code>tile * 32</code>, and <strong>world y is <code>(row + 1) * 32</code></strong>&mdash;the map&rsquo;s own row 0 sits at y 32.</p>
+
+<h3 id="s4-2">4.2 The RLE Tile Stream</h3>
+
+<p>Tiles run left to right, top to bottom. Read the first byte of each entry and branch on it:</p>
+
+<table>
+  <thead>
+    <tr><th>first byte</th><th>entry</th><th>tile</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x3B</code>&ndash;<code>0x3E</code></td><td>1 byte</td><td>shorthand for family 0, id <code>first &minus; 0x3A</code> (Plain1&hellip;Plain4), no fences, no growth</td></tr>
+    <tr><td><code>0x3F</code></td><td>2 bytes</td><td>a water run: <code>repeat = next byte</code> tiles of family 6, id 9</td></tr>
+    <tr><td>anything else</td><td>2 or 3 bytes</td><td><code>fam = first &amp; 0x3F</code>, <code>fenceT = first &amp; 0x40</code>, <code>fenceL = first &amp; 0x80</code>, <code>id = next byte</code>, and <strong>a third growth byte when <code>id &gt;= 0x47</code></strong></td></tr>
+  </tbody>
+</table>
+
+<p>Writing it back:</p>
+
+<ul>
+  <li>A water run caps at 255 per entry, so a longer run emits repeated <code>0x3F FF</code> pairs.</li>
+  <li>Family 0 with id 1&ndash;4 and no fences takes the one-byte shorthand.</li>
+  <li><strong>The border ring is forced to family 15</strong> on every write, whatever the grid holds.</li>
+  <li>Re-encoding is lossless but not byte-exact against an arbitrary save, because the game&rsquo;s own writer makes different run-splitting choices&mdash;about 150&ndash;160 bytes shorter per file. A file this editor wrote does round-trip exactly.</li>
+</ul>
+
+<h3 id="s4-3">4.3 Buried Items</h3>
+
+<p>Each entry is a cell index and an item id. <code>cell</code> is <code>row * W + col</code>, with the same row offset as everything else: <code>x = (cell % W) * 32</code> and <code>y = floor(cell / W) * 32 + 32</code>. Item ids follow the range in Section&nbsp;6.2.</p>
+
+<p>A buried item is three values in a packed stream. It is <strong>not</strong> a world-item record, which is why it cannot carry a genome&mdash;there is no record to put one in.</p>
+
+<h3 id="s4-4">4.4 World-Item Records</h3>
+
+<p><code>HDR = version &lt; 9 ? 45 : 41</code>, and <code>S = HDR &minus; 41</code>.</p>
+
+<table>
+  <thead>
+    <tr><th>field</th><th>v9&ndash;12</th><th>v8</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>type</code> (u32)</td><td><code>+0</code></td><td><code>+0</code></td></tr>
+    <tr><td><code>index</code> (u8)</td><td><code>+5</code></td><td><code>+5</code></td></tr>
+    <tr><td>type-3 DNA flag (u32)</td><td><code>+8</code></td><td><code>+8</code></td></tr>
+    <tr><td><code>x</code>, <code>y</code> (f32) &mdash; types 0/1/2/4</td><td><code>+25</code>, <code>+29</code></td><td><code>+29</code>, <code>+33</code></td></tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr><th>type</th><th>meaning</th><th>length after the header</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>horse</td><td>Section 9.2</td></tr>
+    <tr><td>1</td><td><strong>Truck</strong></td><td><code>+20</code> &mdash; Chapter 8</td></tr>
+    <tr><td>2</td><td><strong>location marker</strong></td><td>0 &mdash; Chapter 5</td></tr>
+    <tr><td>3</td><td>ground item</td><td>Section 6.2 &mdash; 49 bytes (no DNA) / 289 bytes (with DNA); <code>HDR + 8 + D</code></td></tr>
+    <tr><td>4</td><td>hole</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p>Only types 0, 3 and 4 can be deleted. Type 1 is the Truck and type 2 is half of a location pair, so removing either means rewriting something else as well.</p>
+
+<h3 id="s4-5">4.5 Tile Family and Tile Id Must Agree About Growth</h3>
+
+<p>A tile is <code>[flag][id]</code>, plus a third growth byte when it carries growth. The decoder in Section&nbsp;4.2 decides that byte from the <strong>id</strong> (<code>id &gt;= 0x47</code>). The <strong>family</strong> in <code>flag &amp; 0x3F</code> states the same fact, and across 129 corpus files the two never disagree:</p>
+
+<table>
+  <thead>
+    <tr><th>families</th><th>ids</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1, 2, 3, 9, 10, 11, 12 (grass, ngrass, bog, acacia, apple, palm, cactus)</td><td>always <code>id &gt;= 0x47</code>, growth byte present</td></tr>
+    <tr><td>every other family</td><td>always <code>id &lt; 0x47</code>, no growth byte</td></tr>
+  </tbody>
+</table>
+
+<p>So <code>fam=1 / id=1</code>&mdash;GrassLand&rsquo;s family with Plain1&rsquo;s id&mdash;is a byte pair (<code>01 01</code>) the game&rsquo;s own writer never emits, and one the game cannot read: it takes the growth byte from the <strong>family</strong>, so it consumes a third byte the encoder did not write and <strong>every tile after it shifts by one</strong>. The map desynchronises and the save will not load.</p>
+
+<p>Nothing else shows it. The file parses, walks and re-encodes byte-identically in any decoder that keys on the id, which is why this needs an explicit check. A dedicated validation predicate taking <code>(fam, id)</code> is that check, wired into three places: a warning on load, a block on any export that would re-encode the map, and a per-file row in a batch verification pass.</p>
+
+<p>It shipped once. An editor&rsquo;s paint palette defaulted to <code>{ fam: 1, id: 1 }</code>, so <strong>painting before clicking a swatch</strong> wrote exactly this pair. <code>bad-save.dat</code> carries two such tiles at (124,118) and (121,120) and is the only file in the corpus that does. Repair is a one-byte write per tile&mdash;flag <code>0x01</code> &rarr; <code>0x00</code>, same length, nothing downstream moves.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 5 ============================ -->
+<h2 id="ch5">Chapter 5: Location Identity</h2>
+
+<h3 id="s5-1">5.1 Numeric Id from Tiled gid</h3>
+
+<p><strong>Location identity is a hard numeric id taken straight from the Tiled <code>gid</code>.</strong> It is not derived from the name. Only the name record&rsquo;s byte position is found by the indexed array of Section&nbsp;6.1, and pairing names to markers by index is exact.</p>
+
+<p>Every location on the map is a <strong>type-2 world item</strong>, and its <code>index</code> byte at <code>start + 5</code> is the location&rsquo;s id. Across the whole corpus:</p>
+
+<pre><code>type-2 index  ==  Tiled gid &minus; 97</code></pre>
+
+<p>97 is <code>firstgid</code> for the <code>locs.tsx</code> tileset in the Tiled map. On the near-vanilla <code>start.dat</code> and <code>newsave.dat</code>, pairing markers sorted by <code>index</code> against the name records in file order reproduces <strong>26 of 26</strong> of the map&rsquo;s location objects, matching both the object type and its tile-centred coordinates exactly.</p>
+
+<p><strong>A marker is tile-centred</strong>: <code>x = col*32 + 16</code>, <code>y = row*32 + 16</code>. My House at (3056, 3696) is col 95, row 115. Row 0 therefore gives <code>y = 16</code>, not 32&mdash;a location marker does not follow the horse rule of <code>(row+1)*32</code>.</p>
+
+<h3 id="s5-2">5.2 Reading a gid Out of the Atlas</h3>
+
+<p><code>locs.tsx</code> is referenced by the map but is not present in the data folder&mdash;the game reads the gid numerically and never loads the <code>.tsx</code>. The gid is a <strong>tile-grid index into <code>locs.png</code></strong>, not the sprite&rsquo;s ordinal position in the atlas XML:</p>
+
+<pre><code>locs.png is 256 x 256 with 32 x 32 tiles  -&gt;  8 columns
+gid = 97 + (sprite.y / 32) * 8 + (sprite.x / 32)</code></pre>
+
+<p>The <code>c="N"</code> attribute says how many consecutive tiles the family covers (<code>LocStable c="8"</code> &rarr; gids 97&ndash;104). Counting <code>&lt;sprite&gt;</code> entries instead gives the wrong answer for everything after the first: <code>LocTrack</code> is the second entry but sits at <code>y="32"</code>, hence it starts at gid <strong>105</strong>.</p>
+
+<p>Two caveats about the sprite names:</p>
+
+<ul>
+  <li><strong><code>LocSweetie</code> and <code>LocPaddock</code> are swapped</strong> relative to how the game uses them. Gid 111 (<code>LocSweetie</code> by position) is <code>type="paddock"</code>, and gid 125 (<code>LocPaddock</code> by position) is <code>type="sweetie"</code>. The <code>type</code> string in the Tiled map is authoritative, the atlas name is not.</li>
+  <li>Gids 105&ndash;109 fall inside the <code>LocTrack c="6"</code> range but are the five procedurally-named stables (<code>&hellip;'s Hideaway</code>, <code>&hellip;'s Equestrium</code>, <code>&hellip;'s Estate</code>, <code>&hellip;'s Grange</code>, <code>&hellip;'s Horsery</code>). Only gid 110 is the Race Track.</li>
+</ul>
+
+<h3 id="s5-3">5.3 Ordinal Pairing Is Wrong</h3>
+
+<p>Pairing the <em>n</em>-th name record with the <em>n</em>-th type-2 marker <strong>in world-item order</strong> does not work. The world-item block stores markers in spawn order, not index order, and <strong>91 of 107</strong> corpus files have the two disagree. On <code>save1.dat</code> 29 of 30 come out mislabelled&mdash;the marker at (3024, 3952), which is <code>type="bobs"</code>, gets called &ldquo;My House&rdquo;.</p>
+
+<p>Sort markers by <code>index</code> before zipping, or better, key on <code>index</code> directly.</p>
+
+<h3 id="s5-4">5.4 Index &rarr; Location Table</h3>
+
+<p>Aggregated over the corpus. &ldquo;variants&rdquo; are the procedurally generated owner names.</p>
+
+<table>
+  <thead>
+    <tr><th>index</th><th>gid</th><th>map type</th><th>canonical name</th><th>files</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>97</td><td><code>home</code></td><td>My House</td><td>66</td></tr>
+    <tr><td>1</td><td>98</td><td><code>willaby</code></td><td>Willaby Ranch</td><td>66</td></tr>
+    <tr><td>2</td><td>99</td><td><code>circled</code></td><td>Circle-D Corral</td><td>87</td></tr>
+    <tr><td>3</td><td>100</td><td><code>bobs</code></td><td>Bob&rsquo;s Farm <em>(+3)</em></td><td>66</td></tr>
+    <tr><td>4</td><td>101</td><td><code>mabels</code></td><td>Mabel&rsquo;s Stables <em>(+1)</em></td><td>87</td></tr>
+    <tr><td>5</td><td>102</td><td><code>surebreed</code></td><td>Surebreed Steeples</td><td>66</td></tr>
+    <tr><td>6</td><td>103</td><td><code>hacienda</code></td><td>Hacienda Picante</td><td>87</td></tr>
+    <tr><td>7</td><td>104</td><td><code>paradise</code></td><td>Paradise Pastures</td><td>87</td></tr>
+    <tr><td>8</td><td>105</td><td>&mdash;</td><td><em>&hellip;'s</em> Hideaway <em>(+5)</em></td><td>28</td></tr>
+    <tr><td>9</td><td>106</td><td>&mdash;</td><td><em>&hellip;'s</em> Equestrium <em>(+3)</em></td><td>26</td></tr>
+    <tr><td>10</td><td>107</td><td>&mdash;</td><td><em>&hellip;'s</em> Estate <em>(+3)</em></td><td>25</td></tr>
+    <tr><td>11</td><td>108</td><td>&mdash;</td><td><em>&hellip;'s</em> Grange <em>(+3)</em></td><td>26</td></tr>
+    <tr><td>12</td><td>109</td><td>&mdash;</td><td><em>&hellip;'s</em> Horsery <em>(+4)</em></td><td>13</td></tr>
+    <tr><td>13</td><td>110</td><td><code>track</code></td><td>Race Track</td><td>92</td></tr>
+    <tr><td>14</td><td>111</td><td><code>paddock</code></td><td>Paddock</td><td>92</td></tr>
+    <tr><td>15</td><td>112</td><td><code>hermit</code></td><td>Cave</td><td>66</td></tr>
+    <tr><td>16</td><td>113</td><td><code>crispr</code></td><td>CRISPR Lab</td><td>66</td></tr>
+    <tr><td>17</td><td>114</td><td><code>glue</code></td><td>Sue&rsquo;s Glues</td><td>66</td></tr>
+    <tr><td>18</td><td>115</td><td><code>car lot</code></td><td>Clide&rsquo;s Rides <em>(+2)</em></td><td>66</td></tr>
+    <tr><td>19</td><td>116</td><td>&mdash;</td><td><em>unused (<code>LocLab</code>)</em></td><td>0</td></tr>
+    <tr><td>20</td><td>117</td><td><code>supply</code></td><td>Lasso-Mart</td><td>66</td></tr>
+    <tr><td>21</td><td>118</td><td><code>ecologist</code></td><td>Tent</td><td>66</td></tr>
+    <tr><td>22</td><td>119</td><td><code>hutch</code></td><td>Bubber&rsquo;s Hutch</td><td>66</td></tr>
+    <tr><td>23</td><td>120</td><td><code>circus</code></td><td>The Circus</td><td>66</td></tr>
+    <tr><td>24</td><td>121</td><td><code>zoo</code></td><td>The Secret Zoo</td><td>3</td></tr>
+    <tr><td>25</td><td>122</td><td><code>acres</code></td><td>O&rsquo;er Yonder Acres</td><td>66</td></tr>
+    <tr><td>26</td><td>123</td><td><code>saloon</code></td><td>Saloon</td><td>66</td></tr>
+    <tr><td>27</td><td>124</td><td><code>powerplant</code></td><td>Power Plant</td><td>66</td></tr>
+    <tr><td>28</td><td>125</td><td><code>sweetie</code></td><td>Sweetie&rsquo;s House <em>(+8)</em></td><td>66</td></tr>
+    <tr><td>29</td><td>126</td><td><code>sumo</code></td><td>Sumo Ring</td><td>70</td></tr>
+    <tr><td>30</td><td>127</td><td><code>junk</code></td><td>Junk Shop</td><td>3</td></tr>
+    <tr><td>31</td><td>128</td><td><code>biohackers</code></td><td>Bio-Hacker / Normal Suburban House</td><td>66</td></tr>
+    <tr><td>32&ndash;35</td><td>129&ndash;132</td><td>&mdash;</td><td><em>unused (<code>LocTrackB/PaddockB/TrackC/PaddockC</code>)</em></td><td>0</td></tr>
+    <tr><td>36</td><td>133</td><td><code>club</code></td><td>The Jockey Club</td><td>69</td></tr>
+    <tr><td>37</td><td>134</td><td><code>abandoned</code></td><td>Old Abandoned Track</td><td>85</td></tr>
+    <tr><td>38</td><td>135</td><td>&mdash;</td><td>Custom0 (<code>LocM</code>) &mdash; the editor labels it Secret Cave</td><td>1</td></tr>
+  </tbody>
+</table>
+
+<p>Non-location gids in the map: 145 (<code>truck</code>, <code>MarkStart</code>), 146 (<code>MarkHerd</code> &mdash; crazy horse / fest horse / impala), 147 <code>tiger</code>, 148 <code>giraffe</code>, 149 <code>alligator</code>, 150 <code>moose</code>, 153 <code>vial world</code>, 154 buried treasure.</p>
+
+<p><strong>A location is a pair</strong>: the type-2 marker on the map, and a record in the location block, joined by the index. Adding or deleting one means doing both halves plus the present flag of Section&nbsp;6.1.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 6 ============================ -->
+<h2 id="ch6">Chapter 6: The Location Block</h2>
+
+<h3 id="s6-1">6.1 An Indexed Array</h3>
+
+<pre><code>worldItemEnd:
+    &lt;12 bytes padding&gt;
+    for index = 0, 1, 2, ...:
+        u32  present            0 = slot empty, 1 = a record follows
+        &lt;location record&gt;       only when present == 1
+    &lt;the `unknown` record&gt;      terminator, outside the index space</code></pre>
+
+<p><code>index</code> is the same identity as in Chapter&nbsp;5. The array is dense over the index space and a skipped slot costs one zero dword.</p>
+
+<p><strong>The array has a fixed length, and it is version-dependent</strong>: 48 slots (0&ndash;47) on v11 and v12, 38 slots (0&ndash;37) on v8, v9 and v10. Checked against every walkable file: 125 v12 and 4 v11 saves at 48, 13 v8&ndash;v10 saves at 38. 48 is every gid from 97 up to but not including the Truck&rsquo;s 145, which is exactly the range <code>locs.png</code> reserves for locations. <span class="badge re">RE_CONFIRMED</span>: the save writer loops <code>0x180 / 8 = 48</code> iterations hard-coded (<code>cmp rsi, 0x180</code>).</p>
+
+<p><strong>The count must not change.</strong> The game loops a fixed number of times, so an edit that shortens the array leaves it reading the <code>unknown</code> record&rsquo;s bytes as flags&mdash;see the Old Abandoned Track case in Section&nbsp;6.4.</p>
+
+<p>The array ends when the dword where a flag should be is <strong>greater than 1</strong>. That is the <code>nameLen</code> of the trailing <code>unknown</code> record, which always reads 7. Validate it rather than assume it: any dword &gt; 1 ends the array, so a desynchronised walk would otherwise return a plausible wrong answer instead of reporting itself.</p>
+
+<p>The preamble identity</p>
+
+<pre><code>worldItemEnd + 12 + 4 * (firstLocationIndex + 1)  ==  firstLocationNameOffset</code></pre>
+
+<p>holds on <strong>107 of 107</strong> files where markers and name records can both be counted, including every odd preamble that used to look like variable padding. It was never padding&mdash;it is the run of <code>present = 0</code> flags for the locations that map does not contain.</p>
+
+<table>
+  <thead>
+    <tr><th>file</th><th>first location</th><th>its index</th><th>zero dwords before it</th><th>12 + 4&middot;(idx+1)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>save1.dat</code></td><td>My House</td><td>0</td><td>3</td><td>16 &#10003;</td></tr>
+    <tr><td><code>working-save.dat</code></td><td>Circle-D Corral</td><td>2</td><td>5</td><td>24 &#10003;</td></tr>
+    <tr><td><code>sumo-save.dat</code></td><td>Sumo Ring</td><td>29</td><td>32</td><td>132 &#10003;</td></tr>
+    <tr><td><code>abandoned.dat</code></td><td>Old Abandoned Track</td><td>37</td><td>40</td><td>164 &#10003;</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s6-2">6.2 The Record Body, and the Item Records Inside It</h3>
+
+<pre><code>+0                 u32   nameLen
++4                 utf8  name                        -- may be zero-length; index 38 always is
++4+nameLen         u32   crowd                       -- stabled horses, 6.3
++8+nameLen         crowd x &lt;horse block&gt;
+p                  u32   crowdOrdinal                -- see below
+p+4                u32   interiorCount
+p+8                interiorCount x &lt;type-3 record&gt;
+xoff               f32   X   (tile-centred; a second copy of the marker's X)
+xoff+4             f32   Y
+tail = xoff+8      &lt;6.4&gt;</code></pre>
+
+<p>The X/Y pair here is a <strong>redundant copy</strong> of the type-2 marker&rsquo;s coordinates&mdash;identical in 1,955 of 2,003 location instances, with all 48 exceptions in tool-built or degenerate files. An editor that moves a location must write both, or the two drift apart. That dual-write is what keeps them in sync, so it has to stay.</p>
+
+<p><strong>The dword before <code>interiorCount</code> is a crowd ordinal</strong>&mdash;<span class="badge re">RE_CONFIRMED</span> as a &ldquo;selected entity index&rdquo; by the container serializer (<code>0x14006d520</code>). The serializer iterates the crowd vector and writes the index of the entry matching a <code>selectedEntity</code> pointer (<code>container+0x148</code>), or <code>0xFFFFFFFF</code> when nothing matches. It names one of this location&rsquo;s own stabled horses, with <code>0xFFFFFFFF</code> for &ldquo;none&rdquo;. Over 3,268 location records:</p>
+
+<table>
+  <thead>
+    <tr><th>value</th><th>records</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0xFFFFFFFF</code> (&ldquo;none&rdquo;)</td><td>889</td></tr>
+    <tr><td>a valid ordinal, <code>0 &le; v &lt; crowd</code></td><td>2,381, of which <strong>2,380 are <code>0</code></strong></td></tr>
+    <tr><td>out of range</td><td><strong>4</strong>, every one <code>v = 0</code> with <code>crowd = 0</code></td></tr>
+  </tbody>
+</table>
+
+<p>Those four are hand-edited files, three of them the same crash: <code>crash1.dat</code>, <code>crash1 - Copy.dat</code> and <code>save1 - Copy (57).dat</code>, all with Tent emptied and this dword left at 0. An ordinal of 0 into an empty crowd names a horse that is not there, and the game dies on load.</p>
+
+<p>What an editor must do with it: <strong>never invent one, and never leave a stale one.</strong> Emptying a crowd, or shrinking one below the stored ordinal, has to write &ldquo;none&rdquo;. A still-valid ordinal must be left byte-for-byte alone, because 889 loadable records say &ldquo;none&rdquo; and 2,381 name a horse, so the value is not a function of the count and overwriting a live one invents state.</p>
+
+<blockquote>
+  <p>An earlier draft read this field as <code>ownerState</code>&mdash;0 when the tail carries an owner, <code>0xFFFFFFFF</code> when it does not. That rule has <strong>54 corpus violations</strong>, including files the game loads happily. Owner presence correlates with the field only because a location with no proprietor usually has no crowd either.</p>
+</blockquote>
+
+<p>Note the offset carefully. It sits at the <strong>end of the crowd block</strong>, immediately before <code>interiorCount</code>, which is <code>xoff &minus; 8</code> <em>only when the location has no interior items</em>. With interiors present, <code>xoff &minus; 8</code> lands inside the last type-3 record.</p>
+
+<p><strong>Interior items are real world-item type-3 records</strong>, the same encoding as a ground item. This is the one place where reading the geometry wrongly still produces a walk that steps correctly, so it is worth stating exactly:</p>
+
+<pre><code>+0     u32  type = 3
++4     u32  ?    = 1                  (from game obj+0x70; always 1 in corpus)
++8     u32  dnaFlag                   0 or 1                          (D = dnaFlag ? 240 : 0)
++12    240  GENOME                    present iff dnaFlag == 1
++12+D  u8   game-type-code            always 0x0A (10) in corpus      RE_CONFIRMED
++13+D  u8   itemId                    so +13 without DNA, +253 with   RE_CONFIRMED
++14+D  u8   entity class code = 0x17 (23)  hardcoded for all world items (game obj+0x48)   RE_CONFIRMED
++15+D  u16  item usage count          remaining uses; 0 when depleted; per-type defaults: hay/beer=10, disk=1, apple tree=80 (game obj+0x44)   RE_CONFIRMED
++17+D  u32  tick counter              incremented each game update tick; apple tree (id 14) spawns apple when counter reaches 60 (game obj+0x18)   RE_CONFIRMED
++21+D  u32  always 0                  reserved; never written non-zero (game obj+0x24)   RE_CONFIRMED
++25+D  f32  velocity X                low dword of obj+0x1c; 0.0 for static items on the ground   RE_CONFIRMED
++29+D  f32  velocity Y                high dword of obj+0x1c; 0.0 for static items on the ground  RE_CONFIRMED
++33+D  f32  x   (+S on v8)
++37+D  f32  y
++41+D  f32  halfW                     bbox half-width                 RE_CONFIRMED
++45+D  f32  halfH                     bbox half-height                RE_CONFIRMED</code></pre>
+
+<p>The two f32s at <code>+41+D</code> (halfW) and <code>+45+D</code> (halfH) are the <strong>item&rsquo;s collision half-extents</strong> in game units. They are constant for each item type and never change across saves. Analogous to the horse entity&rsquo;s bounding box at <code>entity+0x1D4</code> (written by the same <code>0x1400757d0</code> float-pair writer). The per-type values, measured across the full corpus:</p>
+
+<table>
+  <thead>
+    <tr><th>itemId</th><th>halfW</th><th>halfH</th><th></th><th>itemId</th><th>halfW</th><th>halfH</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>0.6875</td><td>0.8125</td><td></td><td>25</td><td>1.1250</td><td>1.0625</td></tr>
+    <tr><td>1</td><td>1.6250</td><td>1.1250</td><td></td><td>26</td><td>1.1250</td><td>0.8750</td></tr>
+    <tr><td>2</td><td>0.6875</td><td>0.8125</td><td></td><td>27</td><td>1.2500</td><td>0.6875</td></tr>
+    <tr><td>3</td><td>0.9375</td><td>1.1250</td><td></td><td>28</td><td>0.8750</td><td>1.3750</td></tr>
+    <tr><td>4</td><td>0.6250</td><td>1.1875</td><td></td><td>29</td><td>1.3750</td><td>0.9375</td></tr>
+    <tr><td>5</td><td>1.2500</td><td>0.8125</td><td></td><td>30</td><td>1.0625</td><td>1.1875</td></tr>
+    <tr><td>6</td><td>1.1250</td><td>0.5625</td><td></td><td>31</td><td>1.1250</td><td>0.7500</td></tr>
+    <tr><td>7</td><td>1.4375</td><td>0.7500</td><td></td><td>32</td><td>1.0625</td><td>0.7500</td></tr>
+    <tr><td>8</td><td>1.0000</td><td>0.6250</td><td></td><td>33</td><td>1.1875</td><td>0.8750</td></tr>
+    <tr><td>9</td><td>0.6875</td><td>1.1250</td><td></td><td>34</td><td>1.5000</td><td>0.8750</td></tr>
+    <tr><td>10</td><td>0.6875</td><td>1.1250</td><td></td><td>35</td><td>0.8750</td><td>1.1250</td></tr>
+    <tr><td>11</td><td>1.1875</td><td>0.8125</td><td></td><td>36</td><td>1.0625</td><td>1.0000</td></tr>
+    <tr><td>12</td><td>1.2500</td><td>1.4375</td><td></td><td>37</td><td>0.8125</td><td>1.6250</td></tr>
+    <tr><td>13</td><td>1.0000</td><td>1.0000</td><td></td><td>38</td><td>0.8750</td><td>0.8750</td></tr>
+    <tr><td>14</td><td>1.1250</td><td>0.9375</td><td></td><td>39</td><td>1.1250</td><td>1.3750</td></tr>
+    <tr><td>15</td><td>1.4375</td><td>1.5000</td><td></td><td>40</td><td>1.1250</td><td>1.3750</td></tr>
+    <tr><td>16</td><td>0.8125</td><td>1.3125</td><td></td><td>41</td><td>1.1250</td><td>1.3750</td></tr>
+    <tr><td>17</td><td>0.7500</td><td>1.1875</td><td></td><td>42</td><td>1.1250</td><td>1.3750</td></tr>
+    <tr><td>18</td><td>2.3750</td><td>1.5000</td><td></td><td>43</td><td>0.8125</td><td>1.1875</td></tr>
+    <tr><td>19</td><td>0.6875</td><td>0.6875</td><td></td><td>44</td><td>0.8125</td><td>1.1875</td></tr>
+    <tr><td>20</td><td>0.6875</td><td>0.6875</td><td></td><td>45</td><td>0.8125</td><td>1.1875</td></tr>
+    <tr><td>21</td><td>0.6875</td><td>0.6875</td><td></td><td>46</td><td>0.8125</td><td>1.1875</td></tr>
+    <tr><td>22</td><td>0.6875</td><td>0.6875</td><td></td><td>47</td><td>1.1250</td><td>1.0625</td></tr>
+    <tr><td>23</td><td>1.1250</td><td>1.0625</td><td></td><td>48</td><td>0.6875</td><td>0.7500</td></tr>
+    <tr><td>24</td><td>1.1250</td><td>1.0625</td><td></td><td>49</td><td>0.7500</td><td>0.8125</td></tr>
+  </tbody>
+</table>
+
+<p>Items 50&ndash;95 were not attested in the corpus. An editor should preserve these bytes verbatim rather than synthesise them from the table; they are read by the physics engine on load.</p>
+
+<p><strong>The total length is <code>HDR + 8 + D</code> either way</strong>, which is why a walk can step over these records correctly while reading every field from the wrong place. The evidence, over the 1,405 DNA-carrying records in the corpus: the byte at <code>+13</code> is in <code>codeSet</code> 1,405/1,405 times (it is genome&mdash;<code>codeSet</code> is 16 of 256 values, hence not chance), the byte at <code>+253</code> is a valid item id 1,405/1,405, and the 240 bytes at <code>+12</code> are a legal genome 1,405/1,405. The ids at <code>+253</code> are also the right ones: <strong>Vial, Carcass, Bones, Dung and Diskette account for 1,386 of the 1,405.</strong></p>
+
+<p>The interior list&rsquo;s stride is therefore <code>HDR + 8</code>&mdash;<strong>53 bytes on v8</strong> and 49 on v9&ndash;12, plus 240 when the flag is set. Hard-coding 49 desynchronises every v8 save with interior items.</p>
+
+<p><strong>A ground item&rsquo;s coordinates are map pixels. An interior item&rsquo;s are room units</strong>, the same scale as a stabled horse&rsquo;s position (Section&nbsp;6.3), and the same 0&hellip;20 range applies.</p>
+
+<p>Item ids run 0&ndash;95, but only <strong>0&ndash;48 (<code>ItemHay</code> &hellip; <code>ItemMemory</code>)</strong> are objects the game places. Past 48 they are decorations, inventory icons and power-up glyphs. Ids 26&ndash;46 are the wardrobe subset a horse can wear.</p>
+
+<p><strong>The <code>+15+D</code> u16 is a per-item usage counter</strong>&mdash;RE_CONFIRMED by disassembly of the serializer (<code>0x14006d9a0</code>), a setter at <code>0x14005ce60</code> (reads the type&rsquo;s default from the item property table at <code>0x1403d5e70</code>), and a decrement-and-deplete path at <code>0x14005d5c6</code>: <code>dec [rbx+0x44]; jg keep; mov [rbx+0x11], 1; jmp remove</code>. When the counter reaches zero the item sets its depletion flag (entity+0x11 = 1) and is removed from the world. N hay bales or carcasses on the ground are still N separate type-3 records, each with its own counter.</p>
+
+<p>The halfW and halfH values at <code>+41+D</code> and <code>+45+D</code> are saved but immediately overwritten after loading by <code>0x14005caa0</code>, which recomputes them from the sprite database. The saved bytes are redundant; writing zeroes there would produce the same loaded state.</p>
+
+<h3 id="s6-3">6.3 Stabled Horses &mdash; Exact</h3>
+
+<p>The crowd walk steps over exactly <code>crowd</code> blocks, and the offsets it steps through <strong>are</strong> the horses&rsquo; genome starts:</p>
+
+<pre><code>ho = 0
+repeat crowd times:
+    genomeStart = nameOffset + 8 + nameLen + ho
+    ho += 240                                      // genome
+    ho += 39 + u32(genomeStart + 240 + 31)         // detail block + voice string
+    ho += 4 + u32(...) * 8                         // equipped items
+    ho += 4 + u32(...) * 4 + 8                     // trailing dword list, then the room position</code></pre>
+
+<p>6,472 stabled horses across the corpus with zero genome-validity failures. The block layout is Section&nbsp;9.2&rsquo;s, with the genome at offset 0.</p>
+
+<p><strong>Every stabled horse in the corpus has a record-table entry.</strong> Across all walkable files, no crowd member anywhere carries <code>recordIndex == -1</code>. An anonymous crowd member is a state the game does not write, so creating one is not a cosmetic shortcut&mdash;Section&nbsp;2.5 says what adding the entry costs.</p>
+
+<p><strong>The last 8 bytes of a crowd block are the horse&rsquo;s position inside the building</strong>&mdash;two f32s, x then y. It goes negative because the origin is not a corner of the room. Measured over 7,196 blocks across 128 files:</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>min</th><th>p1</th><th>median</th><th>p99</th><th>max</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>x</td><td>&minus;32.67</td><td>&minus;5.43</td><td>1.26</td><td>18.21</td><td>188.79</td></tr>
+    <tr><td>y</td><td>&minus;5.53</td><td>&minus;0.97</td><td>3.62</td><td>9.27</td><td>999.41</td></tr>
+  </tbody>
+</table>
+
+<p>Two things to know before writing this field. <strong>1,064 blocks (14.8%) are exactly <code>(0, 0)</code></strong> and the game loads them, so that reads as &ldquo;unplaced&rdquo; rather than corruption, and normalising it would change a seventh of every file&rsquo;s interior horses. And <strong>negatives are normal</strong>, not damage&mdash;the 1st percentile of x is &minus;5.4. Only 112 blocks (1.56%) fall outside &plusmn;5&hellip;25, and every one of those is in a hand-edited file.</p>
+
+<p>The practical rule, which this editor applies to anything a user types and to any horse or interior item it creates: <strong>a coordinate outside 0&hellip;20 becomes 5, and anything already in the file is left alone.</strong> Unlike the record X/Y of Section&nbsp;6.2, this pair is stored once, so there is no second copy to keep in step.</p>
+
+<h3 id="s6-4">6.4 The Tail &mdash; One Model, Four Special Cases</h3>
+
+<pre><code>tailLength = 4 (ownerFlag) + ownerBlock + EXTRA[index]
+
+    ownerBlock = 0                       when ownerFlag == 0
+               = 240 (one genome)        shops and one-off locations
+               = 480 (owner + champion)  the twelve stables, index 1..12</code></pre>
+
+<p><code>ownerFlag</code> at <code>tail+0</code> is the general gate: a location with no proprietor stores no genome and its tail is 240 bytes shorter. That one rule explains what looked like per-file outliers&mdash;The Secret Zoo is 244 bytes staffed and 4 unstaffed, Old Abandoned Track is 4 when derelict.</p>
+
+<p>Four indices do not follow it:</p>
+
+<table>
+  <thead>
+    <tr><th>index</th><th>location</th><th>rule</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>My House</td><td>fixed <strong>276</strong>. <code>+0</code> is not an owner flag, and the 240 bytes at <code>+4</code> are not a genome (Sections 13.2, 12.2)</td></tr>
+    <tr><td>13</td><td>Race Track</td><td>fixed <strong>929</strong>. <code>+0</code> is not an owner flag; seven state dwords (Section 6.5a) then the three Bookies (Section 6.5)</td></tr>
+    <tr><td>1&ndash;12</td><td>the stables</td><td><code>4 + 480 + 12</code>, <strong>+295</strong> when the Lost Horse flag at <code>tail+492</code> is set (Section 6.6)</td></tr>
+    <tr><td>22</td><td>Bubber&rsquo;s Hutch</td><td>six length-prefixed strings then 12 bytes (Section 6.7)</td></tr>
+  </tbody>
+</table>
+
+<p><code>EXTRA[index]</code> for everything else:</p>
+
+<table>
+  <thead>
+    <tr><th>index</th><th>location</th><th>tail (owner present)</th><th>EXTRA</th><th>decoded</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>14</td><td>Paddock</td><td>280</td><td>36</td><td>9 dwords &mdash; all RE_CONFIRMED (race/prize/spawn state)</td></tr>
+    <tr><td>15</td><td>Cave</td><td>248</td><td>4</td><td>one 0/1 flag</td></tr>
+    <tr><td>16</td><td>CRISPR Lab</td><td>264</td><td>20</td><td>3 flags + 2 wide</td></tr>
+    <tr><td>17</td><td>Sue&rsquo;s Glues</td><td>244</td><td>0</td><td>none</td></tr>
+    <tr><td>18</td><td>Clide&rsquo;s Rides</td><td>248</td><td>4</td><td><strong><code>carsGenerated</code></strong> at <code>tail+244</code> &mdash; Section 6.8</td></tr>
+    <tr><td>20</td><td>Lasso-Mart</td><td>256</td><td>12</td><td>3 stock counters</td></tr>
+    <tr><td>21</td><td>Tent</td><td>260</td><td>16</td><td>4 dwords</td></tr>
+    <tr><td>23</td><td>The Circus</td><td>264</td><td>20</td><td>5 flags</td></tr>
+    <tr><td>24</td><td>The Secret Zoo</td><td>244</td><td>0</td><td>none</td></tr>
+    <tr><td>25</td><td>O&rsquo;er Yonder Acres</td><td>252</td><td>8</td><td>2 small counters</td></tr>
+    <tr><td>26</td><td>Saloon</td><td>12</td><td>8</td><td><code>+4</code> int 0&ndash;34, <code>+8</code> 0/1</td></tr>
+    <tr><td>27</td><td>Power Plant</td><td>252</td><td>8</td><td>2 flags</td></tr>
+    <tr><td>28</td><td>Sweetie&rsquo;s House</td><td>252</td><td>8</td><td><code>+244</code> 0&ndash;8, <code>+248</code> 0&ndash;2</td></tr>
+    <tr><td>29</td><td>Sumo Ring</td><td>20</td><td>16</td><td><code>+4</code> rank?, <code>+8</code> int 0&ndash;1200, <code>+12</code> 0/1/5</td></tr>
+    <tr><td>30</td><td>Junk Shop</td><td>4</td><td>0</td><td>none</td></tr>
+    <tr><td>31</td><td>Bio-Hacker</td><td>4116</td><td>3872</td><td>8 counters + the vat matrix &mdash; Section 6.9</td></tr>
+    <tr><td>36</td><td>The Jockey Club</td><td>4</td><td>0</td><td>none</td></tr>
+    <tr><td>37</td><td>Old Abandoned Track</td><td>4</td><td>0</td><td>none &mdash; see below</td></tr>
+    <tr><td>38</td><td>Custom0 (<code>LocM</code>)</td><td>244</td><td>0</td><td>none; always unnamed, always crowd 2</td></tr>
+  </tbody>
+</table>
+
+<p>Each length is constant across every game-written save in the corpus (66&ndash;92 files per location), which is what makes the walk possible.</p>
+
+<p><strong>Anchor a tail field on EXTRA, not on <code>tail</code>.</strong> A tail-relative offset moves by 240 the moment a location loses its proprietor. The Paddock&rsquo;s money-like field reads <code>tail+272</code> staffed and <code>tail+32</code> unstaffed, and both are <code>EXTRA+28</code>. Only the four special indices above, whose <code>tail+0</code> is not an ownerFlag, have to be anchored on <code>tail</code>.</p>
+
+<p><strong>Index 37 was 36 bytes too long, and it mattered.</strong> An earlier draft gave Old Abandoned Track a 40-byte tail with <code>EXTRA = 36</code>, described as &ldquo;9 zero dwords in every normal save&rdquo;. Those nine dwords are not its tail&mdash;they are the <strong>trailing present-flags for indices 38&ndash;46</strong>. Index 37 is the last record in the array in every file that contains it, so its tail was the one length that could never be measured from a following record; it was measured to the <code>unknown</code> terminator instead, which swallowed the flags.</p>
+
+<p>An editor that deleted the location by splicing out <code>tailEnd &minus; nameOffset</code> therefore removed 36 bytes belonging to the flag array, shortening it from 48 slots to 39. The file still walked&mdash;the extra bytes were zeros either way&mdash;and <strong>the game crashed on load</strong>, because it iterates 48 slots and read the <code>unknown</code> record&rsquo;s bytes as the last nine. Re-adding the location restored them. Both halves were observed in-game before the cause was found. The corrected value is <code>4 + (ownerFlag ? 240 : 0) + 0</code>, and it is what makes Section&nbsp;6.1&rsquo;s slot count come out constant.</p>
+
+<h3 id="s6-5">6.5 The Bookies Live Inside Race Track&rsquo;s Tail</h3>
+
+<p>The three race officials do not need a search:</p>
+
+<pre><code>bookie[k] = raceTrack.tailStart + 36 + 299*k     for k in 0..2</code></pre>
+
+<p><strong>98 of 98</strong> files where Race Track exists, versions 8 through 12, returning the identical offsets as the old 1,200-byte forward search on every one.</p>
+
+<h3 id="s6-5a">6.5a Race Track&rsquo;s Own Fields &mdash; Seven State Dwords, Then Bookie Metadata</h3>
+
+<p>The Race Track serialize method (<code>0x14009B5E0</code>, Section&nbsp;12.2) writes <strong>seven</strong> u32 fields (tail+0 through tail+24 = 28 bytes), then three bookie entries. Each bookie is a presence flag (u32, 4 bytes) followed by the horse record when present. The first bookie&rsquo;s presence flag is at tail+28, its type dword at tail+32, and its genome at tail+36&mdash;which is why <code>BOOKIE_TAIL_OFFSET = 36</code>. The stride 299 = 4 (next flag) + 295 (minimal horse record). An earlier draft counted the first bookie&rsquo;s flag and type dword as state fields, giving &ldquo;nine dwords&rdquo;; the correct count is seven. Measured over the 131 corpus files with a Race Track:</p>
+
+<table>
+  <thead>
+    <tr><th>offset</th><th>observed</th><th>reading</th><th></th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>tail+0</code></td><td><code>0</code> in all 131</td><td><strong>active race count</strong> &mdash; concurrent tracks racing (global <code>0x1403EEED8</code>); always 0 in saves</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>tail+4</code></td><td>0&ndash;895, 36 distinct values</td><td><strong>races run</strong></td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>tail+8</code></td><td><code>{0, 2, 3}</code> &mdash; 48 / 3 / 80 files</td><td><strong>betting tier</strong> &mdash; snapshotted from races_run on phase 3&rarr;4</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>tail+12</code></td><td>0&ndash;3</td><td><strong>race phase</strong> &mdash; 10-state machine (0=idle, 3=betting, 4&ndash;9=racing transient)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>tail+16</code></td><td><code>{0, 1}</code></td><td><strong>bets made</strong> &mdash; set when phase enters state 3</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>tail+20</code></td><td><code>{0, 1}</code> &mdash; 62 / 69 files</td><td><strong>night race scheduled</strong> (0=none, 1=announced, 2=in-progress transient)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>tail+24</code></td><td><code>{0, 2}</code> &mdash; 120 / 11 files, never 1</td><td><strong>finish count</strong> &mdash; horses crossed finish line (0=not done, 2=complete)</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+  </tbody>
+</table>
+
+<p><code>tail+28</code> through <code>tail+35</code> are bookie metadata, not state fields. The value at <code>tail+28</code> (0&ndash;180, never exceeding races run) is the first bookie&rsquo;s presence flag; <code>tail+32</code> (always 1) is its type dword. The three named fields were read off in-game against a save; the corpus supplies the ranges and they agree. <code>tail+4</code> is the independently checkable one: 0&ndash;7 in every fresh save and 58&ndash;895 in the long-running ones. <code>tail+0</code> being constant zero is what confirms the anchor&mdash;nobody would call that a race count.</p>
+
+<p><strong>The hazard here is the upper bound.</strong> A tail-anchored field&rsquo;s only limit is <code>tailEnd</code>, 929 bytes away, so one more hand-added dword at <code>tail+36</code> would land inside the first Bookie&rsquo;s genome, read as a plausible small number, and write over somebody&rsquo;s DNA. Anything editing this region should check its resolved offsets against the Bookie offsets.</p>
+
+<h3 id="s6-6">6.6 The Lost Horse</h3>
+
+<p>The horse that goes missing from your ranch. A conditional slot at the end of every stable&rsquo;s tail:</p>
+
+<pre><code>u32(stable.tailStart + 492) == 1   &lt;=&gt;   a horse record at stable.tailStart + 496</code></pre>
+
+<p>55 files have flag 1 and the horse, 17 have flag 0 and no horse, none are inconsistent. Only Willaby Ranch&mdash;the starting ranch&mdash;is ever observed with the flag set, but the field exists on all twelve stables. The slot holds a complete <strong>stabled-shaped record</strong>, 295 bytes, detail block and all, so the Lost Horse has a name, an age, a personality and an item list. <code>tail+484</code> and <code>tail+488</code> are the <strong>breeding state</strong> (0=idle, 1=waiting for pair, 2=mating, 3=foal delivered) and <strong>foal notification flag</strong> (set once when breeding timer crosses 60 ticks). RE_CONFIRMED from the stable serialize method at <code>0x1400E3810</code>.</p>
+
+<h3 id="s6-7">6.7 Bubber&rsquo;s Hutch &mdash; Six Strings</h3>
+
+<p>The only genuinely variable-length tail, and it parses fully:</p>
+
+<pre><code>tail+0     u32   ownerFlag
+tail+4     240   owner genome
+then six length-prefixed UTF-8 strings:
+    [0] the owner            "Bubber"
+    [1] [2] [3] the rabbits  "Hee Haw", "Freyja", "Dave"
+    [4] the assembled riddle "&#9312;Hee Haw&#9313;, &#9314;Freyja&#9315;, or &#9316;Dave&#9317;"
+    [5] the answer           empty until solved, then e.g. "&#937;Horse&#9312;"
+then 12 bytes                FF FF FF FF and two zero dwords</code></pre>
+
+<p>String [5] being an empty <code>00 00 00 00</code> length is why this looked like five strings and a 16-byte trailer at first. Corpus tail lengths run 345 to 428 bytes and every one is reproduced exactly by this rule. Writing any of these strings changes the record&rsquo;s length, hence it is a splice rather than a patch.</p>
+
+<h3 id="s6-8">6.8 Clide&rsquo;s Rides &mdash; The Car Counter</h3>
+
+<p><code>tail + 244</code>, the last dword of the record, is the number of cars the lot has generated. It is the only field in that tail that ever varies, and across the corpus it takes exactly <code>{0, 2, 4, 6, 8}</code>&mdash;never higher, matching the reported cap of 8. It does not track the interior item count, so it is a running total rather than current stock.</p>
+
+<p>The same &ldquo;one small counter at the end of the tail&rdquo; shape appears elsewhere&mdash;Sweetie&rsquo;s House <code>tail+244</code> (0&ndash;8), O&rsquo;er Yonder Acres <code>tail+244</code> (0&ndash;3), Lasso-Mart <code>tail+244</code> (0&ndash;3)&mdash;so the slot is reused for whatever that location generates.</p>
+
+<h3 id="s6-9">6.9 The Bio-Hacker Vat Matrix</h3>
+
+<p>The largest tail in the file, and it decodes cleanly:</p>
+
+<pre><code>tail+0            u32    ownerFlag
+tail+4            240    owner genome
+tail+244 .. +275  8 x u32 counters      (tail+268 = the set-cell count, below)
+tail+276 .. +4115 960 x u32             the availability matrix</code></pre>
+
+<p><code>960 = 240 genes &times; 4 bases</code>, in gene-major order, every dword 0 or 1. A base becomes available to the simulation once you feed the vat a horse carrying it.</p>
+
+<p>Three independent confirmations. The arithmetic closes exactly: <code>4 + 240 + 32 + 3840 = 4116</code>. Under the gene-major reading a vat is <strong>either empty (all 240 genes at 0) or has every gene at 1 to 4</strong>&mdash;never 5, and in the corpus never a mix&mdash;which would be impossible by chance if the layout were wrong (richest save: 908 of 960 set, 191 genes at 4, 46 at 3, 3 at 2). And <strong><code>u32(tail + 268)</code> equals the number of set cells</strong> in every file that has a Bio-Hacker&mdash;a built-in checksum, and a free validity gate for any write to this region. That also makes the counter read-only on its own: editing it without the matrix breaks the invariant.</p>
+
+<p><em>Correction.</em> This paragraph used to say &ldquo;every gene has 2 to 4 bases set&rdquo;, which held for the richest save only. The 84-file corpus: 59 vats entirely empty; in the 25 non-empty ones, genes at 1/2/3/4 = 4,153 / 1,453 / 285 / 109, and no gene at 0. <strong>Feeding adds the bases on both strands</strong> (user-confirmed): a gene where the fed genome carries the same base twice gains one cell, which is why 1 is common after only a genome or two. The empty-or-full rule has rare exceptions in play (user report); the corpus has none.</p>
+
+<p><strong>Column <code>k</code> is the base&rsquo;s index in the gene&rsquo;s <code>n</code> priority string</strong>&mdash;the same 0-based index the genome byte packs (<code>n1</code>/<code>n2</code> minus 1), <strong>not</strong> ACGT order. Confirmed by a controlled probe (<code>beforevatprobe.dat</code> &rarr; <code>aftervatprobe.dat</code>): an empty vat was fed one genome whose even genes were homozygous for <code>n[3]</code> and odd genes <code>n[3]</code>/<code>n[2]</code>. Result: 360 cells set = 120 genes at 1 + 120 at 2; every even gene gained exactly column 3 whatever the letter (A 30, C 26, G 29, T 35 genes), every odd gene exactly columns 2 and 3; 191 genes decisive for priority order, 0 for ACGT, 0 inconsistent with both. Only the matrix and <code>tail+268</code> changed&mdash;the other seven counters were identical before and after.</p>
+
+<h3 id="s6-10">6.10 The <code>unknown</code> Record</h3>
+
+<p>The <strong>last</strong> location record in every file is named <code>unknown</code>, sits outside the index array, and has coordinates <code>(0, 0)</code>. On <code>save1.dat</code> it carries <code>crowd = 6</code> and 146 interior items. It is the vial world&rsquo;s interior&mdash;an interior with no map exit, which is why its coordinates are zero and why its entrance position lives in the global player block instead (Chapter&nbsp;3).</p>
+
+<p>The bytes after the <code>unknown</code> record are its <strong>tail</strong>. The tail is <strong>exactly 20 bytes</strong> in every corpus file (verified: <code>tailEnd == fileSize</code> with 0 bytes after in 100% of files). The layout is:</p>
+
+<table>
+  <thead>
+    <tr><th>Offset</th><th>Type</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>+0</code></td><td>u32</td><td>ownerFlag = 0 (standard location-tail prefix; this location never has an owner)</td></tr>
+    <tr><td><code>+4</code></td><td>u32</td><td>visit counter (cycles 0&ndash;5, increments per tick, resets to 0 at 5)</td></tr>
+    <tr><td><code>+8</code></td><td>u32&rarr;bool</td><td>state flag: set to <code>(special_mode == 0)</code> on counter reset</td></tr>
+    <tr><td><code>+12</code></td><td>u32&rarr;bool</td><td>same as <code>+8</code></td></tr>
+    <tr><td><code>+16</code></td><td>u32&rarr;bool</td><td>always 1 on counter reset</td></tr>
+  </tbody>
+</table>
+
+<p>The <code>+0</code> ownerFlag is written by the <strong>outer location-tail wrapper</strong> (same as every other location), not by the vial world&rsquo;s own virtual serialize at <code>0x1400FBC00</code>. That virtual method writes only the 16 bytes at <code>+4..+19</code> (4 &times; u32). The &ldquo;16-byte virtual serialize&rdquo; and the &ldquo;20-byte tail&rdquo; are both correct: 4 (ownerFlag) + 16 (payload) = 20. The flush routine writes no footer bytes; <code>tailEnd == fileSize</code> is confirmed across the whole corpus.</p>
+
+<h3 id="s6-10a">6.10a Crowd Counts Are Not Free &mdash; Most Locations Are Never Empty</h3>
+
+<p>Measured across every walkable file, per index:</p>
+
+<table>
+  <thead>
+    <tr><th>locations</th><th>crowd range</th><th>files with <code>crowd == 0</code></th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1&ndash;12 (the twelve stables)</td><td>1&ndash;20</td><td><strong>0</strong></td></tr>
+    <tr><td>15, 16, 17, 18, 20, 23, 25, 26, 27, 31, 36, 38</td><td>1&ndash;17</td><td><strong>0</strong></td></tr>
+    <tr><td>0, 13, 14, 21, 22, 24, 28, 29, 30, 37</td><td>0&ndash;41</td><td>some</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Twenty-four of the thirty-four location indices are never once written with an empty crowd</strong>, all twelve stables among them. This is a hard constraint on creating a location, not a statistical curiosity: an editor that adds a stable with <code>crowd = 0</code> produces a state the game has never written, and the game crashes on load. Adding the same location with one cloned horse is the difference. The Secret Zoo, which loads fine when added empty, is one of the indices where <code>crowd = 0</code> is attested.</p>
+
+<p>The same point holds for interiors. The Junk Shop carries 49&ndash;50 interior records&mdash;its merchandise&mdash;and the Bio-Hacker, CRISPR Lab, Sweetie&rsquo;s House and My House all carry substantial ones. A location whose contents <em>are</em> the location has to be created with them.</p>
+
+<h3 id="s6-11">6.11 What Is Left</h3>
+
+<table>
+  <thead>
+    <tr><th>Aspect</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Which location is which</td><td><span class="badge">STRUCTURAL</span> &mdash; index = gid &minus; 97 (Chapters 5, 6.1)</td></tr>
+    <tr><td>Finding each record</td><td><span class="badge">STRUCTURAL</span> &mdash; the present-flag array (6.1)</td></tr>
+    <tr><td>Location position</td><td><span class="badge">STRUCTURAL</span> &mdash; stored twice, marker and record (6.2)</td></tr>
+    <tr><td>Which horses are stabled where</td><td><span class="badge">STRUCTURAL</span> &mdash; the crowd walk (6.3)</td></tr>
+    <tr><td>Interior items</td><td><span class="badge">STRUCTURAL</span> &mdash; version-aware stride (6.2)</td></tr>
+    <tr><td>Owner / champion / Lost Horse / Bookies</td><td><span class="badge">STRUCTURAL</span> (6.4&ndash;6.6)</td></tr>
+    <tr><td>Record length</td><td><span class="badge">STRUCTURAL</span> &mdash; computed, not measured (6.4)</td></tr>
+    <tr><td>Slot-array length</td><td><span class="badge der">DERIVED</span> &mdash; 48 on v11/v12, 38 on v8&ndash;v10 (6.1)</td></tr>
+    <tr><td><code>crowdOrdinal</code></td><td><span class="badge re">CONFIRMED</span> &mdash; an ordinal into the location&rsquo;s own crowd (6.2)</td></tr>
+    <tr><td>Race Track&rsquo;s races run / betting tier / bets made</td><td><span class="badge re">CONFIRMED</span> &mdash; read in-game, range-checked over 131 files (6.5a)</td></tr>
+    <tr><td>What most tail counters <em>mean</em></td><td><strong>LARGELY CLOSED</strong> &mdash; all locations decoded except Bubber&rsquo;s Hutch strings</td></tr>
+  </tbody>
+</table>
+
+<p>Nothing in the location path is scanned any more, and the heuristic residue is zero. Two findings closed it: 55 of the 61 residue genome runs were the Lost Horse slot (6.6), and the last 6 were the ordinary crowd of the unnamed location at index 38, unreachable while index 37&rsquo;s tail length was wrong (6.4).</p>
+
+<p>The walk is checked against the type-2 marker set rather than against the old scanner, because the markers are structural and the scanner is a heuristic. Where they disagree&mdash;one v8 file&mdash;the walk is right: the scanner&rsquo;s extra entry is <code>SweetieVoice</code>, a horse&rsquo;s voice string that happens to look like a <code>[length][printable][crowd]</code> header.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 7 ============================ -->
+<h2 id="ch7">Chapter 7: Player Inventory</h2>
+
+<p>Six 12-byte triplets at <code>tableEnd + 0x40</code>:</p>
+
+<pre><code>slot k:  tableEnd + 0x40 + 12*k + 0   u32  owned     (0/1)
+                              + 4     u32  quantity
+                              + 8     u32  infinite  (0/1)</code></pre>
+
+<p>Slot order comes from the sprite definitions, which name exactly six inventory icons in this order:</p>
+
+<table>
+  <thead>
+    <tr><th>Slot</th><th>Item</th><th>absolute</th><th>relative to <code>yoff</code> (<code>= tableEnd + 0x38</code>)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td><strong>Trumpet</strong></td><td><code>tableEnd + 0x40</code></td><td><code>yoff + 8</code></td></tr>
+    <tr><td>1</td><td><strong>Lasso</strong></td><td><code>tableEnd + 0x4C</code></td><td><code>yoff + 20</code></td></tr>
+    <tr><td>2</td><td><strong>Shovel</strong></td><td><code>tableEnd + 0x58</code></td><td><code>yoff + 32</code></td></tr>
+    <tr><td>3</td><td><strong>Gun</strong></td><td><code>tableEnd + 0x64</code></td><td><code>yoff + 44</code></td></tr>
+    <tr><td>4</td><td><strong>Fence</strong></td><td><code>tableEnd + 0x70</code></td><td><code>yoff + 56</code></td></tr>
+    <tr><td>5</td><td><strong>Balloon</strong></td><td><code>tableEnd + 0x7C</code></td><td><code>yoff + 68</code></td></tr>
+  </tbody>
+</table>
+
+<p>Three things support the reading. The six <code>owned</code> flags form a <strong>strict prefix chain</strong> in 104 of 105 files&mdash;only <code>100000</code>, <code>110000</code>, <code>111000</code>, <code>111110</code> and <code>111111</code> occur&mdash;hence tools unlock in slot order, and clearing one in the middle writes a state the game has never produced. Quantities behave like the items they name: slot 4 (Fence) is the only one that ever holds a bulk count, 60 in one file and 85 in another. And <code>after-more-upgrades.dat</code> shows a blanket edit landing on all six at once&mdash;quantities <code>1,0,0,0,0,0 &rarr; 21,20,20,20,20,20</code>&mdash;where slot 0&rsquo;s 21 is 1 + 20, because it already held the Trumpet the player starts with.</p>
+
+<p>Slot 0 is the correction worth stating: there is a <strong>sixth slot above Lasso</strong>, and it is owned with <code>quantity = 1</code> in every file in the corpus including a fresh 50-credit game. Balloon is a full triplet too, not a lone on/off flag.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 8 ============================ -->
+<h2 id="ch8">Chapter 8: Truck Upgrades</h2>
+
+<p>The Truck is the single <strong>type-1</strong> world item. Its payload is five dwords starting at <code>truckStart + 41 + S</code>, which is <code>yoff + 12</code> where <code>yoff = truckStart + 29 + S</code> is the Truck&rsquo;s Y coordinate.</p>
+
+<table>
+  <thead>
+    <tr><th>Offset</th><th>Field</th><th>Confidence</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>yoff + 12</code></td><td><strong>Stripe</strong> &mdash; speed stripes</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>yoff + 16</code></td><td><strong>Lift</strong> &mdash; suspension</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>yoff + 20</code></td><td><strong>Rambar</strong> &mdash; charge ram</td><td><span class="badge der">DERIVED</span></td></tr>
+    <tr><td><code>yoff + 24</code></td><td>u32&rarr;bool &mdash; <strong>BalloonShadow destination</strong> &mdash; truck routing flag</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td><code>yoff + 28</code></td><td>u32&rarr;bool &mdash; <strong>Cas9 destination</strong> &mdash; truck routing to CRISPR location</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+  </tbody>
+</table>
+
+<p>Confirmed by four controlled before/after pairs in the save folder, evidently made for exactly this purpose: <code>noparts.dat</code> reads <code>000</code>, <code>stripes.dat</code> <code>100</code>, <code>beforeupgrade.dat</code> &rarr; <code>afterupgrade.dat</code> goes <code>100 &rarr; 110</code> across one 500-credit purchase, and <code>before-ram.dat</code> &rarr; <code>after-ram.dat</code> goes <code>110 &rarr; 111</code>. The sprite definitions name exactly three upgrades in the same order&mdash;<code>ItemStripe</code>, <code>ItemLift</code>, <code>ItemRambar</code>&mdash;each with an owned and an unavailable icon.</p>
+
+<p>Across the corpus the three flags form a monotone prefix in 104 of 105 files; the one violation is hand-edited. The two further booleans are <strong>truck routing flags</strong>&mdash;RE_CONFIRMED from the Truck&rsquo;s action handler (<code>vtable+0x30</code>). <code>yoff+24</code> (<code>obj+0xAD</code>) is a BalloonShadow destination flag: when set, the truck routes to a &ldquo;BalloonShadow&rdquo; location instead of its normal route. <code>yoff+28</code> (<code>obj+0xAC</code>) is a Cas9 destination flag: when set, the truck routes to the CRISPR &ldquo;Cas9&rdquo; location. A hard guard prevents both from being set simultaneously (<code>if [+0xAC] != 0, skip the +0xAD write</code>), which is why the corpus never has both set.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 9 ============================ -->
+<h2 id="ch9">Chapter 9: Horse Containers and the Horse Record</h2>
+
+<h3 id="s9-1">9.1 Four Containers</h3>
+
+<p>All four meet at one identity: <strong><code>detailOff = genomeStart + 248</code></strong>&mdash;240 bytes of genome, an 8-byte gap, then the detail block.</p>
+
+<table>
+  <thead>
+    <tr><th>Container</th><th>How found</th><th>Count in corpus</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>On map</td><td>world-item walk, type 0</td><td>31,002</td></tr>
+    <tr><td>Stabled</td><td>location crowd walk (6.3)</td><td>8,795</td></tr>
+    <tr><td>Bookies</td><td>Race Track <code>tail + 36</code>, stride 299 (6.5)</td><td>3 per save</td></tr>
+    <tr><td>Owner / champion / Lost Horse</td><td>location tail (6.4&ndash;6.6)</td><td>1&ndash;3 per location</td></tr>
+  </tbody>
+</table>
+
+<p>Only the first two can be deleted individually. A Bookie and an owner sit in fixed-length parts of a tail, so removing one means rewriting the tail rather than splicing a record out.</p>
+
+<h3 id="s9-2">9.2 Length</h3>
+
+<p>A type-0 record&rsquo;s own length, which is also how to step over one:</p>
+
+<pre><code>detailOff = start + HDR + 248
+voiceLen  = u32(detailOff + 23)
+itemCount = u32(detailOff + 31 + voiceLen)
+xCount    = u32(detailOff + 35 + voiceLen + 8*itemCount)
+length    = detailOff - start + 4 + 59 + voiceLen + 8*itemCount + 4*xCount</code></pre>
+
+<p><strong>14,013 of 14,052 corpus records are the minimal shape</strong>&mdash;<code>voiceLen</code>, <code>itemCount</code> and <code>xCount</code> all zero, giving a fixed 352 bytes at <code>HDR = 41</code>. That is the one worth cloning when you need to add a horse, because it is fixed-length and carries no inherited worn items, hence no length-field surgery.</p>
+
+<p>A stabled block is the same fields at a different base: <code>voiceLen</code> at <code>genomeStart + 271</code>, and the minimum block is 295 bytes plus its variable parts plus the 8-byte room position of Section&nbsp;6.3. The two containers differ only after the item list&mdash;stabled ends 12 bytes later (xCount field + float pair), on-map 28 (xCount field + float pair + 16-byte wrapper trailer)&mdash;and only the on-map record carries a world-item header.</p>
+
+<p>The type-0 wrapper trailer <strong>is 16 bytes</strong>, not 13: the last field (<code>container+0xB8</code>) is written as a U8 value zero-extended to a 32-bit dword by the tail call at <code>0x140075790</code>.</p>
+
+<h3 id="s9-3">9.3 The Detail Block</h3>
+
+<p>Offsets from <code>detailOff</code> (confirmed by disassembling the horse detail serializer at <code>0x14006ed90</code> and the stabled deserializer at <code>0x14006f0d0</code>):</p>
+
+<pre><code>+0    i32  record index                  -1 = unnamed        entity+0x1F8
++4    u16  speed rating                  race speed score    entity+0x220
++6    u8   status                                            entity+0x1C
++7    u8   age                                               entity+0x1FC
++8    u8   win count                     race wins           entity+0x21C
++9    u8   personality                                       entity+0x284
++10   u8   notification-4 pending        triggers virtual callback  entity+0x214  RE_CONFIRMED
++11   u8   effect index                  -1=none, &#8805;0=active  entity+0x234
++12   u8   notify flag                   event pending       entity+0x210
++13   u8   linked ref                    entity ref, -1=none entity+0x1CC
++14   u8   flags (see below)
++15   f32  bounding-box halfW                                entity+0x1D4
++19   f32  bounding-box halfH                                entity+0x1D8
++23   u32  voice string length, then that many bytes         entity+0x168
+...   u32  entity+0xC0 (4 bytes, written one byte at a time by W_U32_BYTEWISE)
+...   u32  worn item count, then 8 bytes each (i32 index + i32 value, skips &#8722;1 slots)
+...   u32  x-list count, then 4 bytes each (i32 entries from entity+0x40 array)
+...   f32[2]  world/room position (*entity+0x40+0x40, written by horse detail serializer)
+; on-map only:
+...   u8   container+0x70
+...   u8   container+0xBC
+...   u16  container+0x74
+...   u16  container+0x78
+...   u16  container+0xB4
+...   i32  container+0x7C
+...   u32  container+0xB8 (U8 value zero-extended to 32 bits)</code></pre>
+
+<p><strong>Flags byte at <code>+14</code></strong>&mdash;all 8 bits confirmed by disassembly of <code>0x14006ed90</code> and <code>0x14006f0d0</code>:</p>
+
+<table>
+  <thead>
+    <tr><th>bit</th><th>meaning</th><th>entity offset</th><th></th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0x01</td><td>locomotion reversed (moving backwards)</td><td>entity+0x1A</td><td><span class="badge re">RE_CONFIRMED</span></td></tr>
+    <tr><td>0x02</td><td>location&rsquo;s own horse</td><td>entity+0x204</td><td></td></tr>
+    <tr><td>0x04</td><td>Hungry</td><td>entity+0x205</td><td></td></tr>
+    <tr><td>0x08</td><td>Tired</td><td>entity+0x206</td><td></td></tr>
+    <tr><td>0x10</td><td>taming approach stage (non-zero = set)</td><td>entity+0x160</td><td></td></tr>
+    <tr><td>0x20</td><td>Ragdoll</td><td>entity+0x22</td><td></td></tr>
+    <tr><td>0x40</td><td>unconfirmed (no gameplay consumer found)</td><td>entity+0x23</td><td></td></tr>
+    <tr><td>0x80</td><td>always 0 (never written)</td><td>&mdash;</td><td></td></tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr><th>field</th><th>values</th><th>corpus range</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>status</td><td>0 Normal, 1 Hot, 2 Tipsy, 3 Sick, 4 Drunk, 5 ?, 6 Dead</td><td>0&ndash;7 across 40,266 horses, and 0 in 98.7% of them. A real 7 exists and has no known name</td></tr>
+    <tr><td>age</td><td>0&ndash;11</td><td>0&ndash;11 across the map, stabled, Bookie and Lost Horse containers. Nothing above 11</td></tr>
+    <tr><td>personality</td><td>0 Normal, 1 Preppy, 2 Grumpy, 3 Brainy, 4 Swaggy, 5 Cutey, 6 Baby, 7 Haughty, 8 Leprechaun, 9 Algernon de Horsey, 10 Sweetie, 11 Car, 12 ?, 13 Rude</td><td><strong>0&ndash;7 for all 31,002 on-map horses</strong>, no exceptions. 8&ndash;13 appear only on named NPCs in a crowd, 227 of 8,795 stabled horses</td></tr>
+  </tbody>
+</table>
+
+<p>That last row is the rule for creating a horse: <strong>0&ndash;7 is the ordinary range</strong> and 8 upwards are special cases the game assigns deliberately. A new horse of this editor&rsquo;s making gets age 1, status 0 and a personality drawn from 0&ndash;7.</p>
+
+<h3 id="s9-4">9.4 The Owner and Champion Containers Have No Detail Block</h3>
+
+<p>A location tail&rsquo;s owner and champion genomes are followed by the <strong>location&rsquo;s</strong> own tail fields, not by a horse detail block. Reading <code>detailOff + 6/7/9</code> there returns whatever the tail holds: across the corpus the &ldquo;age&rdquo; of an owner ranges to 120 and its &ldquo;personality&rdquo; to 255, which is exactly what garbage looks like.</p>
+
+<p>So anything that writes a horse&rsquo;s age, personality, status or worn items must exclude those two containers by construction, or it will write into a location&rsquo;s counters. The map, stabled, Bookie and Lost Horse containers all have a real detail block and are safe.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 10 ============================ -->
+<h2 id="ch10">Chapter 10: The Genome</h2>
+
+<h3 id="s10-1">10.1 Encoding</h3>
+
+<p>240 bytes, one per gene, in raw gene-id order. The same block appears in a horse record, in a location tail, and inside a type-3 item that carries DNA.</p>
+
+<p><strong>Each byte packs a pair of alleles</strong>&mdash;<span class="badge re">RE_CONFIRMED</span> by disassembling the genome encoder at <code>0x14006d380</code>. The game stores alleles at runtime as 0-based indices (0..3) in two 240-byte strands at entity <code>+0x2B8</code> (dominant) and <code>+0x3A8</code> (recessive). The encoder loops 40 iterations &times; 6 genes and for each gene computes <code>(strand_B[i] + 1) &lt;&lt; 3 | (strand_A[i] + 1)</code>, which is the same <code>n2 * 8 + n1</code> formula with 1-based indices. A gene&rsquo;s <code>n</code> attribute in the gene definitions is a 4-letter priority order, e.g. <code>"ATCG"</code>:</p>
+
+<pre><code>byte  = n2 * 8 + n1                    n1, n2 in 1..4
+pair  = n[byte % 8 - 1] + n[(byte - byte % 8) / 8 - 1]</code></pre>
+
+<p>Only 16 byte values are therefore legal, and they are the <code>codeSet</code>:</p>
+
+<pre><code>9, 10, 11, 12, 17, 18, 19, 20, 25, 26, 27, 28, 33, 34, 35, 36</code></pre>
+
+<p><strong>A byte outside that set is not a genome byte.</strong> This is the cheapest structural check in the file: a 240-byte run entirely inside <code>codeSet</code> is a genome, because <code>codeSet</code> is 16 of 256 values and nothing else matches by chance. <strong>0 is not legal</strong>, so a zeroed genome is corrupt rather than blank.</p>
+
+<h3 id="s10-2">10.2 Genome Hash</h3>
+
+<p>The <strong>u32 immediately after the genome</strong>&mdash;at <code>genomeStart + 240</code>, the first half of the 8-byte gap&mdash;is a <strong>genome hash</strong>, not a per-horse identity. Within a file, every duplicate group turns out to be horses that share a genome, 576 of 576 in the reference save. Across 109 unrelated saves, 18,730 of 18,736 distinct genomes (99.97%) map to exactly one value&mdash;a lineage or session id could not agree across unrelated files, but a hash must.</p>
+
+<p><strong>Carry the hash with the genome, and never invent one.</strong> Copying one horse&rsquo;s genes without its hash leaves the copy carrying the donor&rsquo;s hash for genes that are no longer the donor&rsquo;s. That state is tolerated&mdash;it is what any gene edit already leaves an existing horse in, and such files have been loading and playing for a long time, which is itself the best evidence the game recomputes the hash on load&mdash;but writing a random value there is simply wrong.</p>
+
+<h3 id="s10-3">10.3 Trait Expression</h3>
+
+<p>The trait value a gene expresses comes from its <code>g</code> values and its <code>m</code> dominance percentage in the gene definitions: <code>m &gt;= 100</code> means the dominant allele wins outright, and below that the two blend by percentage. That is presentation rather than format&mdash;the file stores only the pair.</p>
+
+<p>For the text format the tools exchange (<code>HH:SEQUENCE</code>, two lines per helix, zero-padded), the 240 genes group into 20 helices by a fixed table carried in the tools&rsquo; gene-data module.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 11 ============================ -->
+<h2 id="ch11">Chapter 11: If You Are Writing an Editor</h2>
+
+<p>The short list of things that will bite you, each with its section:</p>
+
+<ol>
+  <li><strong>Never insert into the record table anywhere but the end</strong> (Section 2.5). Nothing will complain and every name after the insertion will belong to the wrong horse.</li>
+  <li><strong>Clear parent links on any record block copied between files</strong> (Section 2.5).</li>
+  <li><strong>Key locations by the type-2 index byte, not by name or by ordinal</strong> (Sections 5.1, 5.3).</li>
+  <li><strong>Keep the present-flag array at its full length</strong> (Section 6.1). Shortening it crashes the game, and index 37&rsquo;s tail is the trap that causes it (Section 6.4).</li>
+  <li><strong>Write both copies of a location&rsquo;s coordinates</strong> (Section 6.2).</li>
+  <li><strong>Write &ldquo;none&rdquo; to the crowd ordinal when a deletion empties or shrinks a crowd past it</strong>&mdash;and leave a still-valid one alone (Section 6.2).</li>
+  <li><strong>Seed a new location with at least the crowd the game is observed to write</strong> (Section 6.10a).</li>
+  <li><strong>Read an item&rsquo;s id and coordinates through the DNA flag</strong> (Section 6.2). The payload is spliced in at <code>+12</code>, and a record whose length is right can still have every field read from the wrong place.</li>
+  <li><strong>Use <code>HDR + 8</code> for the interior stride</strong>, not a hard-coded 49 (Section 6.2).</li>
+  <li><strong>Anchor a tail field on EXTRA, not on <code>tail</code></strong> (Section 6.4), and bound a tail-anchored one against what follows it rather than against <code>tailEnd</code> (Section 6.5a).</li>
+  <li><strong>Check family against id on every tile you write</strong> (Section 4.5).</li>
+  <li><strong>Carry a genome&rsquo;s hash with the genome</strong> (Chapter 10), and refuse a genome with a byte outside <code>codeSet</code>.</li>
+  <li><strong>Do not write detail-block fields on an owner or champion</strong> (Section 9.4). They have no detail block.</li>
+  <li><strong>Clamp a room coordinate you invent, and leave the ones already in the file</strong> (Section 6.3).</li>
+  <li><strong>Preserve the PRNG seed at 0x04&ndash;0x0B</strong> (Section 2.2a). Changing it changes the visual appearance of every horse. Carry it verbatim from the source file.</li>
+</ol>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 12 ============================ -->
+<h2 id="ch12">Chapter 12: Reverse-Engineered Code Addresses</h2>
+
+<p>Addresses in <code>Horsey.exe</code> (4,374,528 bytes, x86-64 PE) for the save I/O path. All are build-specific. Re-anchoring a function against a different build proceeds by matching the distinctive instruction sequences and global references quoted alongside each address; the primitives in Section&nbsp;12.3 in particular are short, unique, and stable anchors.</p>
+
+<h3 id="s12-1">12.1 Save I/O Functions</h3>
+
+<table>
+  <thead>
+    <tr><th>Address</th><th>Size</th><th>Function</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x14006db90</code></td><td>2,014 B</td><td><strong>Save writer</strong> &mdash; writes the entire <code>.dat</code> file</td></tr>
+    <tr><td><code>0x14006e380</code></td><td>2,559 B</td><td><strong>Save loader</strong> &mdash; reads and populates game state</td></tr>
+    <tr><td><code>0x14006d520</code></td><td>368 B</td><td><strong>Container serializer</strong> &mdash; shared by main world and locations: writes name, crowd, interiors, coordinates, owner flag + genome</td></tr>
+    <tr><td><code>0x14006d380</code></td><td>259 B</td><td><strong>Genome encoder</strong> &mdash; packs 480-byte runtime genome to 240-byte file format with <code>(B+1)&lt;&lt;3 | (A+1)</code></td></tr>
+    <tr><td><code>0x1400c8240</code></td><td>131+ B</td><td><strong>Record table writer</strong> &mdash; writes header bytes 0x04&ndash;0x13, recordCount, and each record entry</td></tr>
+    <tr><td><code>0x1400c84d0</code></td><td>&mdash;</td><td><strong>Record table reader</strong> &mdash; reads header and record table on load</td></tr>
+    <tr><td><code>0x14006ed90</code></td><td>&mdash;</td><td><strong>World item serializer</strong> &mdash; writes one world-item record (type, header, payload)</td></tr>
+    <tr><td><code>0x1400FE3D0</code></td><td>1,018 B</td><td><strong>Location factory</strong> &mdash; creates location objects by index; switch dispatch</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s12-2">12.2 Location Class Dispatch</h3>
+
+<p>Every location type has its own C++ class with a vtable. The factory at <code>0x1400FE3D0</code> dispatches by index. <code>vtable+0xB0</code> is serialize (writer), <code>vtable+0xB8</code> is deserialize (reader). Locations marked &ldquo;stub&rdquo; have <code>EXTRA = 0</code>&mdash;their serialize is <code>ret 0</code> at <code>0x14000C4B0</code>.</p>
+
+<table>
+  <thead>
+    <tr><th>Idx</th><th>Location</th><th>Constructor</th><th>Serialize</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0&ndash;12</td><td>stables + My House</td><td><code>0x1400DB730</code></td><td><code>0x1400E3810</code></td><td>shared; My House branches at index == 0</td></tr>
+    <tr><td>13</td><td>Race Track</td><td><code>0x14008F740</code></td><td><code>0x14009B5E0</code></td><td>7 fields + 3 Bookies</td></tr>
+    <tr><td>14</td><td>Paddock</td><td><code>0x14005F9C0</code></td><td><code>0x140063E40</code></td><td>9 fields, fully decoded</td></tr>
+    <tr><td>15</td><td>Cave</td><td><code>0x14005BE20</code></td><td><code>0x14005C850</code></td><td>1 bool</td></tr>
+    <tr><td>16</td><td>CRISPR Lab</td><td><code>0x140088040</code></td><td><code>0x14008CB10</code></td><td>3 bools + u32 + index</td></tr>
+    <tr><td>17</td><td>Sue&rsquo;s Glues</td><td><code>0x1400A6D50</code></td><td>stub</td><td>EXTRA = 0</td></tr>
+    <tr><td>18</td><td>Clide&rsquo;s Rides</td><td><code>0x14008DEB0</code></td><td><code>0x14008F710</code></td><td>1 field (cars generated)</td></tr>
+    <tr><td>19</td><td>Lab (unused)</td><td><code>0x1400BFB30</code></td><td>stub</td><td></td></tr>
+    <tr><td>20</td><td>Lasso-Mart</td><td><code>0x14007DC30</code></td><td><code>0x140080600</code></td><td>3 u32s</td></tr>
+    <tr><td>21</td><td>Tent</td><td><code>0x140057B40</code></td><td><code>0x14005B910</code></td><td>4 fields</td></tr>
+    <tr><td>22</td><td>Bubber&rsquo;s Hutch</td><td><code>0x140064480</code></td><td><code>0x140065D00</code></td><td>6 strings + 12 bytes</td></tr>
+    <tr><td>23</td><td>The Circus</td><td><code>0x1400379E0</code></td><td><code>0x14003C820</code></td><td>1 vestigial + 4 event flags</td></tr>
+    <tr><td>24</td><td>Secret Zoo</td><td><code>0x140112990</code></td><td>stub</td><td>EXTRA = 0</td></tr>
+    <tr><td>25</td><td>O&rsquo;er Yonder Acres</td><td><code>0x14002F0F0</code></td><td><code>0x140030620</code></td><td>1 u32 + 1 bool</td></tr>
+    <tr><td>26</td><td>Saloon</td><td><code>0x140069DF0</code></td><td><code>0x14006C9F0</code></td><td>1 u32 + 1 bool</td></tr>
+    <tr><td>27</td><td>Power Plant</td><td><code>0x140067D50</code></td><td><code>0x140069D30</code></td><td>1 bool + 1 u32</td></tr>
+    <tr><td>28</td><td>Sweetie&rsquo;s House</td><td><code>0x1400F5340</code></td><td><code>0x1400F9F20</code></td><td>2 u32s</td></tr>
+    <tr><td>29</td><td>Sumo Ring</td><td><code>0x14007AD50</code></td><td><code>0x14007D9B0</code></td><td>3 u32s + 1 bool</td></tr>
+    <tr><td>30</td><td>Junk Shop</td><td><code>0x140067740</code></td><td>stub</td><td>EXTRA = 0</td></tr>
+    <tr><td>31</td><td>Bio-Hacker</td><td><code>0x140030940</code></td><td><code>0x140036560</code></td><td>8 fields + 960-dword vat</td></tr>
+    <tr><td>36</td><td>Jockey Club</td><td><code>0x14003E720</code></td><td>stub</td><td>EXTRA = 0 (44B tail in tool-saves is artifact)</td></tr>
+    <tr><td>37</td><td>Old Abandoned Track</td><td><code>0x14002CD80</code></td><td>stub</td><td>EXTRA = 0</td></tr>
+    <tr><td>38</td><td>Secret Cave (&ldquo;Mike&rdquo;)</td><td><code>0x14005E200</code></td><td><code>0x14005F960</code></td><td></td></tr>
+    <tr><td>47</td><td>GifLand</td><td><code>0x14005B9E0</code></td><td>stub</td><td>only in factory, not in corpus</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s12-3">12.3 I/O Primitives</h3>
+
+<p>All jump to a common dispatcher at <code>0x140076510</code> that advances the stream position. The global buffer pointer is at <code>0x1403EBD20</code>.</p>
+
+<table>
+  <thead>
+    <tr><th>Address</th><th>File bytes</th><th>Operation</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x1400756b0</code></td><td>4</td><td>write u32 from <code>ecx</code></td></tr>
+    <tr><td><code>0x140075790</code></td><td>4</td><td>write <code>movzx(cl)</code> as u32 &mdash; boolean-as-dword</td></tr>
+    <tr><td><code>0x1400757b0</code></td><td>4</td><td>write f32 from <code>xmm0</code></td></tr>
+    <tr><td><code>0x1400757d0</code></td><td>8</td><td>write two f32s from <code>rcx</code> (low/high dwords)</td></tr>
+    <tr><td><code>0x140075750</code></td><td>1</td><td>write u8 from <code>cl</code></td></tr>
+    <tr><td><code>0x1400756f0</code></td><td>2</td><td>write u16 from <code>cx</code></td></tr>
+    <tr><td><code>0x140075710</code></td><td>8</td><td>write u64 from <code>rcx</code></td></tr>
+    <tr><td><code>0x140075770</code></td><td>4</td><td>write u32 from <code>ecx</code> (alternate entry)</td></tr>
+    <tr><td><code>0x140075690</code></td><td>0</td><td><strong>get position</strong> &mdash; returns <code>(current &minus; start)</code> in eax, writes nothing</td></tr>
+    <tr><td><code>0x1400755e0</code></td><td>0</td><td><strong>allocate buffer</strong> &mdash; <code>ecx</code> = size (250,000 for saves)</td></tr>
+    <tr><td><code>0x140075630</code></td><td>0</td><td><strong>flush to file</strong> &mdash; writes the buffer to disk</td></tr>
+  </tbody>
+</table>
+
+<p>Read-side equivalents: <code>0x140075bc0</code> (read u32 into <code>[rcx]</code>), <code>0x140075de0</code> (read u32 return eax), <code>0x140075ec0</code> (read u32 &rarr; bool at <code>[rcx]</code>), <code>0x140075f10</code> (read f32), <code>0x140075f60</code> (read f32 pair), <code>0x140075cf0</code> (read i16), <code>0x140075e70</code> (read raw byte).</p>
+
+<h3 id="s12-4">12.4 Location Serialization &mdash; Virtual Dispatch</h3>
+
+<p>Each location&rsquo;s tail is written by a <strong>virtual method</strong> at <code>vtable + 0xB0</code>. The container serializer (<code>0x14006d520</code>) writes the common structure (name, crowd, interior items, coordinates, owner flag + genome), then the save writer calls <code>[vtable+0xB0]</code> for the location-specific tail. Different location types (My House, Race Track, Bio-Hacker, etc.) each have their own implementation.</p>
+
+<p>The <code>unknown</code> record&rsquo;s virtual serialize (<code>vtable+0xB0</code>) is the last write before the file is flushed, so the 20-byte file trailer is part of its output.</p>
+
+<h3 id="s12-5">12.5 Key Globals</h3>
+
+<table>
+  <thead>
+    <tr><th>Address</th><th>Contents</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0x1403F45C0</code></td><td>u64 PRNG seed, written to file header at 0x04</td></tr>
+    <tr><td><code>0x1403F45B8</code></td><td>u32 cyclic index, written to file header at 0x0C</td></tr>
+    <tr><td><code>0x1403F45F0</code> / <code>0x1403F45F8</code></td><td>record table vector begin / end (136 bytes per entry in memory)</td></tr>
+    <tr><td><code>0x1403EBD20</code></td><td>file write-stream current pointer</td></tr>
+    <tr><td><code>0x1403DB720</code> / <code>0x1403DB728</code></td><td>xorshift64 RNG state / saved seed</td></tr>
+  </tbody>
+</table>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 13 ============================ -->
+<h2 id="ch13">Chapter 13: Corpus Health and Open Questions</h2>
+
+<h3 id="s13-1">13.1 Corpus Health</h3>
+
+<p>Six files fail every hypothesis, all recognisable artifacts:</p>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Failure</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>desync1.dat</code>, <code>desync2.dat</code>, <code>save1 (2)xad4.dat</code></td><td>bad type dword in the world-item block (v12)</td></tr>
+    <tr><td><code>save1 - Copy (30).dat</code>, <code>save1 - Copy (31).dat</code></td><td>truncated at 6,131 bytes</td></tr>
+    <tr><td><code>save1_bak.bak.dat</code></td><td>0 bytes</td></tr>
+  </tbody>
+</table>
+
+<p>A loader must reject all six with a message naming the offending offset or record, and never crash.</p>
+
+<p>Four more load cleanly here and crash the game, which is worth knowing because they look fine to a reader: <code>bad-save.dat</code> carries the illegal tile pair of Section&nbsp;4.5, and <code>crash1.dat</code>, <code>crash1 - Copy.dat</code> and <code>save1 - Copy (57).dat</code> carry the dangling crowd ordinal of Section&nbsp;6.2. Both are cheap to check for on load.</p>
+
+<h3 id="s13-2">13.2 Open Questions, Ranked</h3>
+
+<blockquote>
+  <p><strong>Closed by reverse engineering:</strong> header dwords 0x04/0x08/0x0C (2.2a); all global block fields decoded &mdash; <code>+0x00</code> world X, <code>+0x04</code> year, <code>+0x08</code> circuit tier, <code>+0x0C</code> sim speed, <code>+0x10</code> sleep counter, <code>+0x14</code> Money, <code>+0x18</code> tutorial step, <code>+0x1C</code> treasure map flag, <code>+0x20</code> first-place bonus, <code>+0x24</code> digs completed, <code>+0x28</code> deprecated, <code>+0x2C</code> race participation, <code>+0x30</code> has-completed-race, <code>+0x3C</code> annual win flag, <code>+0x88..+0xEF</code> race leaderboard (3.1); record byte +5 (redundant name colour) and dword +14 (reserved zero); genome encoding (Chapter 10); float pair at genome-end +23/+27 = body bounding-box extents; crowd ordinal = selected-entity index (6.2); 48-slot count hard-coded (6.1); 20-byte trailer = unknown record&rsquo;s virtual serialize (12.4); Paddock 9 fields fully decoded; Circus 5 fields decoded; location vtable dispatch table complete (12.2); type-3 item trailing float pair = per-item-type bounding-box half-extents (6.2 table); 20-byte tail = 4B ownerFlag + 16B vial payload, tailEnd==fileSize confirmed (6.10); detail block fields +4/+5 (speedRating), +8 (winCount), +10 (raceAgedFlag), +11 (effectIndex), +12 (notifyFlag), +13 (linkedRef), all 8 flag bits at +14, bounding-box pair at +15..+22, mystery field (entity+0xC0) after voice string, and the 16-byte on-map wrapper trailer breakdown &mdash; all confirmed by disassembling <code>0x14006ed90</code> and <code>0x14006f0d0</code> (9.3). Gap at genomeStart+244 = behavioral countdown timer (entity+0x2AC). Type-3 item fields fully resolved: <code>+14+D</code> entity class code = 23 hardcoded for all world items (<code>0x1400a8720</code>); <code>+15+D</code> u16 = item usage counter (default from property table <code>0x1403d5e70</code> via <code>0x14005ce60</code>, decremented at <code>0x14005d5c6</code>); <code>+17+D</code> u32 = tick counter (incremented per update, apple tree spawns apple at 60 ticks); <code>+21+D</code> u32 = always 0, reserved; <code>+25+D</code>/<code>+29+D</code> f32 pair = velocity (vx, vy), 0.0 for static items. halfW/halfH saved but recomputed post-load by <code>0x14005caa0</code>.</p>
+</blockquote>
+
+<ol>
+  <li><p><strong>My House&rsquo;s 240-byte payload</strong> at <code>tail+4</code> (Section 6.4). The per-type serialize at <code>0x1400E3810</code> writes it via <code>W_GENOME(obj+0x25C)</code>&mdash;the same champion-genome slot stables 1&ndash;12 use. My House (index 0) repurposes that slot for non-genome data. The genome encoder applies its <code>(B+1)&lt;&lt;3|(A+1)</code> packing to whatever bytes are there, so the 240-byte output does not resemble a genome. To recover the original 480 bytes, reverse the packing per gene. <strong>What the 60 floats represent is still <span class="badge open">OPEN</span></strong>&mdash;likely world-state or progression data stored on My House because the player always has one.</p></li>
+
+  <li><p><strong>The per-location tail counters</strong> &mdash; <strong>CLOSED.</strong> Every location with custom tail fields is now decoded: Paddock 9/9, Race Track 7/7, Circus 5/5, CRISPR Lab 5/5, Bio-Hacker 8/8, Stables 3/3, Cave 1/1, Tent 4/4, Lasso-Mart 3/3, Saloon 2/2, Power Plant 2/2, Sweetie&rsquo;s House 2/2, O&rsquo;er Yonder Acres 2/2, Sumo Ring 4/4. Only Bubber&rsquo;s Hutch (6 strings, needs in-game observation) remains undecoded.</p></li>
+
+  <li><p><strong>The record&rsquo;s byte <code>+5</code> and dword <code>+14</code></strong> &mdash; <strong>CLOSED.</strong> Byte <code>+5</code> is a redundant copy of <code>nc</code> (byte <code>+1</code>, name colour); 0xFF for NPC records. No runtime reader. Dword <code>+14</code> is a reserved zero&mdash;always 0, no runtime reader, placeholder for an unimplemented feature.</p></li>
+
+  <li><p><strong>Truck dwords 4 and 5</strong> &mdash; <strong>CLOSED.</strong> BalloonShadow and Cas9 truck routing flags (Chapter 8).</p></li>
+
+  <li><p><strong>The float pair at genome-end +23/+27</strong> &mdash; <strong>CLOSED.</strong> Body bounding-box extents (half-width and half-height in world units). Written from <code>entity+0x1D4</code> as a qword via <code>W_F32_PAIR</code>. Derived from 4 genome phenotype floats plus a small xorshift64 jitter (<code>(phenotype[k]+1) + rand * (phenotype[k+2]-2)</code>). The ~0.11% per-genome variation comes from the 16-bit RNG resolution (<code>1/65536</code>), which is why inheriting from a donor is safe.</p></li>
+
+  <li><p><strong>The type-3 item trailing 8-byte float pair (<code>+41+D</code>/<code>+45+D</code>)</strong> &mdash; <strong>CLOSED.</strong> Per-item-type bounding-box half-extents (halfW at <code>+41+D</code>, halfH at <code>+45+D</code>) in game units. Constant per item type across every save in the corpus; the full table for ids 0&ndash;49 is in Section 6.2. Same mechanism as the horse extents (item 5 above): the same <code>W_F32_PAIR</code> writer serialises both. An editor must preserve these bytes verbatim&mdash;they are consumed by the physics engine on load.</p></li>
+
+  <li><p><strong>Header dwords <code>0x04</code>/<code>0x08</code>/<code>0x0C</code></strong> &mdash; <strong>CLOSED</strong> (Section 2.2a). <strong>The global block&rsquo;s <code>+0x88..+0xEF</code> tail</strong> &mdash; <strong>CLOSED</strong>&mdash;race leaderboard: <code>{losses, wins}</code> per player slot, 13 entries (Section 3.1).</p></li>
+
+  <li><p><strong>The 20-byte file trailer</strong> &mdash; <strong>CLOSED.</strong> The <code>unknown</code> record&rsquo;s tail is <strong>20 bytes</strong> (ownerFlag=0 + 16 bytes of vial-world payload). The virtual serialize at <code>0x1400FBC00</code> writes the 16-byte payload; the universal 4-byte ownerFlag prefix explains the remainder. No flush footer. <code>tailEnd == fileSize</code> in 100% of corpus files (Section 6.10).</p></li>
+
+  <li><p><strong>The Jockey Club&rsquo;s 44-byte tail</strong>&mdash;its serialize is a <strong>stub</strong> (<code>ret 0</code> at <code>0x14000C4B0</code>), so the game never writes EXTRA bytes for it. The 44-byte tail in tool-built saves is an artifact, not game-produced data. Confirmed EXTRA = 0.</p></li>
+</ol>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ CH 14 ============================ -->
+<h2 id="ch14">Chapter 14: Conclusion</h2>
+
+<h3 id="s14-1">14.1 Summary of Contributions</h3>
+
+<p>This thesis has presented a complete structural, semantic, and reverse-engineered analysis of the Horsey Game save file format. The principal contributions are:</p>
+
+<ol>
+  <li><strong>A complete byte-level map</strong> of the save file, from header to trailer, accounting for every byte in the live reference save.</li>
+  <li><strong>A confidence taxonomy</strong> distinguishing STRUCTURAL, DERIVED, OPEN, and RE_CONFIRMED claims, enabling future researchers to assess the reliability of each assertion.</li>
+  <li><strong>The record table structure</strong>, including the bidirectional pedigree link system and the critical rule that records may only be appended, never inserted.</li>
+  <li><strong>The global player block</strong> (0xF0 bytes), with all fields decoded and confirmed by disassembly and controlled experimentation.</li>
+  <li><strong>The RLE tile stream</strong> encoding, including the family/id growth agreement rule that, when violated, desynchronises the entire map.</li>
+  <li><strong>The indexed location array</strong>, version-dependent (48 slots on v11/v12, 38 on v8&ndash;v10), with the present-flag structure and the critical warning about index 37&rsquo;s tail length.</li>
+  <li><strong>Location identity</strong> as a hard numeric id from the Tiled gid, with a complete index &rarr; location mapping.</li>
+  <li><strong>The location record body</strong>, including crowd, interior items, coordinates, and the crowd ordinal with its strict editorial rules.</li>
+  <li><strong>The per-location tail system</strong>, with the owner flag, EXTRA table, and four special cases (My House, Race Track, stables, Bubber&rsquo;s Hutch).</li>
+  <li><strong>The Bookies</strong>, <strong>the Lost Horse</strong>, <strong>the Bio-Hacker vat matrix</strong>, and all other location-specific data structures.</li>
+  <li><strong>The 240-byte genome encoding</strong>, with the <code>codeSet</code> validity check and the genome hash.</li>
+  <li><strong>Player inventory</strong>, <strong>Truck upgrades</strong>, and <strong>horse detail blocks</strong>.</li>
+  <li><strong>A set of editorial imperatives</strong> for any tool that reads or writes the format.</li>
+  <li><strong>A catalogue of reverse-engineered code addresses</strong> for the save I/O path.</li>
+</ol>
+
+<h3 id="s14-2">14.2 Implications for Game Preservation</h3>
+
+<p>The Horsey Game save format is a case study in bespoke serialization: tightly packed, version-dependent, intolerant of desynchronization, yet entirely decodable through systematic reverse engineering. The format&rsquo;s design reflects the game&rsquo;s needs&mdash;equine genetics, location state, world persistence&mdash;without the overhead of general-purpose frameworks. For preservationists, this thesis provides the means to read, verify, and migrate saves across versions, and to repair corrupted files.</p>
+
+<h3 id="s14-3">14.3 Future Work</h3>
+
+<p>Several avenues remain open:</p>
+
+<ul>
+  <li><strong>My House&rsquo;s 240-byte payload</strong>: the 60 floats stored there are likely world-state or progression data, but their meaning is not yet established. Recovering the original 480 bytes by reversing the genome packing is a first step.</li>
+  <li><strong>Bubber&rsquo;s Hutch&rsquo;s six strings</strong>: these parse fully, but the riddle&rsquo;s in-game behaviour needs observation to confirm the semantics.</li>
+  <li><strong>The Jockey Club&rsquo;s stub serialize</strong>: the 44-byte tail in tool-built saves is an artifact, but its origin could be traced.</li>
+  <li><strong>Version migration</strong>: the format changed between v8 and v12 (someCount stride, HDR size, slot count). A complete migration guide would be valuable for preservation.</li>
+  <li><strong>The <code>someCount</code> array</strong>: its four u16 fields are written and read, but their semantic meaning is not fully documented here.</li>
+</ul>
+
+<h3 id="s14-4">14.4 Final Remarks</h3>
+
+<p>The Horsey Game save file is a dense, precise artifact. Every byte has a purpose, every offset is load-bearing, and every deviation from the game&rsquo;s own writer is a potential crash. This thesis has aimed to document the format so completely that a reader can write a correct editor from it alone&mdash;and so that future researchers can build on its findings without re-deriving them. The format rewards careful study: it is a window into the game&rsquo;s architecture, a testament to the craftsmanship of its developers, and a challenge to anyone who would modify it. For the PhD candidate whose professor is a devoted Horsey Game fan, this thesis offers not only a technical reference but a tribute to the game&rsquo;s enduring complexity.</p>
+
+<a class="backtotop" href="#toc">&uarr; back to contents</a>
+<hr>
+
+<!-- ============================ REFERENCES ============================ -->
+<h2 id="refs">References</h2>
+
+<ol>
+  <li><strong>Corpus.</strong> Every <code>.dat</code> file under the game&rsquo;s save directory, versions 8 through 12. 148 files; 142 parse and walk end to end.</li>
+  <li><strong>Reference save.</strong> <code>save1 - working.dat</code>.</li>
+  <li><strong>All-locations reference.</strong> <code>locs-template.dat</code>, a game-written v12 save holding all 34 location indices at once.</li>
+  <li><strong>Game executable.</strong> <code>Horsey.exe</code>, 4,374,528 bytes, x86-64 PE.</li>
+  <li><strong>Game assets consulted as oracles.</strong> The Tiled map and its location tileset (<code>horsey.tmx</code>, <code>locs.tsx</code>, <code>locs.xml</code>, <code>locs.png</code>); the sprite definition set (<code>data/sprites.xml</code>); the gene definition set (<code>data/genes.xml</code>).</li>
+  <li><strong>Controlled before/after pairs.</strong> <code>beforeupgrade.dat</code> / <code>afterupgrade.dat</code>; <code>before-ram.dat</code> / <code>after-ram.dat</code>; <code>noparts.dat</code>; <code>stripes.dat</code>; <code>beforevatprobe.dat</code> / <code>aftervatprobe.dat</code>; <code>after-more-upgrades.dat</code>.</li>
+  <li><strong>Single-location experimental saves.</strong> <code>abandoned.dat</code>; <code>sumo-save.dat</code>; <code>save1 - Copy (45..49).dat</code>.</li>
+  <li><strong>Known-artifact saves.</strong> <code>desync1.dat</code>; <code>desync2.dat</code>; <code>save1 (2)xad4.dat</code>; <code>save1 - Copy (30).dat</code>; <code>save1 - Copy (31).dat</code>; <code>save1_bak.bak.dat</code>; <code>bad-save.dat</code>; <code>crash1.dat</code>; <code>crash1 - Copy.dat</code>; <code>save1 - Copy (57).dat</code>.</li>
+</ol>
+
+<p class="dedication">This thesis is dedicated to the Horsey Game, its developers, and every player who ever wondered what lay inside <code>save1.dat</code>.</p>
+
+</div>
+</body>
+</html>
