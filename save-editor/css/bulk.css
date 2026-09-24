@@ -1,7 +1,3 @@
-/* css/bulk.css — the Bulk workspace (plan section 5.5, phase 6): a 2-pane layout, operations
-   list on the left, operation-specific parameters on the right. No toolbar row — the mockup
-   doesn't need one, so js/workspaces/bulk.js fills the pane body directly. */
-
 .bk-root {
     display: flex;
     width: 100%;
@@ -9,8 +5,6 @@
     min-height: 0;
     background: var(--bg-1);
 }
-
-/* ---- operations list ---- */
 .bk-ops {
     flex: 0 0 260px;
     max-width: 300px;
@@ -43,8 +37,6 @@
 }
 .bk-op:hover { background: var(--bg-3); color: var(--text-0); }
 .bk-op.active { background: var(--bg-4); border-color: var(--border); color: var(--text-0); font-weight: 600; }
-
-/* ---- parameters panel ---- */
 .bk-params {
     flex: 1;
     min-width: 0;
@@ -55,14 +47,11 @@
     gap: var(--sp-4);
 }
 .bk-empty { margin: auto; color: var(--text-2); text-align: center; padding: var(--sp-6); }
-
 .bk-op-header { padding-bottom: var(--sp-3); border-bottom: 1px solid var(--border-soft); }
 .bk-op-title { font-size: 16px; font-weight: 600; color: var(--text-0); }
 .bk-op-desc { font-size: 12px; color: var(--text-1); margin-top: var(--sp-1); }
-
 .bk-section { display: flex; flex-direction: column; gap: var(--sp-2); }
 .bk-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-2); text-transform: uppercase; margin-bottom: var(--sp-1); }
-
 .bk-check-row, .bk-radio-row, .bk-radio-line {
     display: flex;
     align-items: center;
@@ -70,11 +59,6 @@
     padding: 3px 0;
     font-size: var(--font-base);
 }
-/* Round-4 feedback F3: .bk-check-label is flex:1 so the trailing count/input lands on a tidy
-   right-aligned column -- but .bk-params fills the pane, so at 1920 that stretched a 60px label
-   to 1533px and threw the count ~1.5k px away from what it counts. Capping the row keeps the
-   alignment and the association. .bk-radio-line was always fine (no flex:1 label), which is why
-   the Population dropdown looked right. */
 .bk-check-row { max-width: 360px; }
 .bk-check-row.bk-onelocation { max-width: 460px; }
 .bk-check-label { flex: 0 0 auto; min-width: 140px; }
@@ -95,26 +79,31 @@
     color: var(--warn);
     font-size: 11px;
 }
-
 .bk-radio-line select, .bk-inline-select {
     margin-left: 26px;
     max-width: 260px;
 }
-.bk-pools {
+.bk-inline-libpicker {
     margin-left: 26px;
+    max-width: 320px;
+    display: block;
+}
+.bk-indent { margin-left: 26px; max-width: 420px; margin-top: 0; }
+.bk-check-row.bk-legalize { max-width: 460px; }
+.bk-legalize select { flex: 1; max-width: 220px; }
+.bk-roll-line { display: flex; align-items: center; gap: var(--sp-2); }
+.bk-roll-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.bk-roll-box {
+    flex: 0 0 150px;
+    height: 110px;
     display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    max-width: 420px;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-3);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
 }
-.bk-pool-textarea {
-    min-height: 70px;
-    font-family: monospace;
-    font-size: 11px;
-    resize: vertical;
-    padding: var(--sp-2);
-}
-
 .bk-footer {
     margin-top: auto;
     padding-top: var(--sp-3);

@@ -1,6 +1,5 @@
-/* css/app.css — shell: app bar, rail, docks, status bar, modals, toasts.
-   One window, no page scroll (plan section 5.1). Every pane scrolls independently. */
 * { box-sizing: border-box; }
+html[data-build="deploy"] .dev-only { display: none !important; }
 html, body {
     height: 100%;
     margin: 0;
@@ -29,15 +28,12 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 6px; }
-
 #shell {
     height: 100dvh;
     display: grid;
     grid-template-rows: var(--h-appbar) 1fr;
     grid-template-columns: 1fr;
 }
-
-/* ---- app bar ---- */
 #appbar {
     grid-row: 1;
     display: flex;
@@ -54,7 +50,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 #appbar .doc-info .dirty-dot { color: var(--warn); }
 #appbar .spacer { flex: 1; }
 #appbar .btn-group { display: flex; gap: var(--sp-2); flex-shrink: 0; }
-
 .btn {
     display: inline-flex;
     align-items: center;
@@ -71,15 +66,12 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .btn.primary { background: var(--accent); border-color: var(--accent-strong); color: var(--accent-text); font-weight: 600; }
 .btn.primary:hover:not(:disabled) { background: var(--accent-strong); }
 .btn.icon { padding: 5px 8px; }
-
-/* ---- body: rail + workspace ---- */
 #body {
     grid-row: 2;
     display: grid;
     grid-template-columns: var(--w-rail) 1fr;
     min-height: 0;
 }
-
 #rail {
     grid-column: 1;
     background: var(--bg-0);
@@ -104,7 +96,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 #rail .rail-btn:hover { background: var(--bg-2); color: var(--text-0); }
 #rail .rail-btn.active { color: var(--text-0); border-left-color: var(--accent); background: var(--bg-2); }
 #rail .rail-spacer { flex: 1; }
-
 #workspace-column {
     grid-column: 2;
     display: grid;
@@ -112,7 +103,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
     min-height: 0;
     min-width: 0;
 }
-
 #context-toolbar {
     grid-row: 1;
     display: flex;
@@ -125,7 +115,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 }
 .toolbar-content { display: none; align-items: center; width: 100%; height: 100%; }
 .toolbar-content.active { display: flex; }
-
 #workspace-body {
     grid-row: 2;
     min-height: 0;
@@ -146,7 +135,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
     text-align: center;
     padding: var(--sp-6);
 }
-
 #statusbar {
     grid-row: 3;
     display: flex;
@@ -160,8 +148,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
     overflow: hidden;
     white-space: nowrap;
 }
-
-/* ---- problems chip (section 22.9) ---- */
 .status-note { color: var(--text-2); margin-right: var(--sp-3); }
 .problem-chip {
     border: 1px solid var(--warn, #c90); border-radius: 3px; background: none;
@@ -176,8 +162,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .problems-heading.warn { color: var(--warn, #c90); }
 .problems-list { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); }
 .problems-list li { margin-bottom: var(--sp-2); overflow-wrap: anywhere; }
-
-/* ---- changes panel (section 22.8) ---- */
 .dirty-dot.changes-btn {
     border: none; background: none; cursor: pointer; font: inherit; color: inherit;
     padding: 0; text-decoration: underline dotted; text-underline-offset: 2px;
@@ -195,14 +179,8 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .changes-row:hover { background: var(--bg-2); }
 .changes-num { color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
 .changes-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Visible at rest, not on hover: undoing back to a point is the reason this list exists, and
-   a modal is not a place where people go hunting for hover affordances. */
 .changes-undo { flex: 0 0 auto; padding: 1px 6px; opacity: 0.5; }
 .changes-row:hover .changes-undo { opacity: 1; }
-
-/* ---- focus chip (section 22.4) ---- */
-/* The one thing selected anywhere, and the workspaces that can show it. Sits between the two
-   status spans, so it takes the middle of a `space-between` row without either side moving. */
 .focus-chip {
     display: flex;
     align-items: center;
@@ -222,15 +200,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .focus-chip .focus-go.here { opacity: 1; cursor: default; text-shadow: 0 0 6px var(--accent, #6ab04c); }
 .focus-chip .focus-clear { border: none; background: none; cursor: pointer; color: var(--text-2); padding: 0 2px; }
 .focus-chip .focus-clear:hover { color: var(--text-0); }
-
-/* ---- empty-document state ---- */
-/* Absolutely positioned, and ABOVE the workspace panes. #workspace-body is the
-   positioning context and every .workspace-pane is `position:absolute; inset:0` — and
-   js/app.js ends its init with switchWorkspace(), which activates the World pane
-   immediately. So an #empty-state left in normal flow sits UNDER a full-bleed pane and
-   its "Open save" button cannot be clicked at all: the pane is transparent where the
-   canvas has not drawn, so it looks fine and swallows the pointer. Nothing else changes;
-   loadFromBytes() already hides this element the moment a save is open. */
 #empty-state {
     position: absolute;
     inset: 0;
@@ -243,8 +212,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
     background: var(--bg-1);
     color: var(--text-1);
 }
-
-/* ---- toasts (ui/toast.js) ---- */
 #toast-stack {
     position: fixed;
     right: var(--sp-5);
@@ -270,8 +237,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .toast.warn { border-left-color: var(--warn); }
 .toast.bad { border-left-color: var(--bad); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-/* ---- settings drawer (plan section 5.6) — a right-side drawer, not a workspace ---- */
 #settings-backdrop {
     position: fixed;
     inset: 0;
@@ -280,10 +245,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
     z-index: 1500;
 }
 #settings-backdrop.show { display: block; }
-/* z-index ABOVE #settings-backdrop's 1500. Both are position:fixed, so the one with a
-   stacking index wins regardless of document order — without this the backdrop covered
-   the drawer and every click inside it hit the backdrop's only listener, which is
-   close(). The drawer looked drawn and was entirely inert. */
 #settings-drawer {
     position: fixed;
     z-index: 1501;
@@ -313,13 +274,6 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .diag-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: var(--sp-3); }
 .diag-table td, .diag-table th { padding: 3px 6px; border-bottom: 1px solid var(--border-soft); text-align: left; }
 .radio-row { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); font-size: 12px; }
-
-/* ---- modals (ui/modal.js) — replaces alert()/confirm()/prompt() everywhere (plan M11) ----
-   A CLASS rule, not an ID rule: ui/modal.js's own dynamically-created backdrop has
-   id="modal-backdrop", but static modals declared straight in index.html (e.g. #resizeModal)
-   only carry class="modal-backdrop" with their own distinct id — an ID-selector version of
-   this rule would silently not apply to those and leave them visible-by-default (found during
-   phase 4 review: #resizeModal was exactly this, always rendered inline since nothing hid it). */
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -345,4 +299,131 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focu
 .modal.wide { max-width: min(760px, 92vw); }
 .modal-body { padding: var(--sp-4); overflow: auto; color: var(--text-1); }
 .modal-body ul { margin: var(--sp-2) 0; padding-left: var(--sp-5); }
+.hp-canvas { display: block; image-rendering: pixelated; }
+.hp-panel {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--bg-2);
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+.hp-panel-head {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-3);
+    background: none;
+    border: none;
+    color: var(--text-1);
+    font-size: calc(var(--font-base) - 1px);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+.hp-panel-head:hover { color: var(--text-0); background: var(--bg-3); }
+.hp-panel-chevron { color: var(--text-2); }
+.hp-panel.collapsed .hp-panel-body { display: none; }
+.hp-panel-body {
+    padding: var(--sp-2) var(--sp-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+.hp-box {
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-3);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.hp-panel .hp-bg .bg-swatch { border-color: var(--border); }
+.hp-panel .hp-bg .bg-swatch:hover { border-color: var(--text-2); }
+.hp-panel .hp-bg .bg-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.hp-panel .hp-bg .bg-swatch[data-bg=""] {
+    background:
+        linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 0 0 / 8px 8px,
+        linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 4px 4px / 8px 8px,
+        var(--bg-3);
+}
 .modal-footer { padding: var(--sp-4); border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; gap: var(--sp-3); }
+.split-handle {
+    flex: 0 0 6px;
+    width: 6px;
+    min-width: 6px;
+    position: relative;
+    cursor: col-resize;
+    background: transparent;
+    touch-action: none;
+    outline: none;
+}
+.split-handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    margin-left: -0.5px;
+    background: var(--border);
+}
+.split-handle:hover::after,
+.split-handle.dragging::after { background: var(--accent); }
+.split-handle:focus-visible { box-shadow: var(--focus-ring); }
+body.narrow-layout .split-handle,
+.split-handle.split-handle-hidden { display: none; }
+.libpicker { position: relative; display: inline-flex; min-width: 0; }
+.libpicker-host { display: inline-flex; min-width: 190px; }
+.libpicker-input {
+    width: 100%;
+    padding: 3px 8px;
+    font-size: inherit;
+}
+.libpicker-input::placeholder { color: var(--text-2); }
+.libpicker-list {
+    position: fixed;
+    z-index: 60;
+    max-height: min(320px, 50vh);
+    overflow-y: auto;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-1);
+    padding: var(--sp-1) 0;
+}
+.libpicker-group {
+    padding: 3px var(--sp-3) 2px;
+    color: var(--text-2);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.libpicker-option {
+    padding: 4px var(--sp-3);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.libpicker-option:hover { background: var(--bg-4); }
+.libpicker-option.active { background: var(--accent); color: var(--accent-text); }
+.libpicker-option.active .libpicker-match { color: inherit; }
+.libpicker-option.current:not(.active) { color: var(--accent); }
+.libpicker-empty {
+    padding: 6px var(--sp-3);
+    color: var(--text-2);
+    font-size: var(--font-base);
+    white-space: normal;
+}
+.libpicker-match {
+    background: none;
+    color: var(--accent);
+    font-weight: 600;
+}

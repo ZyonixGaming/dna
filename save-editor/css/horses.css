@@ -1,7 +1,4 @@
-/* css/horses.css — 🐎 Horses workspace (plan section 5.3, phase 3). */
-
 .workspace-pane[data-workspace="horses"] { flex-direction: column; }
-
 .hz-root {
     display: flex;
     flex-direction: column;
@@ -10,8 +7,6 @@
     min-height: 0;
     min-width: 0;
 }
-
-/* ---- toolbar ---- */
 .hz-toolbar {
     display: flex;
     align-items: center;
@@ -26,23 +21,16 @@
 .hz-chip { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--text-1); white-space: nowrap; }
 .hz-spacer { flex: 1; }
 .hz-count { color: var(--text-2); white-space: nowrap; }
-
-/* ---- 3-pane body ---- */
 .hz-body {
     flex: 1;
     min-height: 0;
     min-width: 0;
     display: grid;
-    /* F2: properties used to be the flexible 1fr column, so on a wide screen it swallowed
-       ~1270px for content that is at most ~400px wide. Pin it instead and let the roster
-       (truncated names) and the genome textarea absorb the width. */
-    grid-template-columns: minmax(260px, 1fr) minmax(360px, 440px) minmax(280px, 1fr);
+    grid-template-columns: var(--hz-roster-w, 340px) 6px minmax(420px, 1fr) 6px var(--hz-genome-w, 340px);
 }
 @media (max-width: 1499px) {
-    .hz-body { grid-template-columns: minmax(220px, 1fr) minmax(340px, 420px) minmax(240px, 1fr); }
+    .hz-body { grid-template-columns: var(--hz-roster-w, 300px) 6px minmax(420px, 1fr) 6px var(--hz-genome-w, 300px); }
 }
-
-/* ---- roster (left) ---- */
 .hz-roster {
     display: flex;
     flex-direction: column;
@@ -61,8 +49,6 @@
 }
 .hz-player-label { color: var(--text-1); white-space: nowrap; }
 .hz-player-money { width: 120px; }
-/* Player panel: inventory + Truck upgrades (plan section 15.13). Sits under the money row in
-   the roster column, so it scrolls with the roster rather than stealing fixed chrome. */
 .hz-player-toggle {
     background: none; border: none; color: var(--text-1); cursor: pointer;
     font: inherit; padding: 0 2px; white-space: nowrap;
@@ -80,7 +66,6 @@
 .hz-inv-name { flex: 1; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .hz-inv-qty { width: 76px; }
 .hz-inv-inf { display: flex; align-items: center; gap: 2px; color: var(--text-2); }
-
 .hz-roster-scroll {
     flex: 1;
     min-height: 0;
@@ -90,7 +75,6 @@
 }
 .hz-roster-spacer { position: relative; width: 100%; }
 .hz-roster-rows { position: absolute; top: 0; left: 0; right: 0; will-change: transform; }
-
 .hz-row {
     padding: var(--sp-2) var(--sp-4);
     border-bottom: 1px solid var(--border-soft);
@@ -104,7 +88,6 @@
 .hz-row-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hz-row-name.unnamed { color: var(--text-2); font-weight: 400; font-style: italic; }
 .hz-row-line2 { color: var(--text-2); font-size: calc(var(--font-base) - 1px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
-
 .hz-badge {
     flex-shrink: 0;
     font-size: 10px;
@@ -118,14 +101,9 @@
 .hz-badge-map { color: var(--info); }
 .hz-badge-stabled { color: var(--ok); }
 .hz-badge-official { color: var(--warn); }
-/* The fourth container (plan section 15.4): a genome held in a location's record tail.
-   One muted colour for all three roles -- they share the trait that matters here, that
-   there is no detail block behind them. */
 .hz-badge-owner,
 .hz-badge-champion,
 .hz-badge-lost { color: var(--text-2); }
-
-/* ---- properties (middle) ---- */
 .hz-props, .hz-genome {
     min-height: 0;
     min-width: 0;
@@ -133,9 +111,7 @@
     padding: var(--panel-pad);
 }
 .hz-props { border-right: 1px solid var(--border-soft); }
-
 .hz-props-title { font-weight: 600; font-size: calc(var(--font-base) + 2px); margin-bottom: var(--sp-4); }
-
 .hz-section { margin-bottom: var(--sp-5); }
 .hz-section-title {
     font-size: calc(var(--font-base) - 1px);
@@ -146,12 +122,6 @@
     padding-bottom: var(--sp-1);
     border-bottom: 1px solid var(--border-soft);
 }
-
-/* Round-4 feedback F2: this was `display:flex; justify-content:space-between`, which pinned the
-   label to the left edge and the control to the right edge of whatever width the panel happened
-   to have -- ~1100px apart at 1920, since .hz-props is the flexible 1fr column (and just as bad
-   under the <=1279px single-column collapse below). A fixed two-track grid keeps the pair
-   adjacent at every width; .hz-props-inner caps the section rules so they don't span the panel. */
 .hz-props-inner { max-width: 460px; }
 .hz-prop-row {
     display: grid;
@@ -167,21 +137,14 @@
 .hz-prop-row select { width: 160px; padding: 3px 6px; }
 .hz-prop-row input[type="checkbox"] { width: auto; justify-self: start; }
 .hz-readonly { color: var(--text-1); }
-
 .hz-advanced { margin-top: var(--sp-3); }
 .hz-advanced summary { cursor: pointer; color: var(--accent); margin-bottom: var(--sp-2); }
-
 .hz-note { color: var(--text-2); font-size: calc(var(--font-base) - 1px); line-height: 1.5; }
-/* Action row inside a properties section (plan 15.6's stabled Clone / Remove). */
 .hz-actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
-/* Queued for removal on export (plan 15.6) -- still listed, visibly on the way out. */
 .hz-row.doomed .hz-row-name,
 .hz-row.doomed .hz-row-line2 { text-decoration: line-through; opacity: 0.55; }
-
 .hz-item-row { display: flex; align-items: center; gap: var(--sp-2); }
 .hz-item-row select { flex: 1; min-width: 0; }
-
-/* ---- genome preview (right) ---- */
 .hz-genome-inner { display: flex; flex-direction: column; gap: var(--sp-3); height: 100%; }
 .hz-genome-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .hz-genome-actions .btn { flex: 1; white-space: nowrap; }
@@ -194,15 +157,26 @@
     font-size: calc(var(--font-base) - 1px);
     padding: var(--sp-3);
 }
-
+.hz-genome-warnings {
+    font-size: calc(var(--font-base) - 1px);
+    color: var(--warn);
+    background: var(--warn-tint);
+    border: 1px solid var(--warn-tint-border);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-2);
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre-line;
+    flex-shrink: 0;
+}
 .hz-empty {
     margin: auto;
     color: var(--text-2);
     text-align: center;
     padding: var(--sp-6);
 }
-
 @media (max-width: 1279px) {
     .hz-body { grid-template-columns: 1fr; grid-auto-rows: 1fr; overflow-y: auto; }
     .hz-roster, .hz-props, .hz-genome { border: none; border-bottom: 1px solid var(--border-soft); }
+    .hz-body .split-handle { display: none; }
 }

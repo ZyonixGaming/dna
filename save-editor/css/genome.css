@@ -1,7 +1,18 @@
-/* css/genome.css — 🧬 Genome workspace (plan section 5.4, phase 4). */
-
+:root {
+    --odds-lime: #a3e635;
+    --odds-orange: #fb923c;
+    --odds-zero-tint: rgba(248, 113, 113, 0.12);
+    --lib-match-tint: rgba(124, 156, 255, 0.35);
+    --gn-dominant: #2dd4bf;
+}
+:root[data-theme="light"] {
+    --odds-lime: #4d7c0f;
+    --odds-orange: #c2410c;
+    --odds-zero-tint: rgba(208, 38, 38, 0.10);
+    --lib-match-tint: rgba(50, 87, 224, 0.22);
+    --gn-dominant: #0d9488;
+}
 .workspace-pane[data-workspace="genome"] { flex-direction: column; }
-
 .gn-root {
     display: flex;
     flex-direction: column;
@@ -10,8 +21,6 @@
     min-height: 0;
     min-width: 0;
 }
-
-/* ---- subject bar ---- */
 .gn-subjectbar {
     display: flex;
     align-items: center;
@@ -35,20 +44,16 @@
 }
 .gn-spacer { flex: 1; }
 .gn-chip { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--text-1); white-space: nowrap; }
-
-/* ---- 3-pane body ---- */
 .gn-body {
     flex: 1;
     min-height: 0;
     min-width: 0;
     display: grid;
-    grid-template-columns: 260px 1fr 320px;
+    grid-template-columns: var(--gn-left-w, 260px) 6px 1fr 6px var(--gn-right-w, 320px);
 }
 @media (max-width: 1499px) {
-    .gn-body { grid-template-columns: 220px 1fr 280px; }
+    .gn-body { grid-template-columns: var(--gn-left-w, 220px) 6px 1fr 6px var(--gn-right-w, 280px); }
 }
-
-/* ---- left panel ---- */
 .gn-left {
     display: flex;
     flex-direction: column;
@@ -86,7 +91,6 @@
     overflow-y: auto;
     white-space: pre-line;
 }
-/* ---- preview: the same renderer the World workspace uses for map horses ---- */
 .gn-preview-box {
     height: 190px;
     display: flex;
@@ -97,27 +101,15 @@
     border-radius: var(--radius-sm);
     overflow: hidden;
 }
-.gn-preview-canvas { display: block; image-rendering: pixelated; }
-.gn-preview-bg { display: flex; gap: var(--sp-2); }
-.gn-bg-swatch {
-    flex: 1;
-    height: 18px;
-    padding: 0;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--sw, transparent);
-}
-/* "Default" reads as a swatch of the panel itself rather than as an empty slot. */
-.gn-bg-swatch.gn-bg-none {
+#gnPreviewBg .bg-swatch { border-color: var(--border); }
+#gnPreviewBg .bg-swatch:hover { border-color: var(--text-2); }
+#gnPreviewBg .bg-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+#gnPreviewBg .bg-swatch[data-bg=""] {
     background:
         linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 0 0 / 8px 8px,
         linear-gradient(45deg, var(--bg-4) 25%, transparent 25%, transparent 75%, var(--bg-4) 75%) 4px 4px / 8px 8px,
         var(--bg-2);
 }
-.gn-bg-swatch:hover { border-color: var(--text-2); }
-.gn-bg-swatch.is-active { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-
 .gn-helixnav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
 .gn-helixnav button {
     padding: 3px 0;
@@ -131,8 +123,6 @@
 .gn-helixnav button:hover { background: var(--bg-4); color: var(--text-0); }
 .gn-diversity { flex-direction: row; flex-wrap: wrap; }
 .gn-diversity button { flex: 1; }
-
-/* ---- center: gene table ---- */
 .gn-center { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--bg-1); }
 .gn-table-toolbar {
     display: flex;
@@ -144,11 +134,19 @@
 }
 .gn-search { width: 220px; padding: 4px 8px; }
 .gn-genecount { color: var(--text-2); white-space: nowrap; }
+.gn-mode-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+.gn-mode-btn {
+    padding: 4px 12px;
+    font-size: calc(var(--font-base) - 2px);
+    background: var(--bg-3);
+    color: var(--text-2);
+    border: none;
+    cursor: pointer;
+}
+.gn-mode-btn + .gn-mode-btn { border-left: 1px solid var(--border); }
+.gn-mode-btn:hover { color: var(--text-0); }
+.gn-mode-btn.active { background: var(--accent); color: var(--accent-text); }
 .gn-table-scroll { flex: 1; min-height: 0; overflow: auto; }
-/* Round-4 feedback F4: `width:100%` with auto table layout spread three narrow columns across
-   the whole centre pane (H:P alone took 194px of a 1292px pane at 1920). Capping the table
-   reproduces the 1280-width proportions the columns already read well at, without switching
-   layout algorithms; .gn-hp shrinks to its content via the width:1% trick. */
 .gn-table { width: 100%; max-width: 780px; border-collapse: collapse; font-size: calc(var(--font-base) - 1px); }
 .gn-table.has-compare { max-width: 900px; }
 .gn-table thead th {
@@ -177,24 +175,40 @@
 .gn-row.gn-diff { background: var(--warn-tint); }
 .gn-row.gn-hidden { display: none; }
 .gn-hp { width: 1%; color: var(--text-2); white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
-/* F5: the current allele pair, one colour per base. A native <option> can't hold markup, so the
-   pair stays as plain text inside the value <select> (it is the only thing distinguishing two
-   combos that share a value, e.g. "0  GG" vs "0  GA") and is repeated here in colour. */
 .gn-pair { width: 1%; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.08em; }
 .gn-base-A { color: var(--base-a); }
 .gn-base-C { color: var(--base-c); }
 .gn-base-G { color: var(--base-g); }
 .gn-base-T { color: var(--base-t); }
 .gn-desc { white-space: nowrap; cursor: pointer; }
-/* Round-2 feedback C3: marks a gene whose byte stores the recessive allele on strand 1
-   (double-click to flip back to dominant-first). */
 .gn-desc.gn-inverted { color: var(--warn); }
 .gn-desc.gn-inverted::after { content: ' ⇄'; }
 .gn-value-select { width: 100%; padding: 2px 4px; font-size: inherit; }
 .gn-compare-value { color: var(--text-2); text-align: right; padding-right: var(--sp-3); }
 .gn-row.gn-diff .gn-compare-value { color: var(--warn); }
-
-/* ---- right dock ---- */
+.gn-table.has-bases { max-width: 940px; }
+.gn-table.has-bases.has-compare, .gn-table.has-bases.has-odds { max-width: 1060px; }
+.gn-m-col { width: 1%; white-space: nowrap; color: var(--text-2); font-size: calc(var(--font-base) - 2px); text-align: center; }
+.gn-strand-td, .gn-strand-th { width: 1%; white-space: nowrap; }
+.gn-base-select {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px 4px;
+    font: bold calc(var(--font-base) - 1px) ui-monospace, SFMono-Regular, Consolas, monospace;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: calc(6ch + 30px);
+    color: var(--text-1);
+}
+.gn-base-select-A, .gn-base-select .gn-base-opt-A { color: var(--base-a); }
+.gn-base-select-C, .gn-base-select .gn-base-opt-C { color: var(--base-c); }
+.gn-base-select-G, .gn-base-select .gn-base-opt-G { color: var(--base-g); }
+.gn-base-select-T, .gn-base-select .gn-base-opt-T { color: var(--base-t); }
+.gn-base-select option { background: var(--bg-1); font-weight: bold; }
+.gn-base-dominant { border-color: var(--gn-dominant); box-shadow: 0 0 0 1px var(--gn-dominant) inset; }
+.gn-base-select:focus-visible { outline: 2px solid var(--gn-dominant); outline-offset: 1px; }
+.gn-base-value { font-size: calc(var(--font-base) - 2px); color: var(--text-1); white-space: nowrap; }
 .gn-dock {
     display: flex;
     flex-direction: column;
@@ -213,7 +227,6 @@
     border-bottom: 1px solid var(--border-soft);
     padding-bottom: var(--sp-1);
 }
-
 .gn-modgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .gn-mod-btn {
     display: flex;
@@ -232,10 +245,14 @@
 .gn-mod-btn .gn-mod-icon { font-size: 16px; }
 .gn-mod-btn.active { color: var(--text-0); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .gn-mod-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
+.gn-collapsible { cursor: pointer; }
+.gn-collapsible::after { content: ' \25BE'; float: right; color: var(--text-2); }
+.gn-collapsible.collapsed::after { content: ' \25B8'; }
+.gn-presets-body { display: flex; flex-direction: column; gap: var(--sp-2); min-height: 0; }
 .gn-preset-filter { padding: 3px 6px; width: 100%; }
 .gn-preset-list { flex: 1; min-height: 80px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; }
-.gn-preset-row {
+.gn-preset-list .presets-empty { color: var(--text-2); padding: var(--sp-3); }
+.gn-preset-list .preset-row {
     display: flex;
     align-items: center;
     gap: var(--sp-2);
@@ -243,25 +260,37 @@
     border-bottom: 1px solid var(--border-soft);
     cursor: pointer;
 }
-.gn-preset-row:hover { background: var(--bg-3); }
-.gn-preset-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gn-preset-dot { width: 14px; text-align: center; color: var(--ok); }
-.gn-preset-dot.invalid { color: var(--text-2); }
-.gn-preset-compare-btn {
+.gn-preset-list .preset-row:hover { background: var(--bg-3); }
+.gn-preset-list .preset-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gn-preset-list .preset-dot { width: 14px; text-align: center; color: var(--ok); }
+.gn-preset-list .preset-dot.invalid { color: var(--text-2); }
+.gn-preset-list .preset-odds,
+.gn-preset-list .preset-compare {
     background: none;
     border: none;
     color: var(--text-2);
     cursor: pointer;
     padding: 0 3px;
+    font-size: inherit;
 }
-.gn-preset-compare-btn:hover { color: var(--text-0); }
-.gn-presets-empty { color: var(--text-2); padding: var(--sp-3); }
-
-/* ---- DNA Library: categories and entries (plan section 16) ---------------------------
-   The drop indicator is a border on the TOP edge of whatever the pointer is over, so the
-   line the user sees is literally where the dragged row will land. `border-top` rather
-   than an ::after pseudo-element because the row is the drag target: a pseudo-element
-   would sit under the pointer and fire its own dragleave. */
+.gn-preset-list .preset-odds:hover,
+.gn-preset-list .preset-compare:hover { color: var(--text-0); }
+.gn-preset-list .preset-odds.active {
+    color: var(--accent-text);
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+}
+.gn-lib-search-row { display: flex; gap: var(--sp-2); align-items: center; }
+.gn-lib-search { flex: 1; padding: 3px 6px; min-width: 0; }
+.gn-lib-search-clear {
+    background: none;
+    border: none;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 11px;
+}
+.gn-lib-search-clear:hover { color: var(--text-0); }
 .gn-library-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .gn-library-actions .btn { flex: 1; font-size: 11px; padding: 4px 6px; white-space: nowrap; }
 .gn-lib-shared {
@@ -276,7 +305,6 @@
     padding: 0 4px;
     cursor: help;
 }
-
 .gn-cat-list {
     list-style: none;
     margin: var(--sp-2) 0 var(--sp-2);
@@ -284,23 +312,22 @@
     max-height: 320px;
     overflow-y: auto;
 }
-.gn-cat-item {
+#gnCategoryList .category-item {
     border: 1px solid var(--border-soft);
     border-radius: 4px;
     margin-bottom: var(--sp-2);
     background: var(--bg-1);
 }
-.gn-cat-item.dragging { opacity: 0.45; }
-.gn-cat-item.drop-before { border-top: 2px solid var(--accent); }
-.gn-cat-item.drop-into { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.gn-cat-header {
+#gnCategoryList .category-item.dragging { opacity: 0.45; }
+#gnCategoryList .category-item.drag-disabled { cursor: default; }
+#gnCategoryList .category-header {
     display: flex;
     align-items: center;
     gap: var(--sp-2);
     padding: 4px 5px;
 }
-.gn-cat-item.selected > .gn-cat-header { background: var(--bg-2); }
-.gn-cat-name {
+#gnCategoryList .category-item.selected > .category-header { background: var(--bg-2); }
+#gnCategoryList .category-name {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -308,17 +335,19 @@
     cursor: pointer;
     font-weight: 600;
 }
-.gn-cat-name:hover { color: var(--accent); }
-.gn-cat-count { color: var(--text-2); font-weight: 400; }
-.gn-drag-handle {
+#gnCategoryList .category-name:hover { color: var(--accent); }
+#gnCategoryList .drag-handle {
     cursor: grab;
     color: var(--text-2);
     letter-spacing: -2px;
     user-select: none;
 }
-.gn-drag-handle:active { cursor: grabbing; }
-.gn-row-actions { display: flex; gap: 1px; flex: 0 0 auto; }
-.gn-row-actions button {
+#gnCategoryList .drag-handle:active { cursor: grabbing; }
+#gnCategoryList .drag-handle.drag-disabled { visibility: hidden; }
+#gnCategoryList .category-actions,
+#gnCategoryList .entry-actions { display: flex; gap: 1px; flex: 0 0 auto; }
+#gnCategoryList .category-actions button,
+#gnCategoryList .entry-actions button {
     background: none;
     border: none;
     color: var(--text-2);
@@ -327,26 +356,61 @@
     font-size: 11px;
     line-height: 1;
 }
-.gn-row-actions button:hover { color: var(--text-0); }
-.gn-row-actions button[data-act="del-cat"]:hover,
-.gn-row-actions button[data-act="del-entry"]:hover { color: var(--bad); }
-
-.gn-entry-list { list-style: none; margin: 0; padding: 0 0 3px 0; }
-.gn-entry-item {
+#gnCategoryList .category-actions button:hover,
+#gnCategoryList .entry-actions button:hover { color: var(--text-0); }
+#gnCategoryList .entry-list { list-style: none; margin: 0; padding: 0 0 3px 0; }
+#gnCategoryList .entry-item {
     display: flex;
     align-items: center;
     gap: var(--sp-2);
     padding: 2px 5px 2px 14px;
     cursor: pointer;
 }
-.gn-entry-item:hover { background: var(--bg-2); }
-.gn-entry-item.dragging { opacity: 0.45; }
-.gn-entry-item.drop-before { border-top: 2px solid var(--accent); }
-.gn-entry-item.is-compare { color: var(--accent); }
-.gn-entry-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gn-entry-empty, .gn-library-empty { color: var(--text-2); padding: 3px 5px 5px 14px; }
-
+#gnCategoryList .entry-item:hover { background: var(--bg-2); }
+#gnCategoryList .entry-item.dragging { opacity: 0.45; }
+#gnCategoryList .entry-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#gnCategoryList .library-empty { list-style: none; color: var(--text-2); padding: 3px 5px 5px 14px; font-style: italic; }
+#gnCategoryList mark.lib-match {
+    background: var(--lib-match-tint);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.gn-odds-bar[hidden] { display: none; }
+.gn-odds-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 4px var(--sp-3);
+    margin: 0 var(--sp-3);
+    margin-top: var(--sp-2);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+    font-size: calc(var(--font-base) - 1px);
+    color: var(--text-1);
+}
+.gn-odds-bar-label { flex: 1; }
+.gn-odds-bar-label strong { color: var(--accent); }
+.gn-odds-impossible-count { color: var(--bad) !important; }
+.gn-odds-exact strong { color: var(--ok); }
+.gn-odds-legalize:disabled { opacity: 0.4; cursor: not-allowed; }
+.gn-table.has-odds { max-width: 900px; }
+.gn-odds-cell {
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-weight: 600;
+    cursor: help;
+}
+.gn-odds-pct-sign { font-weight: 400; opacity: 0.55; margin-left: 1px; }
+.gn-odds-cell.gn-odds-high { color: var(--ok); }
+.gn-odds-cell.gn-odds-mid { color: var(--odds-lime); }
+.gn-odds-cell.gn-odds-low { color: var(--warn); }
+.gn-odds-cell.gn-odds-rare { color: var(--odds-orange); }
+.gn-odds-cell.gn-odds-zero { color: var(--bad); background: var(--odds-zero-tint); }
 @media (max-width: 1279px) {
     .gn-body { grid-template-columns: 1fr; grid-auto-rows: minmax(240px, auto); overflow-y: auto; }
     .gn-left, .gn-center, .gn-dock { border: none; border-bottom: 1px solid var(--border-soft); overflow: visible; }
+    .gn-body .split-handle { display: none; }
 }

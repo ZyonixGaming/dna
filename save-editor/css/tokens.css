@@ -1,82 +1,41 @@
-/* css/tokens.css — colours, spacing, density scale, focus rings.
-
-   TWO THEMES (plan section 23.5). The original file said "dark theme only ... tokens are
-   structured so a light theme is additive later, not a rewrite: every colour is a token here,
-   nothing is hardcoded downstream". That held: adding light meant restating this block and
-   tokenising nine values that had escaped into the other five stylesheets — shadows, scrims,
-   two canvas backgrounds and one border — not touching a single rule.
-
-   HOW IT IS SELECTED. js/app.js always writes an explicit `data-theme` on <html>, resolving
-   'system' through matchMedia itself, so the CSS never has to ask twice and the canvas has one
-   value to read. Bare `:root` repeats the dark palette rather than relying on the attribute,
-   because the attribute is set by script: without it, a stylesheet that loads before that
-   script would paint unstyled. */
 :root,
 :root[data-theme="dark"] {
-    /* Native widgets — select popups, scrollbars, date pickers — follow this and nothing else.
-       Its absence is why the dark app opened white OS dropdowns. */
     color-scheme: dark;
-
-    /* ---- surfaces ---- */
-    --bg-0: #0f1115;   /* app bar, rail */
-    --bg-1: #15181e;   /* workspace body background */
-    --bg-2: #1b1f27;   /* panels, docks */
-    --bg-3: #232833;   /* raised elements: cards, inputs */
-    --bg-4: #2c323f;   /* hover state on bg-3 */
+    --bg-0: #0f1115;
+    --bg-1: #15181e;
+    --bg-2: #1b1f27;
+    --bg-3: #232833;
+    --bg-4: #2c323f;
     --border: #333a48;
     --border-soft: #262b35;
-
-    /* ---- text ---- */
-    --text-0: #e8eaf0;  /* primary */
-    --text-1: #a8afbe;  /* secondary */
-    --text-2: #6b7280;  /* muted / disabled */
-
-    /* ---- brand / accent ---- */
+    --text-0: #e8eaf0;
+    --text-1: #a8afbe;
+    --text-2: #6b7280;
     --accent: #7c9cff;
     --accent-strong: #5b7cf7;
     --accent-text: #0f1115;
-
-    /* ---- semantic ---- */
     --ok: #4ade80;
     --warn: #fbbf24;
     --bad: #f87171;
     --info: #60a5fa;
-
-    /* ---- DNA bases (plan section 13, F5) — one colour per base, used by the Genome
-       workspace's Pair column. Kept as tokens so the light theme can restate them. ---- */
-    --base-a: #eab308;  /* yellow */
-    --base-c: #60a5fa;  /* blue */
-    --base-g: #4ade80;  /* green */
-    --base-t: #f87171;  /* red */
-
-    /* ---- elevation and scrims. Black at 40-55% reads as depth on a dark ground and as dirt
-       on a light one, which is why these are tokens rather than literals in five files. ---- */
-    --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.4);     /* toasts, minimap */
-    --shadow-2: -8px 0 32px rgba(0, 0, 0, 0.4);    /* the settings drawer */
-    --shadow-3: 0 12px 40px rgba(0, 0, 0, 0.5);    /* modals */
-    --warn-tint: rgba(251, 191, 36, 0.08);         /* Bulk's caution box, Genome's diff rows */
+    --base-a: #eab308;
+    --base-c: #60a5fa;
+    --base-g: #4ade80;
+    --base-t: #f87171;
+    --shadow-1: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-2: -8px 0 32px rgba(0, 0, 0, 0.4);
+    --shadow-3: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --warn-tint: rgba(251, 191, 36, 0.08);
     --warn-tint-border: rgba(251, 191, 36, 0.3);
-    --scrim: rgba(0, 0, 0, 0.55);                  /* modal backdrop */
-    --scrim-soft: rgba(0, 0, 0, 0.35);             /* drawer backdrop */
+    --scrim: rgba(0, 0, 0, 0.55);
+    --scrim-soft: rgba(0, 0, 0, 0.35);
     --danger-border: #7a3b3b;
-
-    /* ---- the map canvas. Not CSS: js/workspaces/world.js reads these two off the computed
-       style so the canvas follows the theme like everything else. --map-void is what shows
-       OUTSIDE the tile grid; the tiles themselves are the game's own art in both themes. ---- */
     --map-void: #0c0c14;
     --minimap-bg: #000000;
-
-    /* ---- focus ---- */
     --focus-ring: 0 0 0 2px var(--bg-1), 0 0 0 4px var(--accent);
 }
-
-/* LIGHT. Not an inversion — the surface ORDER is kept (bg-0 is the chrome, bg-3 the raised
-   element), so every existing rule means the same thing. The accents and semantics are
-   darkened rather than reused: #4ade80 on white is unreadable, and a token that needs a
-   different value in each theme is exactly what this block is for. */
 :root[data-theme="light"] {
     color-scheme: light;
-
     --bg-0: #dfe3ec;
     --bg-1: #eef1f6;
     --bg-2: #f7f8fb;
@@ -84,25 +43,20 @@
     --bg-4: #e7ebf3;
     --border: #c5ccda;
     --border-soft: #dde2ec;
-
     --text-0: #171a21;
     --text-1: #4b5364;
     --text-2: #798294;
-
     --accent: #3257e0;
     --accent-strong: #2442c4;
     --accent-text: #ffffff;
-
     --ok: #15803d;
     --warn: #a15c07;
     --bad: #d02626;
     --info: #1d4ed8;
-
     --base-a: #a16207;
     --base-c: #1d4ed8;
     --base-g: #15803d;
     --base-t: #c92a2a;
-
     --shadow-1: 0 4px 16px rgba(23, 26, 33, 0.12);
     --shadow-2: -8px 0 32px rgba(23, 26, 33, 0.14);
     --shadow-3: 0 12px 40px rgba(23, 26, 33, 0.22);
@@ -111,39 +65,27 @@
     --scrim: rgba(23, 26, 33, 0.32);
     --scrim-soft: rgba(23, 26, 33, 0.16);
     --danger-border: #d59a9a;
-
     --map-void: #b9c1d1;
     --minimap-bg: #9aa3b4;
 }
-
 :root {
-    /* ---- spacing scale ---- */
     --sp-1: 2px;
     --sp-2: 4px;
     --sp-3: 8px;
     --sp-4: 12px;
     --sp-5: 16px;
     --sp-6: 24px;
-
-    /* ---- chrome dimensions (plan section 5.1) ---- */
     --h-appbar: 40px;
     --h-toolbar: 36px;
     --h-statusbar: 22px;
     --w-rail: 48px;
-
-    /* ---- density (plan section 7.3) — Comfortable is the default; .density-compact on
-       <body> switches every one of these. Compact triggers automatically when
-       innerHeight < 900 (js/app.js), matching 720p. ---- */
     --row-h: 28px;
     --font-base: 13px;
     --panel-pad: 12px;
-
     --radius-sm: 4px;
     --radius-md: 6px;
-
     --transition-fast: 100ms ease;
 }
-
 body.density-compact {
     --row-h: 22px;
     --font-base: 11.5px;
