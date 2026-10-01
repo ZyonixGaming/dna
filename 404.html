@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+/*
+Keeping this up so people can retrieve their DNA library.
+*/
+const lengths = [10,13,13,15,11,8,11,8,11,11,13,15,13,11,11,14,15,11,11,16];
+const bases = ['A','C','G','T'];
+
+function base64tonum(text) {
+	let fixed = text.split('-').join('+');
+	fixed = fixed.split('_').join('/');
+	while (fixed.length % 4 !== 0) {
+		fixed = fixed + '=';
+	}
+	const binary = atob(fixed);
+	const num = [];
+	for (let i = 0; i < binary.length; i++) {
+		num.push(binary.charCodeAt(i));
+	}
+	return num;
+}
+
+function decodetolines(encodedtext) {
+	const num = base64tonum(encodedtext);
+	const genomeline = [];
+	for (let i = 0; i < num.length; i++) {
+		const byte = num[i];
+		const p = i * 4;
+		genomeline[p] = bases[Math.floor(byte / 64) % 4];
+		genomeline[p + 1] = bases[Math.floor(byte / 16) % 4];
+		genomeline[p + 2] = bases[Math.floor(byte / 4) % 4];
+		genomeline[p + 3] = bases[byte % 4];
+	}
+	let lines = '';
+	let position = 0;
+	for (let h = 0; h < 20; h++) {
+		const length = lengths[h];
+		let numbertext = '' + h;
+		if (h < 10) {
+			numbertext = '0' + h;
+		}
+		let line1 = numbertext + ':';
+		for (let j = 0; j < length; j++) {
+			line1 = line1 + genomeline[position];
+			position = position + 1;
+		}
+		if (lines === '') {
+			lines = line1;
+		} else {
+			lines = lines + '\n' + line1;
+		}
+		let line2 = numbertext + ':';
+		for (let j = 0; j < length; j++) {
+			line2 = line2 + genomeline[position];
+			position = position + 1;
+		}
+		if (lines === '') {
+			lines = line2;
+		} else {
+			lines = lines + '\n' + line2;
+		}
+	}
+	return lines;
+}
+
+let html = '';
+
+const dna = new URLSearchParams(location.search).get('dna');
+if (dna !== null && dna.length > 0) {	
+	html = html + '<div>Genome</div><textarea>' + decodetolines(dna.trim()) + '</textarea>';
+}
+
+function loadallcategories() {
+	return JSON.parse(localStorage.getItem('dna_shortener_categories'));
+}
+
+const categories = loadallcategories();
+if(categories){
+html = html + '<ol>';
+
+for (let c = 0; c < categories.length; c++) {
+	const category = categories[c];
+	html = html + '<li>' + category.name;
+	html = html + '<ol>';
+	for (let e = 0; e < category.entries.length; e++) {
+		const entry = category.entries[e];
+		html = html + '<li>';
+		html = html + entry.name;
+		html = html + '<br><textarea>' + entry.dnaText + '</textarea>';
+		html = html + '</li>';
+	}
+	html = html + '</ol>';
+	html = html + '</li>';
+}
+}
+document.body.innerHTML = html;
+
+</script>
+</body>
+</html>
